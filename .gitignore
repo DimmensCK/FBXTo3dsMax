@@ -1,0 +1,41 @@
+# Generated Python files and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local assets, historical releases, and acceptance results
+*.fbx
+*.max
+*.blend
+*.blend1
+/Test/
+/Release/
+/PROTECTED_RELEASE_EVIDENCE_*/
+/RELEASE_EVIDENCE_*/
+/_iso_*/
+tests/_*
+*.log
+
+# Build products and downloaded toolchains
+/build/
+/dist/
+*.egg-info/
+*.zip
+*.7z
+*.pyd
+*.dll
+*.exe
+*.mse
+*.obj
+*.pdb
+
+# Machine-specific files and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+Thumbs.db

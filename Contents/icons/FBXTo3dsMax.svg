@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>FBXTo3dsMax</title>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#33b7e8"/>
+      <stop offset="1" stop-color="#1769c2"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 14 25 5l17 9v20l-17 9-17-9Z" fill="url(#body)" stroke="#eaf8ff" stroke-width="2"/>
+  <path d="m8 14 17 9 17-9M25 23v20" fill="none" stroke="#eaf8ff" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M30 42h17v-7l11 11-11 11v-7H30Z" fill="#f3a52b" stroke="#fff4d6" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M14 17 25 11l11 6-11 6Z" fill="#72d7f5" opacity=".7"/>
+</svg>

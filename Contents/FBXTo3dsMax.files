@@ -1,0 +1,29 @@
+# FBXTo3dsMax v1.3.24 安装清单。
+# 源文件路径|安装包内路径
+PackageContents.xml|PackageContents.xml
+Contents\FBXTo3dsMax_Bootstrap.ms|Contents\FBXTo3dsMax_Bootstrap.ms
+Contents\FBXTo3dsMax.mcr|Contents\FBXTo3dsMax.mcr
+Contents\f2m_toolbar.py|Contents\f2m_toolbar.py
+Contents\icons\FBXTo3dsMax.svg|Contents\icons\FBXTo3dsMax.svg
+Contents\FBXTo3dsMax.version|Contents\FBXTo3dsMax.version
+Contents\FBXTo3dsMax.files|Contents\FBXTo3dsMax.files
+FBXTo3dsMax_UI.ms|Contents\FBXTo3dsMax_UI.ms
+f2m_topology_transfer.py|Contents\f2m_topology_transfer.py
+f2m_skin_replace.py|Contents\f2m_skin_replace.py
+f2m_smoothing.py|Contents\f2m_smoothing.py
+f2m_fbx_metadata.py|Contents\f2m_fbx_metadata.py
+f2m_selfcheck.py|Contents\f2m_selfcheck.py
+f2m_test_fixtures.py|Contents\f2m_test_fixtures.py
+CHANGELOG_中文.md|Contents\CHANGELOG_中文.md
+README_中文.md|Contents\README_中文.md
+INSTALL_中文.md|Contents\INSTALL_中文.md
+FBXTo3dsMax_详细说明书.md|Contents\FBXTo3dsMax_详细说明书.md
+VERSION.txt|Contents\VERSION.txt
+tests\max_core_smoke.py|Contents\tests\max_core_smoke.py
+tests\max_fbx_integration.py|Contents\tests\max_fbx_integration.py
+tests\max_normals_safety.py|Contents\tests\max_normals_safety.py
+tests\max_ui_parse.py|Contents\tests\max_ui_parse.py
+tests\test_smoothing_algorithm.py|Contents\tests\test_smoothing_algorithm.py
+tests\test_fbx_metadata.py|Contents\tests\test_fbx_metadata.py
+Uninstall_FBXTo3dsMax.ms|Contents\Uninstall_FBXTo3dsMax.ms
+LICENSE|Contents\LICENSE
