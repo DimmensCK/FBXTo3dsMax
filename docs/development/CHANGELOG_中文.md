@@ -2,6 +2,15 @@
 
 版本基线为原插件 `1.2.16`；BUG 修复增加 `0.0.1`，新增功能增加 `0.1.0`。发布时同步引擎、UI、版本文件、包元数据和安装器标记。
 
+## v1.4.25（2026-10-09）：紧凑语言按钮与图文教程
+
+- 将占用独立顶部行的语言下拉框改为模式标题空白角落中的 **Language · 中文 / EN** 两个直接选择按钮，回收顶部空间。切换保留模式、FBX、选项与检查状态；点击当前语言保持单选，保存失败沿用回退流程，执行中禁用两钮。
+- 修复语言切换失败时界面回退但偏好已提前写入的边界：预览、目录与工具栏刷新及原生语言读回成功后才原子提交；回退失败保留原始与恢复诊断。保存成功后不再执行可能抛错的临时文件清理。自检严格识别三处原执行桥和一处偏好提交桥，保留异常传播与撤销栈选项。
+- 这是既有语言功能的界面修正，按 BUG 规则增加 `0.0.1`，同步运行版本与安装元数据；固定安装目标仍为32项。
+- 扩充中文与英文首页、按任务操作的教程和功能图解，区分历史授权演示、原创示意与当前真实界面。说明选择性回传、SG/法线约束、Max绑定与FBX权重来源，不承诺任意资产无损、性能倍数或未测版本兼容。
+- 本版必须独立验收，旧版结果不代替本版证明。实际状态和边界见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
+- English: replace the full language row with compact, direct **中文 / EN** buttons in the mode heading; preserve UI state, exclusive selection, atomic preference saving and failure recovery. Commit language preferences only after preview, catalog/toolbar refresh and native locale readback succeed; retain original and recovery diagnostics, with no filesystem cleanup after successful replace. Expand both language portals and task tutorials without changing the two-mode data contract. This repair requires its own real-host qualification; see [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md).
+
 ## v1.4.24（2026-10-09）：双语与目录整理
 
 - 新增常驻 **语言 / Language** 下拉框，中文/English 原位切换，保留模式、FBX、选项和检查状态；偏好原子保存到本地，工具栏与用户摘要使用所选语言，原始技术诊断保留必要信息。

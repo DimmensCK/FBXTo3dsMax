@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+<title id="title">FBXTo3dsMax — free MIT source by Dimmens</title>
+<desc id="desc">Original social preview: FBX to 3ds Max, selective channels and Skin workflows, Chinese and English. Concept illustration, not software or acceptance evidence.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#18394b"/></linearGradient><radialGradient id="glow"><stop stop-color="#4dd9cc" stop-opacity=".13"/><stop offset="1" stop-color="#4dd9cc" stop-opacity="0"/></radialGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#6fe3dd" stroke-width="1.5"/></marker></defs>
+<rect width="1280" height="640" fill="url(#bg)"/>
+<circle cx="1020" cy="295" r="330" fill="url(#glow)"/>
+<g font-family="Arial">
+<text x="64" y="80" font-size="22" fill="#71ded8" letter-spacing="2.5">READABLE PYTHON + MAXSCRIPT</text>
+<text x="60" y="192" font-size="79" font-weight="700" fill="#f3f8ff">FBX → 3ds Max</text>
+<text x="64" y="273" font-size="42" font-weight="600" fill="#dcecf5">Bring the edit back.</text>
+<text x="66" y="326" font-size="29" fill="#adc8da">Selective channels / Skin workflows</text>
+<text x="66" y="372" font-size="26" fill="#adc8da" font-family="Microsoft YaHei">让修改回到已有场景，继续你的 Max 工作流。</text>
+<rect x="64" y="430" width="245" height="58" rx="14" fill="#234d59" stroke="#5fbfbd"/>
+<text x="86" y="468" font-size="27" font-weight="600" fill="#d8fbf6">Free MIT source</text>
+<rect x="327" y="430" width="249" height="58" rx="14" fill="#263952" stroke="#5b7597"/>
+<text x="348" y="468" font-size="27" font-weight="600" fill="#e0eaff" font-family="Microsoft YaHei">中文 / English</text>
+<text x="66" y="572" font-size="25" fill="#e7f0f7">FBXTo3dsMax</text>
+<text x="304" y="572" font-size="22" fill="#94b2c8">by Dimmens</text>
+</g>
+<g stroke="#6edbd5" stroke-width="3" fill="#1b4c58"><path d="M900 272L1006 235L1086 295L980 333Z"/><path d="M900 272V371L980 431V333"/><path d="M980 431L1086 394V295"/><path d="M900 322L1006 285L1086 344M940 291V401M1034 257V413" opacity=".55" fill="none"/></g>
+<g stroke="#95a9ff" stroke-width="3" fill="#2a3a60"><path d="M1012 392L1101 359L1170 410L1081 444Z"/><path d="M1012 392V475L1081 527V444"/><path d="M1081 527L1170 494V410"/><path d="M1012 434L1101 401L1170 451M1047 418V501M1127 379V510" opacity=".6" fill="none"/></g>
+<path d="M942 452C942 504 971 525 1009 521" fill="none" stroke="#6fe3dd" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M1216 80H1162M1216 80V134M64 600H118M64 600V546" stroke="#3d6177" stroke-width="2" fill="none"/>
+</svg>

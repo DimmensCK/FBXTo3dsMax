@@ -10,10 +10,10 @@ global F2M_UI_LanguageCode
 global F2M_UI_SourceTexts
 global F2M_UI_EnglishTexts
 
-rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
+rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:466
 (
     local toolAuthor = "Dimmens"
-    local toolVersion = "1.4.24"
+    local toolVersion = "1.4.25"
     local scriptDir = getFilenamePath (getSourceFileName())
     local pyTopologyFile = scriptDir + "f2m_topology_transfer.py"
     local pyReplaceFile = scriptDir + "f2m_skin_replace.py"
@@ -29,44 +29,46 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     local lastFbxKey = ""
     local executeConfirmSelectionKey = ""
 
-    dropdownlist ddl_language "语言 / Language" items:#("中文", "English") selection:1 pos:[24,4] width:260 height:3
 
-    groupBox grp_mode "选择模式" pos:[12,52] width:436 height:92
-    dotNetControl btn_mode_topo "System.Windows.Forms.Button" pos:[28,78] width:190 height:48
-    dotNetControl btn_mode_replace "System.Windows.Forms.Button" pos:[238,78] width:190 height:48
+    groupBox grp_mode "选择模式" pos:[12,12] width:436 height:92
+    label lbl_language "Language" pos:[270,16] width:60 height:16
+    checkbutton btn_language_zh "中文" pos:[334,12] width:44 height:22 checked:true toolTip:"中文"
+    checkbutton btn_language_en "EN" pos:[382,12] width:44 height:22 checked:false toolTip:"English"
+    dotNetControl btn_mode_topo "System.Windows.Forms.Button" pos:[28,38] width:190 height:48
+    dotNetControl btn_mode_replace "System.Windows.Forms.Button" pos:[238,38] width:190 height:48
 
-    groupBox grp_file "FBX 文件" pos:[12,152] width:436 height:86
-    editText edt_fbx "FBX 文件：" pos:[24,178] width:330 height:20 text:""
-    button btn_pick "选择..." pos:[360,176] width:70 height:24
-    label lbl_target "传递数据前优先检查 FBX" pos:[24,210] width:286 height:24
-    button btn_check "检查 FBX/匹配" pos:[306,208] width:124 height:24
+    groupBox grp_file "FBX 文件" pos:[12,112] width:436 height:86
+    editText edt_fbx "FBX 文件：" pos:[24,138] width:330 height:20 text:""
+    button btn_pick "选择..." pos:[360,136] width:70 height:24
+    label lbl_target "传递数据前优先检查 FBX" pos:[24,170] width:286 height:24
+    button btn_check "检查 FBX/匹配" pos:[306,168] width:124 height:24
 
-    groupBox grp_topo "传递数据" pos:[12,248] width:436 height:116
-    checkbox chk_shape "变形" pos:[28,274] width:80 height:18 checked:true
-    checkbox chk_matid "材质与 ID" pos:[138,274] width:100 height:18 checked:false
-    checkbox chk_normals "顶点法线" pos:[258,274] width:110 height:18 checked:false
-    checkbox chk_uv1 "传递 UV 1" pos:[28,300] width:110 height:18 checked:false
-    checkbox chk_uv2 "传递 UV 2" pos:[158,300] width:110 height:18 checked:false
-    checkbox chk_uv3 "传递 UV 3" pos:[288,300] width:110 height:18 checked:false
-    checkbox chk_vc "顶点色 RGB" pos:[28,326] width:130 height:18 checked:false
-    checkbox chk_alpha "顶点 Alpha" pos:[166,326] width:130 height:18 checked:false
-    checkbox chk_smoothing "光滑组" pos:[306,326] width:125 height:18 checked:false
+    groupBox grp_topo "传递数据" pos:[12,208] width:436 height:116
+    checkbox chk_shape "变形" pos:[28,234] width:80 height:18 checked:true
+    checkbox chk_matid "材质与 ID" pos:[138,234] width:100 height:18 checked:false
+    checkbox chk_normals "顶点法线" pos:[258,234] width:110 height:18 checked:false
+    checkbox chk_uv1 "传递 UV 1" pos:[28,260] width:110 height:18 checked:false
+    checkbox chk_uv2 "传递 UV 2" pos:[158,260] width:110 height:18 checked:false
+    checkbox chk_uv3 "传递 UV 3" pos:[288,260] width:110 height:18 checked:false
+    checkbox chk_vc "顶点色 RGB" pos:[28,286] width:130 height:18 checked:false
+    checkbox chk_alpha "顶点 Alpha" pos:[166,286] width:130 height:18 checked:false
+    checkbox chk_smoothing "光滑组" pos:[306,286] width:125 height:18 checked:false
 
-    groupBox grp_replace "替换网格并保留蒙皮" pos:[12,248] width:436 height:150 visible:false
-    label lbl_replace_1 "使用 FBX 目标网格替换所选 Max 源模型；一对一可直接匹配，其它情况按同名匹配。" pos:[28,276] width:390 height:32 visible:false
-    label lbl_replace_2 "双方必须带 Skin。Max 源 Skin 提供场景骨骼与绑定数据；FBX 提供逐顶点权重、Unnormalized 和 DQ 数据。" pos:[28,320] width:390 height:60 visible:false
+    groupBox grp_replace "替换网格并保留蒙皮" pos:[12,208] width:436 height:150 visible:false
+    label lbl_replace_1 "使用 FBX 目标网格替换所选 Max 源模型；一对一可直接匹配，其它情况按同名匹配。" pos:[28,236] width:390 height:32 visible:false
+    label lbl_replace_2 "双方必须带 Skin。Max 源 Skin 提供场景骨骼与绑定数据；FBX 提供逐顶点权重、Unnormalized 和 DQ 数据。" pos:[28,280] width:390 height:60 visible:false
 
-    button btn_advanced "高级选项..." pos:[24,370] width:120 height:24
-    button btn_selfcheck "运行插件自检" pos:[306,370] width:124 height:24
-    groupBox grp_advanced "高级选项" pos:[12,404] width:436 height:74 visible:false
-    checkbox chk_backup "替换时隐藏备份旧网格" pos:[28,430] width:190 height:18 checked:true visible:false
-    checkbox chk_keep_mat "兼容：改用 Max 源材质" pos:[238,430] width:180 height:18 checked:false visible:false
-    checkbox chk_keep_imported "保留临时导入节点用于排查" pos:[28,456] width:200 height:18 checked:false visible:false
-    checkbox chk_hidden "允许处理隐藏对象" pos:[238,456] width:150 height:18 checked:true visible:false
+    button btn_advanced "高级选项..." pos:[24,330] width:120 height:24
+    button btn_selfcheck "运行插件自检" pos:[306,330] width:124 height:24
+    groupBox grp_advanced "高级选项" pos:[12,364] width:436 height:74 visible:false
+    checkbox chk_backup "替换时隐藏备份旧网格" pos:[28,390] width:190 height:18 checked:true visible:false
+    checkbox chk_keep_mat "兼容：改用 Max 源材质" pos:[238,390] width:180 height:18 checked:false visible:false
+    checkbox chk_keep_imported "保留临时导入节点用于排查" pos:[28,416] width:200 height:18 checked:false visible:false
+    checkbox chk_hidden "允许处理隐藏对象" pos:[238,416] width:150 height:18 checked:true visible:false
 
-    label lbl_warn "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。" pos:[24,404] width:410 height:44
-    button btn_run "开始执行" pos:[155,436] width:150 height:26
-    label lbl_meta "作者：Dimmens    版本：1.4.24" pos:[24,470] width:410 height:14
+    label lbl_warn "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。" pos:[24,364] width:410 height:44
+    button btn_run "开始执行" pos:[155,396] width:150 height:26
+    label lbl_meta "作者：Dimmens    版本：1.4.25" pos:[24,430] width:410 height:14
 
     fn pyString s =
     (
@@ -84,15 +86,15 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     (
         local code = "import os, sys, importlib.util, builtins\nfrom pymxs import runtime as rt\n"
         code += "p = os.path.abspath(" + pyString pyLanguageFile + ")\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n"
-        code += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n"
+        code += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n"
         code += "    sys.modules.pop(name, None)\n    spec = importlib.util.spec_from_file_location(name, p)\n"
         code += "    if spec is None or spec.loader is None: raise RuntimeError('Language module loader missing')\n"
         code += "    m = importlib.util.module_from_spec(spec)\n    sys.modules[name] = m\n"
         code += "    try: spec.loader.exec_module(m)\n    except BaseException:\n        if sys.modules.get(name) is m: sys.modules.pop(name, None)\n        raise\n"
-        code += "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language module identity/version mismatch')\n"
+        code += "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language module identity/version mismatch')\n"
         code += "for api in ('translate', 'get_language', 'set_language', 'ui_catalog_sources', 'ui_catalog_english'):\n    if not callable(getattr(m, api, None)): raise RuntimeError('Language API missing: ' + api)\n"
         if requestedLocale != undefined do
-            code += "m.set_language(" + pyString requestedLocale + ", persist=" + (if persist then "True" else "False") + ")\n"
+            code += "m.set_language(" + pyString requestedLocale + ", persist=False)\n"
         code += "rt.globalVars.set(rt.Name('F2M_UI_LanguageCode'), m.get_language())\n"
         code += "rt.globalVars.set(rt.Name('F2M_UI_SourceTexts'), rt.Array(*m.ui_catalog_sources()))\n"
         code += "rt.globalVars.set(rt.Name('F2M_UI_EnglishTexts'), rt.Array(*m.ui_catalog_english()))\n"
@@ -100,6 +102,18 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         python.Execute code throwOnError:true clearUndoBuffer:false
         if F2M_UI_LanguageCode != "zh-CN" and F2M_UI_LanguageCode != "en" do throw "Unsupported language readback"
         currentLanguage = F2M_UI_LanguageCode
+        if requestedLocale != undefined and currentLanguage != requestedLocale do throw "Language preview readback mismatch"
+        if requestedLocale != undefined and persist do
+        (
+            -- Commit only after catalog, toolbar and native language readback succeed.
+            local commitCode = "import os, sys\n"
+            commitCode += "p = os.path.abspath(" + pyString pyLanguageFile + ")\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n"
+            commitCode += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language commit module identity/version mismatch')\n"
+            commitCode += "for api in ('get_language', 'set_language'):\n    if not callable(getattr(m, api, None)): raise RuntimeError('Language commit API missing: ' + api)\n"
+            commitCode += "chosen = " + pyString currentLanguage + "\nif chosen not in ('zh-CN', 'en') or m.get_language() != chosen: raise RuntimeError('Language commit preview mismatch')\n"
+            commitCode += "m.set_language(chosen, persist=True)\n"
+            python.Execute commitCode throwOnError:true clearUndoBuffer:false
+        )
         currentLanguage
     )
 
@@ -452,7 +466,8 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         -- Only display properties change. Cache keys, options and scene identity stay intact.
         changingLanguage = true
         F2M_Transfer_Rollout.title = tr "FBX 到 3ds Max 数据传递"
-        ddl_language.selection = if currentLanguage == "en" then 2 else 1
+        btn_language_zh.checked = currentLanguage == "zh-CN"
+        btn_language_en.checked = currentLanguage == "en"
         grp_mode.text = tr "选择模式"
         grp_file.text = tr "FBX 文件"
         edt_fbx.caption = tr "FBX 文件："
@@ -485,6 +500,36 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         setAdvancedVisible advancedOpen
         changingLanguage = false
         true
+    )
+
+    fn switchLanguage requestedLocale =
+    (
+        if changingLanguage do return false
+        local previousLanguage = currentLanguage
+        try
+        (
+            initializeLanguage requestedLocale:requestedLocale persist:false
+            applyLanguage()
+            initializeLanguage requestedLocale:currentLanguage persist:true
+            true
+        )
+        catch
+        (
+            local languageError = getCurrentException()
+            try(initializeLanguage requestedLocale:previousLanguage persist:false)catch
+            (
+                languageError += "\nLanguage session/display rollback failed:\n" + getCurrentException()
+            )
+            currentLanguage = previousLanguage
+            try(applyLanguage())catch
+            (
+                languageError += "\nLanguage control rollback failed:\n" + getCurrentException()
+            )
+            changingLanguage = false
+            local languageDiagnostic = writeUiDiagnostic languageError
+            messageBox ((tr "无法保存或切换语言。请保留内部诊断文件。") + "\n\n" + languageDiagnostic) title:"FBXTo3dsMax"
+            false
+        )
     )
 
     fn selectedTargetOk =
@@ -689,28 +734,12 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
 
     on btn_selfcheck pressed do runSelfCheck()
 
-    on ddl_language selected index do
-    (
-        if not changingLanguage do
-        (
-            local previousLanguage = currentLanguage
-            try
-            (
-                initializeLanguage requestedLocale:(if index == 2 then "en" else "zh-CN") persist:false
-                applyLanguage()
-                initializeLanguage requestedLocale:currentLanguage persist:true
-            )
-            catch
-            (
-                local languageDiagnostic = writeUiDiagnostic (getCurrentException())
-                try(initializeLanguage requestedLocale:previousLanguage persist:false)catch()
-                currentLanguage = previousLanguage
-                try(applyLanguage())catch()
-                changingLanguage = false
-                messageBox ((tr "无法保存或切换语言。请保留内部诊断文件。") + "\n\n" + languageDiagnostic) title:"FBXTo3dsMax"
-            )
-        )
-    )
+    -- Clicking the selected language must restore its pressed state as well.
+    on btn_language_zh changed state do
+        if not changingLanguage do switchLanguage "zh-CN"
+
+    on btn_language_en changed state do
+        if not changingLanguage do switchLanguage "en"
 
     on F2M_Transfer_Rollout open do
     (
@@ -748,13 +777,15 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
                 local selectionIdentityBeforeRun = captureSelectionHandlesAndNames()
                 setWarning "正在传递数据，请等待；复杂模型会在完成安全写入和回读后返回。"
                 btn_run.enabled = false
-                ddl_language.enabled = false
+                btn_language_zh.enabled = false
+                btn_language_en.enabled = false
                 try(setWaitCursor())catch()
                 try(windows.processPostedMessages())catch()
                 local transferSucceeded = runPython false
                 try(setArrowCursor())catch()
                 btn_run.enabled = true
-                ddl_language.enabled = true
+                btn_language_zh.enabled = true
+                btn_language_en.enabled = true
                 restoreSelectionByHandlesOrNames selectionIdentityBeforeRun[1] selectionIdentityBeforeRun[2]
                 if transferSucceeded then
                 (

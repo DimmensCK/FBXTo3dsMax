@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""UI selection-lifetime regression checks for the v1.4.24 repair."""
+"""UI selection-lifetime regression checks for the v1.4.25 repair."""
 
 from __future__ import annotations
 

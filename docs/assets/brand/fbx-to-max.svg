@@ -1,19 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
-  <title id="title">FBXTo3dsMax</title>
-  <desc id="desc">Readable source tools for bringing FBX geometry and data into an existing 3ds Max scene.</desc>
-  <defs>
-    <linearGradient id="background" x1="0" x2="1"><stop stop-color="#101c2e"/><stop offset="1" stop-color="#172d41"/></linearGradient>
-    <linearGradient id="accent" x1="0" x2="1"><stop stop-color="#64e1ce"/><stop offset="1" stop-color="#87b8ff"/></linearGradient>
-  </defs>
-  <rect width="1200" height="240" rx="20" fill="url(#background)"/>
-  <g fill="none" stroke="#64e1ce" stroke-width="2" opacity=".7">
-    <path d="M78 66 130 42 183 66 183 126 130 154 78 126Z M78 66 130 94 183 66 M130 94V154 M130 42V94 M78 126 130 94 183 126"/>
-    <circle cx="130" cy="94" r="5" fill="#64e1ce"/>
-  </g>
-  <path d="M219 98H279M265 84 280 98 265 112" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="323" y="108" fill="#f4f8ff" font-size="53" font-family="Segoe UI,Arial,sans-serif" font-weight="700">FBXTo3dsMax</text>
-  <text x="325" y="151" fill="#bad0e3" font-size="23" font-family="Segoe UI,Arial,sans-serif">Your mesh. Your scene. Readable source.</text>
-  <text x="79" y="201" fill="#88a6bd" font-size="17" font-family="Segoe UI,Arial,sans-serif">Dimmens</text>
-  <rect x="961" y="172" width="173" height="32" rx="16" fill="#233e52"/>
-  <text x="1047" y="194" fill="#b2efe3" font-size="15" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">MIT · OPEN SOURCE</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+<title id="title">FBXTo3dsMax — FBX data, your Max scene</title><desc id="desc">Original conceptual illustration. Selectively transfer mesh data into an existing Max scene, or replace a skinned mesh under validation. This is not a software screenshot.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#162b40"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5ce0dc" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="320" rx="22" fill="url(#bg)"/>
+<g font-family="Arial"><text x="52" y="52" font-size="14" fill="#6fe3dd" letter-spacing="2.8" font-family="Microsoft YaHei">READABLE SOURCE · MIT · 中文 / ENGLISH</text>
+<text x="50" y="122" font-size="55" font-weight="700" fill="#f4f8ff">FBXTo3dsMax</text>
+<text x="53" y="166" font-size="22" fill="#c5d6e8">Bring the edit back. Keep your Max workflow.</text>
+<text x="53" y="201" font-size="19" fill="#a8bed3" font-family="Microsoft YaHei">把修改带回 Max，让已有场景继续工作。</text>
+<g fill="#20394d" stroke="#38596e"><rect x="52" y="236" width="133" height="34" rx="17"/><rect x="196" y="236" width="121" height="34" rx="17"/><rect x="328" y="236" width="158" height="34" rx="17"/></g>
+<g font-size="14" fill="#d9f4f3"><text x="72" y="258">MESH + UV</text><text x="214" y="258">NORMALS</text><text x="347" y="258">SKIN WORKFLOW</text></g>
+<g stroke="#79dad8" stroke-width="2.5" fill="#153647"><path d="M813 80L902 51L968 98L879 130Z"/><path d="M813 80V163L879 213V130"/><path d="M879 213L968 179V98"/><path d="M813 121L902 92L968 139M846 104L846 187M922 82V198" fill="none" opacity=".55"/></g>
+<g stroke="#859dff" stroke-width="2.5" fill="#22304f"><path d="M999 121L1081 89L1143 136L1061 170Z"/><path d="M999 121V201L1061 248V170"/><path d="M1061 248L1143 217V136"/><path d="M999 161L1081 129L1143 176M1030 145V224M1102 111V232" fill="none" opacity=".55"/></g>
+<path d="M906 241C937 265 969 268 999 252" fill="none" stroke="#5ce0dc" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="802" y="263" font-size="15" fill="#b6d5df">FBX DATA</text><text x="1023" y="283" font-size="15" fill="#c5cdfb">MAX SCENE</text></g></svg>

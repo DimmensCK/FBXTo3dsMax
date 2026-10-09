@@ -19,12 +19,12 @@ autoUndoEnabled:false
             local code =
                 "import importlib.util, os, sys\nfrom pymxs import runtime as rt\n" +
                 "p = os.path.abspath('" + escapedPath + "')\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n" +
-                "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n" +
+                "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n" +
                 "    sys.modules.pop(name, None)\n    spec = importlib.util.spec_from_file_location(name, p)\n" +
                 "    if spec is None or spec.loader is None: raise RuntimeError('Language loader missing')\n" +
                 "    m = importlib.util.module_from_spec(spec)\n    sys.modules[name] = m\n" +
                 "    try: spec.loader.exec_module(m)\n    except BaseException:\n        if sys.modules.get(name) is m: sys.modules.pop(name, None)\n        raise\n" +
-                "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True or not callable(getattr(m, 'translate', None)): raise RuntimeError('Language identity/version/API mismatch')\n" +
+                "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True or not callable(getattr(m, 'translate', None)): raise RuntimeError('Language identity/version/API mismatch')\n" +
                 "rt.globalVars.set(rt.Name('F2M_Macro_LocalizedText'), m.translate(str(rt.globalVars.get(rt.Name('F2M_Macro_LocalizedText')))))\n"
             python.Execute code throwOnError:true clearUndoBuffer:false
             F2M_Macro_LocalizedText

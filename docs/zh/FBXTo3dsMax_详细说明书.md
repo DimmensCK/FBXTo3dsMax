@@ -1,10 +1,138 @@
-# FBXTo3dsMax 1.4.24 使用教程与参考
+# FBXTo3dsMax 1.4.25 · 使用教程
 
-作者：Dimmens。[English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) · [安装](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md)。
+**先选任务，再选数据。** 本教程既提供可以照做的步骤，也解释传递依据、蒙皮来源和失败边界。
 
-本教程定义可读源码版的操作和证明标准。当前测试状态及历史 1.3.24 的独立范围见测试说明，旧版结果不自动证明后续版本。
+作者：Dimmens · [English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) · [安装与卸载](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [功能主页](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md)
 
-## 术语与匹配
+本页描述 1.4.25 的操作与设计，具体版本验收见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。1.4.24 与 1.3.24 的历史结果分别保留，不自动证明后续版本。
+
+## 从这里选任务
+
+| 需要做什么 | 直接阅读 |
+|---|---|
+| 保留原 Max 节点，传回修改后的形状 | [任务一：形状](#任务一只修改形状) |
+| 只修 UV、材质或逐面 ID | [任务二：UV 与材质](#任务二更新-uv材质与面-id) |
+| 带回 RGB 和独立 Alpha 数据 | [任务三：顶点色](#任务三分别传递-rgb-与-alpha) |
+| 明暗不对，想还原 SG / 自定义法线 | [任务四：光滑与法线](#任务四选择光滑组或自定义法线) |
+| 拓扑改变，结合 FBX 权重与 Max 场景骨骼 | [任务五：替换带 Skin 的网格](#任务五拓扑改变后替换带-skin-的网格) |
+| 看匹配、算法、数据来源与事务细节 | [技术参考](#技术参考) |
+| 检查失败或结果和预期不同 | [遇到问题时](#遇到问题时) |
+
+## 所有任务通用的准备
+
+1. **保存场景副本。** 初次从一个普通、独立的接收网格开始，避免组、实例、XRef 等不安全状态。
+2. 完整安装后打开 **FBX 转 MAX / FBX to MAX**，点击 **Language** 旁的 **中文** 或 **EN（英文）**。界面位置见[仓库语言说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md#language-ui)。
+3. 选择 **Max 接收网格**，再选 FBX。界面的“Max 源模型”接收数据，“FBX 目标模型”提供数据，方向是 **FBX → Max**。
+4. 选择模式与通道，点击 **检查 FBX/匹配 / Check FBX / Match**。阅读匹配对象、警告和失败理由。
+5. 检查通过后 **开始执行 / Run Transfer**。正式执行会重新导入并验证，不直接信任旧检查缓存。
+6. 读最终报告，再核对外观、实际通道、蒙皮播放与保存重载；“检查通过”和“执行完成”不是同一件事。
+
+一个 Max 网格与一个 FBX 网格可以直接配对；其余数量组合按完整网格名匹配。请不要用多对象重名来猜配对结果。
+
+![原创示意：两种工作流](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/two-modes.svg)
+
+## 任务一：只修改形状
+
+**适合：** 调整比例、轮廓或点位置，但保持顶点身份、边连接与面绕序。
+
+1. 在建模工具中保留拓扑身份并导出 FBX。点数与面数相同只是必要线索，不是充分证明。
+2. 在 Max 中选接收网格，选择 **模型完全一致 / 传递数据**。
+3. 先只勾默认的 **变形**。这次不需要更新的 UV、材质、RGB/Alpha 和法线保持未勾选。
+4. 检查、执行并阅读逐对象报告。插件按对象空间转换点位置并逐点读回。
+5. 核对轮廓、原节点与用户修改器栈，再检查有 Skin 的场景在动画下是否仍符合预期。
+
+| 历史形状示意：传递前 | 历史形状示意：传递后 |
+|---|---|
+| ![历史形状传递前](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![历史形状传递后](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
+
+这是作者授权的历史功能示意，不是 1.4.25 截图；左右位置不定义固定的数据提供方。[v1.3.23 历史结果检查片段，约 10 秒](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)展示变形/绑定查看，没有展示完整操作。
+
+## 任务二：更新 UV、材质与面 ID
+
+**适合：** 同拓扑模型重新展开 UV、整理材质槽或修改面分配，不需要再次传点位置。
+
+![原创示意：网格数据的不同层级](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/channel-map.svg)
+
+1. 选择模式一，取消不需要的 **变形**。
+2. 根据 FBX 实际内容勾选 **UV 1 / 2 / 3**。它们对应 map channel 1 / 2 / 3；不要把通道编号当成任意可替换的 UV 集名称。
+3. 需要传材质对象与逐面 ID 时勾 **材质与 ID**；仅修 UV 时可以不勾。
+4. 检查、执行；若报告某勾选通道缺失并跳过，先修 FBX，再重新操作。
+5. 在 Max 中查看 UV 接缝与对应通道，抽查材质槽和受影响面的 ID。视口外观相近不能替代数据检查。
+
+![授权历史截图：材质和面 ID 的检查](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
+
+UV 以面角为单位，一个几何顶点可对应多个 UV 顶点。材质 ID 以面为单位。上图是授权历史画面，仅展示功能查看，不附带模型文件。
+
+## 任务三：分别传递 RGB 与 Alpha
+
+**适合：** 模型用顶点数据表达颜色、遮罩或独立透明度信息。
+
+1. 保持模式一，分别选择 **RGB 顶点色** 和/或 **顶点 Alpha**。
+2. RGB 使用 **map channel 0**，Alpha 使用 **map channel -2**。Alpha 不由 RGB 亮度推测。
+3. 不需要移动模型时取消变形；不需要替换材质时取消材质与 ID。
+4. 执行后按报告核对这两个通道，再用适合的 Max 显示方式或材质检查视觉效果。
+
+![授权历史截图：RGB 顶点色](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-color-rgb.webp)
+
+![授权历史截图：独立顶点 Alpha](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-alpha.webp)
+
+两张历史截图分别展示 RGB 和 Alpha 的查看。照明、材质和视口显示会改变屏幕观感；实际通道读回才是数据依据。缺失通道会警告并跳过，不会从另一个通道补造。
+
+## 任务四：选择光滑组或自定义法线
+
+**适合：** 形状一致但明暗不同，或需要保留专门编辑的法线方向。
+
+![原创示意：光滑组与法线的区别](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/smoothing-and-normals.svg)
+
+| 目标 | 建议选择 | 要核对什么 |
+|---|---|---|
+| 只更新面之间的平滑关系 | 光滑组 | 原生 SG 或严格推导结果、逐面掩码 |
+| 保留 Max 原 SG，带回自定义方向 | 顶点法线 | 最终面角方向，以及是否有覆盖修改器 |
+| SG 与自定义法线都来自 FBX | 两项一起勾选 | 先 SG、后法线；读回后的最终方向 |
+
+不要根据绿色、黄色或蓝色判断法线来自谁。它们表示编辑状态和选择显示，不能证明权威来源。
+
+插件保留的 `F2M_顶点法线` 是传递结果的一部分，**不要删除或塌陷**。用户自己的 Edit Normals / Weighted Normal 不会被静默清除；覆盖冲突会停止。
+
+SG 无法表达所有手工或加权法线方向。只有方向数据时，也无法推知“硬边两侧恰好同向”的隐藏意图。需要保留这类意图时，FBX 应带有效原生平滑层。具体容差、三路行为及严格失败条件见下方技术参考。
+
+## 任务五：拓扑改变后替换带 Skin 的网格
+
+**适合：** FBX 网格已改变拓扑，并希望采用它的权重，同时继续使用 Max 场景中的骨骼与绑定系统。
+
+![原创示意：模式二各类数据的来源](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/skin-data-authority.svg)
+
+1. 在场景副本中，确认 **Max 网格与 FBX 网格各有一个 Skin**。每个实际非零 FBX 骨骼影响都必须唯一匹配 Max 源 Skin。
+2. 选择 **模型不一致 / 替换并保留蒙皮**。保持默认 **替换时隐藏备份旧网格** 开启。
+3. 默认使用 FBX 材质；只有明确需要旧 Max 材质时，才开启高级选项 **兼容：改用 Max 源材质**。
+4. 先检查匹配与 Skin 条件。正式执行会建立候选，复制带 local data 的 Skin、写入 FBX 权重并读回骨骼/绑定/顶点数据。
+5. 完成后核对新网格世界位置、图层/显示状态和隐藏旧备份；播放动画、保存并重新打开副本。
+6. 批量操作前先验证单对象。保留旧备份时支持批次回滚；关闭备份只允许单对象，删除旧网格后不能承诺无损恢复。
+
+**来源不要记反：** 新网格、通道、默认材质与逐顶点权重来自 FBX；场景骨骼身份、绑定 local data 和包络来自 Max；候选 Mesh Bind 经过自适应建立。
+
+这不是“任意改拓扑仍无损保留整个旧动画系统”。旧父子层级、Transform/动画控制器、约束和任意用户修改器不会自动复制。骨骼匹配、权重或绑定读回不合格时应停止，不要忽略失败继续提交。
+
+## 遇到问题时
+
+| 现象 | 下一步 |
+|---|---|
+| 安装失败，或没有顶部按钮 | 先读安装结果与日志；完整解压、重启后再检查，不忽略事务失败 |
+| 预检通过但执行失败 | 读正式报告；执行验证的是本次真实导入，不是先前缓存 |
+| 点数和面数相同，却不能传 | 查顶点身份、边连接、绕序、重复面与唯一匹配 |
+| UV / RGB / Alpha 被跳过 | 核对 FBX 是否真的包含勾选通道 |
+| 光滑组无法推导 | 查原生层、非流形、方向矛盾和 32 位可表达性；不要制造非流形来“稳定”结果 |
+| 明暗不符 | 查 SG 与自定义法线是否都需要传，以及是否有覆盖修改器 |
+| 模式二失败 | 查双方 Skin、骨骼唯一性、完整权重与绑定读回；保留旧备份和报告 |
+| 清理或回滚不完整 | 停止扩大操作，保留场景副本与报告，先解决问题 |
+
+传递报告在 `%LOCALAPPDATA%\FBXTo3dsMax\Reports`。公开 Issue 前清理路径、名称与项目资料；优先提供原创最小复现，不上传正式资产。
+
+以下参考解释同一套流程的严格条件。历史图与原创 SVG 的用途见[媒体说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md)。
+
+## 技术参考
+
+### 术语与匹配
 
 数据方向为 **Max 源模型 ← FBX 目标模型**：选中的 Max 网格接收数据，FBX 提供数据。模式一保持原节点，模式二使 FBX 候选取得原名称并替代旧网格。
 
@@ -14,11 +142,11 @@
 
 组头/组成员、冻结对象、LOD 可见性控制器、实例和 XRef 等不安全状态会被阻断。先制作独立副本或解除相应状态，再重新检查。
 
-## 操作与高级选项
+### 操作与高级选项
 
 先保存场景副本，选择接收模型，选择模式和 FBX，再点击 **检查 FBX/匹配 / Check FBX / Match**。检查会实际隔离导入并验证，随后恢复名称、选择与导入器设置，生成报告。读报告后再 **开始执行 / Run Transfer**，核对视觉、通道/Skin、动画与保存重载，再扩大对象范围。
 
-顶部 **语言 / Language** 下拉框可选 **中文 / English**。切换原位更新窗口，不丢失模式、FBX、选项与检查状态；选择会保存供下次使用。用户摘要跟随所选语言，原始技术诊断可能保留原语种。
+模式标题右侧的 **Language · 中文 / EN** 按钮直接选择语言，**EN** 即英文。两个按钮保持单选，点击当前语言不会清空选择。切换原位更新窗口，不丢失模式、FBX、选项与检查状态；选择会保存供下次使用。用户摘要跟随所选语言，原始技术诊断可能保留原语种。
 
 正式执行前阅读报告。更换 FBX、模式、选中对象或隐藏范围时重新检查；只改变传递通道可继续执行。每次正式执行仍重新导入和验证当前数据，检查缓存不会替代写前验证。
 
@@ -31,7 +159,7 @@
 
 检查时不保留临时导入节点。只有自检可异步取消；正式传递同步执行，没有中途安全取消。
 
-## 模式一：同拓扑传递
+### 模式一：同拓扑传递
 
 要求稳定顶点身份、相同边连接、相同面角数量及同向绕序，且每个面能唯一对应。相同点数/面数不能单独证明同拓扑。面顺序变化与同向循环角起点变化可通过显式映射处理；反向面、重复面歧义或连接变化会停止。
 
@@ -53,17 +181,7 @@
 
 模式一按对象建立事务。某对象失败会尝试恢复该对象；此前已经成功的其它对象不会自动被撤销。
 
-### 形状传递示意
-
-| 传递前 | 传递后 |
-|---|---|
-| ![传递前的历史形状示意](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![传递后的历史形状示意](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
-
-作者授权的历史示意，不是当前版验收录像，不附带模型。图片显示场景网格，不定义左/右是 FBX 或 Max 的固定约定。
-
-[观看约 10 秒的历史结果检查片段](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)（v1.3.23）：展示变形结果和绑定查看，没有展示完整操作，也不是本版验收证据。
-
-## 光滑组：来源和边界
+### 光滑组：来源和边界
 
 Max 每个面的 SG 是 32 位掩码，可同时包含多个组。相邻面掩码按位与非零时共享计算法线；第 32 位在 signed int32 中可能表现为负数，这是合法数据。
 
@@ -77,7 +195,7 @@ Max 每个面的 SG 是 32 位掩码，可同时包含多个组。相邻面掩�
 
 仅有方向数据时，无法识别“硬边两侧恰好同向”的隐藏编辑意图。需要保留这种意图的 FBX 应带原生平滑层。光滑组也不能表达任意 Weighted Normal 或手工锁定方向；需要时同时传递自定义法线。
 
-## 自定义法线的三路行为
+### 自定义法线的三路行为
 
 | 选择 | 接收端 SG | 处理 |
 |---|---|---|
@@ -92,7 +210,7 @@ Max 每个面的 SG 是 32 位掩码，可同时包含多个组。相邻面掩�
 
 用户自己的 Edit Normals、Weighted Normal 等不会被静默删除；存在覆盖冲突时停止。法线使用逆转置处理空间变换，SG 和最终逐面角方向在写后及强制重评估后再次读回，所有方向与权威 FBX 的角差须在 `0.1°` 内。绿色/黄色只表示状态与选择显示，方向验证才是结果依据。
 
-## 模式二：替换并保留蒙皮
+### 模式二：替换并保留蒙皮
 
 双方网格都必须恰好有一个 Skin，且每个实际 FBX 权重影响都能唯一映射到 Max 源 Skin。空权重、骨骼歧义、关键 API 不可用或读回不一致会停止提交。
 
@@ -111,7 +229,7 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 
 模式二不复制旧节点的父子层级、Transform/动画控制器、约束或任意用户修改器。复杂绑定和动画流程需在副本中检查世界位置、播放与保存重载。
 
-## 状态恢复和报告
+### 状态恢复和报告
 
 每次原生 FBX 导入前会解除 Modify 当前对象并切到 Create，验证成功后才修改 Importer。全局设置采用快照、设置读回、finally 恢复及再次读回。名称和选择按 handle 恢复，名称回退必须恰好唯一；临时节点按 handle 删除并确认。
 
@@ -127,7 +245,7 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 
 若出现清理/回滚不完整，保留场景副本和报告，先解决问题再继续批量操作。报告与截图可能包含本地路径和模型名称，提交公开 Issue 前先脱敏。
 
-## 自检、兼容性与故障排查
+### 自检、兼容性与故障排查
 
 自检启动独立 3ds Max Batch，覆盖源码/版本、纯算法、过程网格、法线、原创合成 FBX 同拓扑与 Skin 替换链路。仓库不携带模型文件；运行时由 `f2m_test_fixtures.py` 提供原创简单网格、UV/法线/原生 SG，`f2m_selfcheck.py` 在 Max 中构建并导出两骨骼 Skin 场景；文件放到用户本地数据目录。它不会重置当前交互场景；全部六类通过、Batch 自然退出码为 0 才成功。超时、取消、非零退出或强制清理均失败。
 
@@ -147,7 +265,7 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 
 反馈问题时提供版本、脱敏报告、最小重现步骤；优先用程序生成场景，无需公开正式项目资产。
 
-## 容易误解的地方
+### 容易误解的地方
 
 - **安装失败不能忽略。** 结果中的事务失败不是正常提示；先保留日志、解决错误，不直接使用未完成的安装。
 - **相同数量不等于同拓扑。** 顶点身份、连接、绕序和唯一映射也必须成立。
@@ -156,4 +274,4 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 - **法线颜色不代表来源。** 以方向和 Specified/Explicit 状态验证；F2M 修改器只可在测试副本暂时开关比较，不应删除或塌陷。
 - **不强制使用特定配套导出插件。** 导出工具可以不同，但 FBX 必须满足本文的网格/通道/Skin 合同。
 
-安装副本同目录提供本教程及 `README_中文.md`、`INSTALL_中文.md`；英文完整教程为 `USER_GUIDE_EN.md`。网页图片和导航指向维护中的仓库内容。
+安装副本同目录提供本教程及 `README_中文.md`、`INSTALL_中文.md`；英文完整教程为 `USER_GUIDE_EN.md`。本地安装包含本教程文字；图片、视频和网页导航指向维护中的在线仓库，需要网络。

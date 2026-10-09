@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc">
+<title id="title">Geometry and data channels / 网格与数据通道</title><desc id="desc">Original conceptual mesh and UV diagram. Positions are per vertex, UV and normals are per face corner, material IDs and smoothing masks are per face. RGB map zero and alpha map minus two are independent.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#162b40"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5ce0dc" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="480" rx="22" fill="url(#bg)"/>
+<g font-family="Arial"><text x="36" y="47" font-size="25" font-weight="700" fill="#f2f6ff">One mesh. Several independent kinds of data.</text>
+<text x="36" y="76" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">同一个网格，几何顶点 / 面角 / 面承载不同数据。</text>
+<g stroke="#65d6d3" stroke-width="3" fill="#1c5060"><path d="M65 180L200 130L298 205L162 260Z"/><path d="M65 180L162 260L160 362L65 283Z"/><path d="M162 260L298 205L298 310L160 362Z"/><path d="M65 180L298 310M200 130L160 362" opacity=".4" fill="none"/></g>
+<g fill="#eff9fc" stroke="#6fe3dd" stroke-width="3"><circle cx="65" cy="180" r="5"/><circle cx="200" cy="130" r="5"/><circle cx="298" cy="205" r="5"/><circle cx="162" cy="260" r="5"/><circle cx="160" cy="362" r="5"/><circle cx="65" cy="283" r="5"/><circle cx="298" cy="310" r="5"/></g>
+<text x="70" y="405" font-size="17" fill="#dceaf4" font-family="Microsoft YaHei">Position / 点位置</text>
+<g transform="translate(360 121)"><rect width="245" height="248" rx="12" fill="#1b3045" stroke="#476177"/><g stroke="#324b61"><path d="M0 62H245M0 124H245M0 186H245M61 0V248M122 0V248M183 0V248"/></g><g fill="#275262" stroke="#70d8d2" stroke-width="2"><path d="M23 30H103V109H23ZM130 30H220V109H130ZM23 139H103V222H23ZM130 139H220V222H130Z"/><path d="M23 30L103 109M130 30L220 109M23 139L103 222M130 139L220 222"/></g></g>
+<text x="375" y="405" font-size="17" fill="#dceaf4">UV islands / UV 1 · 2 · 3</text>
+<rect x="646" y="111" width="516" height="303" rx="15" fill="#1d3347"/>
+<g font-size="17" fill="#dceaf4"><text x="675" y="153" font-family="Microsoft YaHei">VERTEX / 顶点</text><text x="675" y="222" font-family="Microsoft YaHei">FACE CORNER / 面角</text><text x="675" y="291" font-family="Microsoft YaHei">FACE / 面</text><text x="675" y="360" font-family="Microsoft YaHei">INDEPENDENT MAPS / 独立通道</text></g>
+<g font-size="16" fill="#9fc2d5"><text x="675" y="180" font-family="Microsoft YaHei">Point positions / 点位置</text><text x="675" y="249">UV coordinates + custom normal directions</text><text x="675" y="318">Material ID + smoothing-group mask</text><text x="675" y="387">RGB = 0     Alpha = -2     UV = 1 / 2 / 3</text></g>
+<text x="36" y="452" font-size="14" fill="#9ab2c8" font-family="Microsoft YaHei">Original schematic / 原创示意 · No model file, software screenshot or acceptance result is represented</text></g></svg>

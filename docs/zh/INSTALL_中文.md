@@ -1,8 +1,18 @@
-# FBXTo3dsMax 1.4.24 安装说明
+# FBXTo3dsMax 1.4.25 安装说明
 
 [English installation](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md) · [使用教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md)
 
-这是可读源码版，入口是根目录 `Install_FBXTo3dsMax.ms`。本页定义安装操作和证明标准。当前结果与历史 1.3.24 的独立范围见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)，旧结果不替代当前版本验收。
+这是 **1.4.25 可读源码版**的安装与卸载说明，标准入口是根目录 `Install_FBXTo3dsMax.ms`。各版本实际验收见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)；1.4.24 与 1.3.24 的历史结果不自动证明 1.4.25。
+
+## 先分清三个入口
+
+| 你要做什么 | 使用入口 |
+|---|---|
+| 正常安装或同版本重新安装 | 根目录 `Install_FBXTo3dsMax.ms` |
+| 正常卸载并保留恢复归档 | 根目录 `Uninstall_FBXTo3dsMax.ms` |
+| 已安装后开始工作 | Max 顶部 **FBX 转 MAX / FBX to MAX** |
+
+**下载完整 ZIP → 解压 → 拖入安装器 → 确认成功 → 自检 → 场景副本首次传递。** 安装脚本与 `contents/` 必须来自同一份完整版本。单独打开 UI 脚本不等于安装。
 
 ## 环境与下载
 
@@ -16,9 +26,9 @@
 
 1. 保存当前场景。
 2. 把根目录 **`Install_FBXTo3dsMax.ms`** 拖入 Max 视口。
-3. 等待结果对话框。失败时保存显示的日志，先解决问题再使用插件。
+3. 等待安装结束并确认成功。交互安装通常显示结果对话框；静默启动可能只把结果记入日志。失败时保存日志，先解决问题再使用插件。
 4. 成功后点击顶部 **FBX 转 MAX / FBX to MAX**。优先使用主工具栏，必要时使用顶部停靠备用栏。
-5. 在 **语言 / Language** 选择中文或 English，运行插件自检并阅读报告。
+5. 点击 **Language** 旁的 **中文** 或 **EN（英文）**，运行插件自检并阅读报告。
 6. 重启 Max，确认按钮仍存在；首次传递使用场景副本。
 
 安装不会自动打开插件主窗口。通常用户级安装位置为：
@@ -27,7 +37,7 @@
 %APPDATA%\Autodesk\ApplicationPlugins\FBXTo3dsMax
 ```
 
-通常无需管理员权限。安装后运行完整安装副本。语言选择原位更新并保存到 `%LOCALAPPDATA%\FBXTo3dsMax\language.txt`。
+通常无需管理员权限。安装后运行完整安装副本。语言选择原位更新并保存到 `%LOCALAPPDATA%\FBXTo3dsMax\language.txt`。[语言界面说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md#language-ui)在仓库根主页；安装文本可本地阅读，网页图片和视频需要网络。
 
 ## 重复安装、升级和归档
 
@@ -43,11 +53,13 @@
 
 结果对话框提供本次准确路径。已有包、同名 Macro/图标无法确认所有权时，会停止而不覆盖。识别到属于插件的旧 AutoLoader 后先归档并记录；历史源工程不属于安装清理范围。
 
-归档是可恢复数据，不是自动恢复按钮。保留清单与日志，手动恢复前先核对内容。历史卸载验收验证了归档逐字节一致，未执行从该归档恢复安装。
+历史 27 项源码版到当前 32 项版的升级未单独验证；不要从新清单数量推断该升级已通过。
+
+归档是可恢复数据，不是自动恢复按钮。保留清单与日志，手动恢复前先核对内容。历史卸载验收验证了归档逐字节一致，未执行从该归档恢复安装。它不等于已给当前日常用户环境完成安装、卸载或恢复。
 
 ## 没有按钮或打不开
 
-确认完整下载/解压，阅读实际安装结果与日志，再运行标准安装器并重启 Max。仍失败时提供 Max 完整版本、插件版本、重现步骤和脱敏日志。
+确认完整下载/解压，阅读实际安装结果与日志，再运行标准安装器并重启 Max。不要为了消除提示而手动删除未确认所有权的同名包、Macro、图标或旧 AutoLoader。仍失败时提供 Max 完整版本、插件版本、重现步骤和脱敏日志。
 
 直接运行 `contents/FBXTo3dsMax_UI.ms` 只临时打开窗口，不等于完整安装成功。开发者须保留包内 `post-start-up scripts parts`：它是 AutoLoader 路由标识。
 
@@ -75,4 +87,4 @@ pwsh -NoLogo -NoProfile -File .\tools\Install_FBXTo3dsMax.ps1 -MaxRoot '<实际 
 
 将占位内容替换为安装目录或 `3dsmax.exe` 的绝对路径。启动器先只读检查文件、版本及选定 Max，再执行同一个 `.ms` 事务；检测到已有 Max/Batch 会拒绝，不会结束用户进程。
 
-开发验证见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。安装副本的本篇为 `INSTALL_中文.md`，英文为同目录 `INSTALL_EN.md`。
+按任务操作见[完整教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md)。开发验证见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。安装副本的本篇为 `INSTALL_中文.md`，英文为同目录 `INSTALL_EN.md`。

@@ -11,7 +11,7 @@ Before editing, read:
 
 - The sibling `Blender To 3dsMax` directory is read-only historical source. Never edit, install from, rename or clean it.
 - Keep the mature two-mode workflow unless a verified defect requires change.
-- Original version baseline is `1.2.16`: bug fixes add `0.0.1`, new features add `0.1.0`. Current target `1.4.24` requires fresh qualification; historical `1.3.24` results do not qualify it.
+- Original version baseline is `1.2.16`: bug fixes add `0.0.1`, new features add `0.1.0`. Current target `1.4.25` requires fresh qualification; historical `1.3.24` or `1.4.24` results do not qualify it.
 - Runtime source/resources live under lowercase `contents/`. Keep root user entry points concise; PowerShell installation is `tools/Install_FBXTo3dsMax.ps1`.
 - Synchronize versions in both Python engines, UI, language modules, `contents/VERSION.txt`, `contents/FBXTo3dsMax.version`, package metadata, installer manifest and changelog.
 - Load runtime modules by absolute path and verify `module.__file__`, version, completion state and entry point.
@@ -25,7 +25,7 @@ Before editing, read:
 - Do not silently delete previous installations or legacy AutoLoader scripts; archive and record their locations.
 - Current source manifest has 32 safe unique targets. Installed hash-manifest targets must equal that set. Historical 27-target results apply only to version 1.3.24.
 - Installed guides are flat in `contents/`: Chinese names plus `README_EN.md`, `INSTALL_EN.md`, `USER_GUIDE_EN.md`. Resolve installed files by absolute package path.
-- `语言 / Language` switches 中文/English in place, retaining mode, file, options and check state. Persist only `zh-CN`/`en` atomically under local user data. Keep original technical diagnostics when translation would lose information.
+- Compact `Language` buttons select 中文/EN in place, retaining mode, file, options and check state. Keep exactly one language selected, including after clicking the active language. Persist only `zh-CN`/`en` atomically under local user data. Keep original technical diagnostics when translation would lose information.
 - Run isolated fresh/repeat install, cold start, installed self-check, relevant failure rollback and recoverable uninstall for layout/installer changes. Verify both languages and persistence for language changes. Distinguish archived-byte verification from an exercised archive restoration.
 
 ## Public repository

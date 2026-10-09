@@ -530,7 +530,7 @@ class FbxMetadataTests(unittest.TestCase):
             return reader(path)
 
     def test_version_matches_release(self) -> None:
-        self.assertEqual(TOOL_VERSION, "1.4.24")
+        self.assertEqual(TOOL_VERSION, "1.4.25")
 
     def test_existing_topology_fixture_has_no_native_smoothing(self) -> None:
         self.assertEqual(

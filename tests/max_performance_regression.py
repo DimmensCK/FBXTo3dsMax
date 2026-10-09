@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bounded performance regressions for FBXTo3dsMax v1.4.24.
+"""Bounded performance regressions for FBXTo3dsMax v1.4.25.
 
 The first two cases exercise pure Python code and therefore run both under
 ordinary CPython and 3ds Max's embedded Python.  When pymxs is available, a
@@ -438,8 +438,8 @@ def main() -> None:
             "topology": str(topology.TOOL_VERSION),
         }
         if result["tool_version"] != {
-            "smoothing": "1.4.24",
-            "topology": "1.4.24",
+            "smoothing": "1.4.25",
+            "topology": "1.4.25",
         }:
             raise AssertionError(f"性能回归加载到错误版本：{result['tool_version']}")
 

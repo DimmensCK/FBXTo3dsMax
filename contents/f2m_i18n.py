@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-TOOL_VERSION = "1.4.24"
+TOOL_VERSION = "1.4.25"
 SUPPORTED_LOCALES = ("zh-CN", "en")
 MODULE_NAME = "_fbx_to_3dsmax_i18n_runtime"
 REPORT_MODULE_NAME = "_f2m_report_i18n_runtime"
@@ -159,9 +159,13 @@ def set_language(locale: str, persist: bool = True) -> str:
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, str(destination))
-        finally:
-            if os.path.exists(temporary):
+        except BaseException:
+            # Preserve the save error; no filesystem work follows a successful replace.
+            try:
                 os.unlink(temporary)
+            except OSError:
+                pass
+            raise
     _session_locale = chosen
     return chosen
 

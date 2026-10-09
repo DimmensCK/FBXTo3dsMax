@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.4.24 事务式拖放安装器。
+FBXTo3dsMax v1.4.25 事务式拖放安装器。
 
 源文件夹不会作为运行目录。安装器先完整暂存插件包、核对哈希，再以目录
 切换方式放入当前用户的 ApplicationPlugins；旧版插件包和已确认归属的
@@ -19,7 +19,7 @@ F2M_Installer_FinalDialogTitle = ""
 F2M_Installer_FinalDialogText = ""
 
 (
-    local installerVersion = "1.4.24"
+    local installerVersion = "1.4.25"
     local installerPath = getSourceFileName()
     local fileClass = dotNetClass "System.IO.File"
     local directoryClass = dotNetClass "System.IO.Directory"
@@ -1037,7 +1037,7 @@ F2M_Installer_FinalDialogText = ""
 
             finalDialogTitle = "FBXTo3dsMax"
             finalDialogText = (
-            (localized "FBXTo3dsMax v1.4.24 安装成功。\n\n" "FBXTo3dsMax v1.4.24 installed successfully.\n\n") +
+            (localized "FBXTo3dsMax v1.4.25 安装成功。\n\n" "FBXTo3dsMax v1.4.25 installed successfully.\n\n") +
                 (localized "3ds Max 顶部已经创建一个显眼的“FBX 转 MAX”按钮，并通过可见区域与点击命中验证。\n" "The FBX to MAX toolbar button passed visibility and hit-area checks.\n") +
                 (localized "安装完成时不会自动打开主窗口；需要时请点击顶部按钮。\n\n" "Click the toolbar button when you want to open the plug-in.\n\n") +
                 (localized "安装目录：\n" "Installation directory:\n") + targetPackage + "\n" +

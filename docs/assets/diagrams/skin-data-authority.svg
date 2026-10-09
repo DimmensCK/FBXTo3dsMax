@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+<title id="title">Mode two data authority / 模式二数据来源</title><desc id="desc">Original data authority diagram. The FBX provides candidate mesh, channels and weights. Max provides scene bone identities, binding local data and envelopes. Candidate mesh binding is adapted. Old parent relationships, controllers and arbitrary user stacks are not cloned.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#162b40"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5ce0dc" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="500" rx="22" fill="url(#bg)"/>
+<g font-family="Arial"><text x="36" y="46" font-size="25" font-weight="700" fill="#f2f6ff">Replace the mesh. Be precise about what “keep Skin” means.</text>
+<text x="36" y="78" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">模式二：保留场景骨架与绑定系统，不是复制旧节点的整个动画与修改器栈。</text>
+<rect x="28" y="109" width="367" height="245" rx="15" fill="#1b3c4b"/>
+<text x="52" y="148" font-size="23" font-weight="700" fill="#6fe3dd">FBX</text>
+<g font-size="17" fill="#dceaf4"><text x="52" y="185">Candidate mesh + channels</text><text x="52" y="213" font-family="Microsoft YaHei">网格 / UV / RGB / Alpha / 法线</text><text x="52" y="257">Per-vertex weights + DQ</text><text x="52" y="285" font-family="Microsoft YaHei">逐顶点权重 / Unnormalized</text><text x="52" y="325" font-family="Microsoft YaHei">Default material / 默认材质</text></g>
+<rect x="805" y="109" width="367" height="245" rx="15" fill="#28364d"/>
+<text x="829" y="148" font-size="23" font-weight="700" fill="#acbbff">MAX SCENE</text>
+<g font-size="17" fill="#dceaf4"><text x="829" y="185">Existing scene-bone identities</text><text x="829" y="213" font-family="Microsoft YaHei">原场景骨骼身份</text><text x="829" y="257">Bind / Stretch / envelopes</text><text x="829" y="285" font-family="Microsoft YaHei">绑定与包络 / local data</text><text x="829" y="325" font-family="Microsoft YaHei">Layer + display / 图层与显示</text></g>
+<path d="M410 224H493M791 224H707" fill="none" stroke="#5ce0dc" stroke-width="3"/>
+<rect x="467" y="155" width="266" height="160" rx="16" fill="#294d5b" stroke="#5ce0dc" stroke-width="2"/>
+<text x="490" y="195" font-size="20" font-weight="700" fill="#f2f6ff">VALIDATED CANDIDATE</text>
+<text x="494" y="226" font-size="17" fill="#dceaf4">Adapted Mesh Bind</text><text x="495" y="253" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">自适应候选网格绑定</text><text x="502" y="287" font-size="16" fill="#6fe3dd" font-family="Microsoft YaHei">Full readback / 全量读回</text>
+<text x="36" y="403" font-size="17" fill="#f0c694">Not cloned: old parenting, transform / animation controllers, arbitrary modifier stack.</text>
+<text x="36" y="434" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">默认隐藏旧网格用于回滚；双方 Skin、骨骼、权重与绑定必须通过检查。</text>
+<text x="36" y="469" font-size="14" fill="#9ab2c8" font-family="Microsoft YaHei">Original schematic / 原创示意 · Not a promise of lossless arbitrary topology or animation editing</text></g></svg>

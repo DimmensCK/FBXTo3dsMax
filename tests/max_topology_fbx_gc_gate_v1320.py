@@ -39,7 +39,7 @@ def load_selfcheck() -> Any:
 
 payload = {
     "ok": False,
-    "version": "1.4.24",
+    "version": "1.4.25",
     "engine_pid": os.getpid(),
     "started_at_utc_epoch": time.time(),
     "finished_at_utc_epoch": 0.0,

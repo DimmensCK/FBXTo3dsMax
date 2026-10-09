@@ -33,7 +33,7 @@ except Exception:
     rt = None
 
 
-TOOL_VERSION = "1.4.24"
+TOOL_VERSION = "1.4.25"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CHILD_ENV = "F2M_SELFCHECK_CHILD"
 RESULT_ENV = "F2M_SELFCHECK_RESULT"
@@ -938,11 +938,17 @@ def _validate_ui_bridge_source(ui_text: str) -> None:
     protected_execute = (
         "python.Execute code throwOnError:true clearUndoBuffer:false"
     )
+    protected_commit = (
+        "python.Execute commitCode throwOnError:true clearUndoBuffer:false"
+    )
     execute_lines = [line for line in ui_text.splitlines()
-                     if "python.Execute" in line and not line.lstrip().startswith("--")]
+                     if re.search(r"\bpython\s*\.\s*execute\b", line, flags=re.IGNORECASE)
+                     and not line.lstrip().startswith("--")]
     if (ui_text.count(protected_execute) != 3
-            or len(execute_lines) != 3
-            or any(protected_execute not in line for line in execute_lines)):
+            or ui_text.count(protected_commit) != 1
+            or len(execute_lines) != 4
+            or any(line.strip() not in (protected_execute, protected_commit)
+                   for line in execute_lines)):
         raise RuntimeError(
             "界面的传递或自检入口可能清空用户撤销栈，或异常传播选项不完整。"
         )

@@ -59,7 +59,7 @@ else:
     RESULT_CONFIGURATION_ERROR = (
         "Refused unsafe gate result path: " + _requested_result
     )
-VERSION = "1.4.24"
+VERSION = "1.4.25"
 FINAL_NORMAL_MODIFIER = "F2M_顶点法线"
 MODULE_NAME = "_f2m_topology_undo_redo_v1320"
 SG_REPORT_MARKER = "光滑组完成：已写入并回读验证"

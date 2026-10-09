@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mode-2 scale-aware world-position tolerance regressions for v1.4.24."""
+"""Mode-2 scale-aware world-position tolerance regressions for v1.4.25."""
 
 from __future__ import annotations
 

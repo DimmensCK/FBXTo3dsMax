@@ -1,10 +1,138 @@
-# FBXTo3dsMax 1.4.24 — user guide
+# FBXTo3dsMax 1.4.25 · user guide
 
-[中文教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) · [Installation](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [Overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md)
+**Choose the task, then the data.** Follow practical workflows first; consult the reference below for matching, Skin authority and failure boundaries.
 
-By Dimmens. This guide defines operation and proof requirements for the readable source edition. Current results and the separate historical 1.3.24 scope are in [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md).
+By Dimmens · [中文教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) · [Installation and removal](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [Feature overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md)
 
-## Data direction and matching
+This guide describes 1.4.25 operations and design. Version-specific acceptance is recorded in [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md). Historical 1.4.24 and 1.3.24 results are separate and do not qualify later versions.
+
+## Pick a task
+
+| Goal | Read |
+|---|---|
+| Keep the Max node and bring back a shape edit | [Task 1: shape](#task-1--update-shape-only) |
+| Update UVs, materials or face IDs only | [Task 2: UVs and materials](#task-2--update-uvs-materials-and-face-ids) |
+| Bring back RGB and independent alpha | [Task 3: vertex data](#task-3--transfer-rgb-and-alpha-separately) |
+| Restore smoothing relationships or edited normals | [Task 4: smoothing and normals](#task-4--choose-smoothing-groups-or-custom-normals) |
+| Combine a changed FBX mesh/weights with Max scene bones | [Task 5: replace a skinned mesh](#task-5--replace-a-skinned-mesh-after-topology-changes) |
+| Understand matching, authority and transactions | [Technical reference](#technical-reference) |
+| Investigate a failure or unexpected result | [Troubleshooting](#when-something-goes-wrong) |
+
+## Preparation shared by every task
+
+1. **Save a scene copy.** Start with one ordinary independent receiving mesh; resolve unsafe groups, instances or XRefs first.
+2. After full installation, open **FBX 转 MAX / FBX to MAX** and click **EN** beside **Language** for English (or **中文** for Chinese). See the root [language UI reference](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md#language-ui).
+3. Select the **receiving Max mesh**, then the FBX. The Chinese “Max 源模型” receives data and “FBX 目标模型” supplies it. The direction is **FBX → Max**.
+4. Choose the mode and channels, then **Check FBX / Match**. Read matched objects, warnings and failure reasons.
+5. After a valid check, **Run Transfer**. Actual execution imports and validates again; it does not blindly trust a cached check.
+6. Read the final report and inspect appearance, channels, Skin playback and save/reload. A successful precheck is not a completed transfer.
+
+One Max mesh and one FBX mesh can pair directly. Other object-count combinations use full mesh names; duplicate names are not a way to guess a pairing.
+
+![Original schematic: the two workflows](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/two-modes.svg)
+
+## Task 1 — update shape only
+
+**Use for:** proportions, silhouette or point-position edits that retain vertex identity, connectivity and winding.
+
+1. Preserve topology identity in the modeling tool and export FBX. Equal vertex/face counts are necessary clues, not sufficient proof.
+2. Select the receiving Max mesh and **Matching Models / Transfer Data**.
+3. Start with only the default shape/position option. Leave UVs, materials, RGB/alpha and normals unselected unless this edit needs them.
+4. Check, transfer and read the per-object result. Point positions are converted through object transforms and read back individually.
+5. Inspect the shape, original node and user stack; for a skinned scene, test the intended animation too.
+
+| Historical shape illustration: before | Historical shape illustration: after |
+|---|---|
+| ![Before historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![After historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
+
+These author-authorized historical images are not 1.4.25 captures. Their left/right positions do not define source authority. The [historical v1.3.23 inspection clip, about 10 seconds](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4), shows deformation/binding inspection, not the complete procedure.
+
+## Task 2 — update UVs, materials and face IDs
+
+**Use for:** re-unwrapped UVs, revised material slots or face assignments on matching topology, without transferring positions again.
+
+![Original schematic: mesh data at different levels](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/channel-map.svg)
+
+1. Use Mode 1 and deselect shape/positions if they should stay unchanged.
+2. Select the **UV 1 / 2 / 3** channels actually present in the FBX. These are map channels 1 / 2 / 3, not interchangeable names for arbitrary UV sets.
+3. Select materials/IDs if both the material object and face assignments need updating. Leave them unselected for a UV-only edit.
+4. Check and transfer. If a selected channel is missing and skipped, correct the FBX before trying again.
+5. Inspect UV seams and the actual channel, then sample material slots and affected face IDs. Similar viewport appearance does not replace data verification.
+
+![Authorized historical screenshot: materials and face IDs](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
+
+UVs are face-corner data: one geometric vertex may correspond to several UV vertices. Material IDs are face data. The historical screenshot illustrates inspection; no model files accompany it.
+
+## Task 3 — transfer RGB and alpha separately
+
+**Use for:** color, masks or independent alpha stored as vertex data.
+
+1. Stay in Mode 1 and select RGB vertex color and/or vertex alpha independently.
+2. RGB is **map channel 0**; alpha is **map channel -2**. Alpha is never inferred from RGB brightness.
+3. Deselect positions when the mesh should not move, and materials/IDs when they should stay unchanged.
+4. Read the report for each channel, then inspect it with an appropriate Max display or material.
+
+![Authorized historical screenshot: RGB vertex color](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-color-rgb.webp)
+
+![Authorized historical screenshot: independent vertex alpha](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-alpha.webp)
+
+The historical figures illustrate RGB and alpha inspection separately. Lighting, materials and viewport settings change the appearance; actual channel readback is the data evidence. Missing channels are warned about and skipped, not synthesized from another channel.
+
+## Task 4 — choose smoothing groups or custom normals
+
+**Use for:** matching geometry with different shading, or preserving deliberately edited normal directions.
+
+![Original schematic: smoothing groups versus normal directions](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/smoothing-and-normals.svg)
+
+| Goal | Select | Inspect |
+|---|---|---|
+| Update face smoothing relationships only | Smoothing groups | Native or strictly inferred SG and per-face masks |
+| Keep Max SG but bring back custom directions | Custom normals | Final corner directions and overriding modifiers |
+| Take both SG and custom normals from FBX | Both | SG first, then normals and final direction readback |
+
+Do not infer normal source from green, yellow or blue display colors. They describe editing/selection state, not authority.
+
+The retained `F2M_顶点法线` modifier is part of the result. **Do not delete or collapse it.** User Edit Normals / Weighted Normal modifiers are not silently removed; overriding conflicts stop the transfer.
+
+SG cannot represent every hand-edited or weighted direction. Directions alone also cannot reveal a hard edge whose sides happen to point identically. Include a valid native smoothing layer when that intent matters. The reference below explains tolerances, transfer paths and strict failure conditions.
+
+## Task 5 — replace a skinned mesh after topology changes
+
+**Use for:** a changed FBX mesh whose weights should be used with the existing Max scene's bones and binding system.
+
+![Original schematic: Mode 2 data authority](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/skin-data-authority.svg)
+
+1. On a scene copy, confirm **exactly one Skin on each Max/FBX mesh**. Every actual nonzero FBX influence must map uniquely to a Max source Skin bone.
+2. Select **Different Models / Replace / Keep Skin**. Keep the default hidden old-mesh backup enabled.
+3. FBX materials are used by default. Enable the advanced old-Max-material compatibility option only when that is explicitly required.
+4. Check matching and Skin conditions. Transfer builds a candidate, copies Skin with local data, writes FBX weights and reads back bone/binding/vertex data.
+5. Inspect world placement, layer/display state and the hidden old backup. Play animation, save and reopen the copy.
+6. Validate one object before a batch. Retaining old backups permits batch rollback. Disabling backup is single-object only and cannot promise recovery after old-mesh deletion.
+
+**Keep the authority clear:** FBX supplies mesh, channels, default material and per-vertex weights; Max supplies scene-bone identity, binding local data and envelopes. Mesh Bind is adapted for the candidate.
+
+This is not arbitrary topology editing with lossless copying of the whole old animation system. Old parenting, transform/animation controllers, constraints and arbitrary user modifiers do not migrate automatically. Bone, weight or binding failures are reasons to stop, not warnings to ignore.
+
+## When something goes wrong
+
+| Symptom | Next step |
+|---|---|
+| Install fails or the toolbar is missing | Read installation result/log; verify full extraction and restart; never ignore a failed transaction |
+| Precheck passes but transfer fails | Read the execution report: it validates the current import, not old cached data |
+| Counts match but topology fails | Inspect identity, edges, winding, duplicate faces and unique pairing |
+| UV / RGB / alpha is skipped | Confirm that the FBX contains the selected channel |
+| SG cannot be inferred | Inspect native SG, non-manifold input, contradictory directions and 32-bit representability; do not create non-manifold geometry as a workaround |
+| Unexpected shading | Check whether both SG and normals are needed and whether modifiers override them |
+| Mode 2 fails | Inspect both Skins, unique bones and complete weight/binding readback; retain backups and reports |
+| Cleanup or rollback is incomplete | Stop widening the operation and retain a scene copy/report while resolving the problem |
+
+Transfer reports are under `%LOCALAPPDATA%\FBXTo3dsMax\Reports`. Sanitize paths, names and project information before public Issues; prefer an original minimal reproduction instead of formal assets.
+
+The reference below defines the same workflows in detail. See [media scope](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md) for historical images and original schematics.
+
+## Technical reference
+
+### Data direction and matching
 
 **FBX data → selected Max receiving mesh.** The Chinese UI calls these “Max 源模型” and “FBX 目标模型”; these names do not reverse the data flow. Mode 1 retains the Max node. Mode 2 replaces it with the imported FBX candidate, giving the candidate the old name.
 
@@ -14,10 +142,10 @@ One selected Max mesh and one FBX mesh may pair directly. Other combinations mat
 
 Group heads/members, frozen nodes, LOD visibility controllers, instances and XRefs are blocked when their state is unsafe. Make an independent scene copy or resolve the unsupported state before checking again.
 
-## First transfer and language
+### First transfer and language
 
 1. Save a scene copy and select the Max receiving mesh.
-2. Choose **中文 / English** in **语言 / Language**. Switching updates the open window without losing the selected mode, FBX, options or check state; the choice is saved for future sessions.
+2. Click **中文** or **EN** beside **Language**; **EN** selects English. Exactly one button remains selected, including after clicking the active language. Switching updates the open window without losing the selected mode, FBX, options or check state; the choice is saved for future sessions.
 3. Select the FBX, choose a mode and the channels you need.
 4. Run **Check FBX / Match**. It performs isolated imports and checks, restores names, selection and importer settings, and produces a report.
 5. Read the report, then use **Run Transfer**. Check appearance, channels/Skin, animation and save/reload before processing more objects.
@@ -33,7 +161,7 @@ Changing the FBX, mode, selection or hidden-object scope requires a new check. C
 
 Precheck never retains temporary import nodes. The self-check is asynchronous and cancellable; actual transfer is synchronous and has no safe mid-transfer cancellation.
 
-## Mode 1 — matching topology
+### Mode 1 — matching topology
 
 **Matching Models / Transfer Data** requires stable vertex identity, equal edge connections and face-corner counts, consistent winding, and a unique mapping for every face. Equal point/face counts alone are insufficient. Reordered faces and same-winding cyclic corner rotations are handled by explicit mappings. Reverse winding, ambiguous duplicate faces and changed connectivity stop the operation.
 
@@ -55,17 +183,7 @@ Write order is positions, material/IDs, UV, SG, RGB, alpha, then normals. Basic 
 
 Mode 1 is transactional **per object**. Failure attempts to restore that object; earlier successful objects are not automatically undone.
 
-### Shape illustration
-
-| Before | After |
-|---|---|
-| ![Before shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![After shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
-
-Author-authorized historical illustrations. They are not current-version acceptance evidence, and no underlying model files are included. The figures show scene meshes; they do not define a left/right source convention.
-
-[Historical result-inspection clip](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4) — v1.3.23, about 10 seconds. It shows deformation/binding inspection rather than the complete operation; it does not qualify this version.
-
-## Smoothing groups — authority and limits
+### Smoothing groups — authority and limits
 
 Each Max face has a 32-bit SG mask and may belong to multiple groups. Adjacent faces whose masks have a nonzero bitwise AND share computed normals. Bit 32 may appear negative in signed int32; this is valid.
 
@@ -79,7 +197,7 @@ Every soft/hard edge and vertex fan is validated. Non-manifold input, one-endpoi
 
 Without native SG, a hard edge whose two sides happen to have identical directions cannot be inferred from directions alone. Include a native smoothing layer to preserve that intent. SG also cannot express arbitrary weighted or manually locked normal directions; transfer custom normals when required.
 
-## Custom normals — three transfer paths
+### Custom normals — three transfer paths
 
 | Selected channels | Receiver SG | Behavior |
 |---|---|---|
@@ -94,7 +212,7 @@ This path retains one bottom `F2M_顶点法线` Edit Normals modifier. Even with
 
 User Edit Normals/Weighted Normal modifiers are not silently deleted; detected overriding conflicts stop the operation. Normal-space conversion uses the inverse transpose. SG masks and all final corner directions are read immediately and after forced reevaluation; directions must agree with authoritative FBX within **0.1°**. Green/yellow display colors describe state and selection, not data provenance or correctness.
 
-## Mode 2 — replace mesh and keep skinning
+### Mode 2 — replace mesh and keep skinning
 
 **Different Models / Replace / Keep Skin** requires exactly one Skin on each mesh. Every actual nonzero FBX influence must map uniquely to a Max source Skin bone. Empty weights, ambiguous bones, missing required APIs or inconsistent readback block commit.
 
@@ -113,7 +231,7 @@ Hidden backup is on by default. Later batch failure deletes committed candidates
 
 The mode does **not** clone old parenting, transform/animation controllers, constraints or arbitrary user modifiers. Verify complex rigs on a copy, including world appearance, animation playback and save/reload.
 
-## State restoration and reports
+### State restoration and reports
 
 Before native FBX import, the plug-in detaches Modify's current object and switches to Create, verifies it, then changes importer settings. Settings use snapshot, set/get verification, `finally` restoration and readback. Names/selection use node handles; a name fallback must be unique. Temporary nodes are deleted and verified by handle.
 
@@ -127,7 +245,7 @@ Before native FBX import, the plug-in detaches Modify's current object and switc
 
 Precheck success means only that precheck passed. Completion requires writes, readback and temporary-state restoration. Skipped channels, object failures, rolled-back batches or incomplete rollback are not full success. Preserve a scene copy and report when cleanup/rollback is incomplete. Sanitize local paths and model names before a public Issue. User-facing summaries follow the chosen language; raw technical diagnostics may retain their original language.
 
-## Self-check and troubleshooting
+### Self-check and troubleshooting
 
 Self-check launches a dedicated Max Batch and covers six categories: files/version/loading source, pure algorithms, procedural Max mesh/stack, normal space/protection/rollback, synthetic matching-topology FBX, and synthetic Skin replacement. `f2m_test_fixtures.py` generates original small topology/UV/normal/native-SG data; `f2m_selfcheck.py` builds and exports a simple two-bone Skin scene in Max. Exporter settings are restored, and generated data stays in local user storage.
 
@@ -145,9 +263,9 @@ Historical real-host validation used Max 2023.3.10 / Python 3.9.7 on Windows 11 
 | Skin replacement stops | Exactly one Skin per mesh, unique bones and complete weight/binding readback |
 | Self-check fails | Report, internal diagnostics and natural exit; a green JSON alone is insufficient |
 
-Use an original generated minimal scene when reporting a problem; no formal project assets are needed. The installed offline guide is `USER_GUIDE_EN.md`, beside `README_EN.md` and `INSTALL_EN.md`.
+Use an original generated minimal scene when reporting a problem; no formal project assets are needed. The installed offline guide is `USER_GUIDE_EN.md`, beside `README_EN.md` and `INSTALL_EN.md`. Its text is local; images, videos and web navigation use the online repository and require internet access.
 
-## Common misconceptions
+### Common misconceptions
 
 - An installation transaction failure is not safe to ignore. Keep the log and resolve it before use.
 - Equal mesh counts do not prove matching topology; identity, connectivity, winding and unique mapping matter.

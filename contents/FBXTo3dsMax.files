@@ -1,4 +1,4 @@
-# FBXTo3dsMax v1.4.24 source installation manifest / 源码安装清单
+# FBXTo3dsMax v1.4.25 source installation manifest / 源码安装清单
 # Repository source path|Installed package path
 PackageContents.xml|PackageContents.xml
 contents\FBXTo3dsMax_Bootstrap.ms|contents\FBXTo3dsMax_Bootstrap.ms

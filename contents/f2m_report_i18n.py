@@ -11,7 +11,7 @@ import re
 import string
 from typing import Any
 
-TOOL_VERSION = "1.4.24"
+TOOL_VERSION = "1.4.25"
 
 # Complete fixed messages precede fragments. Internal Chinese status values
 # belong to the engines and must never be replaced with these display values.

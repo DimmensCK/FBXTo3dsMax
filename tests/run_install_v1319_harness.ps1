@@ -14,7 +14,7 @@ $resultPath = [IO.Path]::GetFullPath(
     (Join-Path $PSScriptRoot '_max_install_v1319_harness.txt')
 )
 $tokenName = 'F2M_INSTALL_HARNESS_TOKEN'
-$runToken = 'v1.4.24-' + [Guid]::NewGuid().ToString('N')
+$runToken = 'v1.4.25-' + [Guid]::NewGuid().ToString('N')
 
 if (-not (Test-Path -LiteralPath $MaxExecutable -PathType Leaf)) {
     throw "找不到 3ds Max：$MaxExecutable"

@@ -27,7 +27,7 @@ import qtmax
 
 SCRIPT_FILE = os.path.abspath(__file__)
 SCRIPT_DIR = os.path.dirname(SCRIPT_FILE)
-TOOL_VERSION = "1.4.24"
+TOOL_VERSION = "1.4.25"
 ICON_PATH = os.path.join(SCRIPT_DIR, "icons", "FBXTo3dsMax.svg")
 
 MAIN_TOOLBAR_OBJECT_NAME = "Main Toolbar"

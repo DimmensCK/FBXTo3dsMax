@@ -16,7 +16,7 @@ $resultPath = [IO.Path]::GetFullPath(
     (Join-Path $resultRoot 'FBXTo3dsMax\Validation\_max_installed_interactive_verify.json')
 )
 $tokenName = 'F2M_INSTALLED_VERIFY_TOKEN'
-$runToken = 'v1.4.24-' + [Guid]::NewGuid().ToString('N')
+$runToken = 'v1.4.25-' + [Guid]::NewGuid().ToString('N')
 
 if (-not (Test-Path -LiteralPath $MaxExecutable -PathType Leaf)) {
     throw "找不到 3ds Max：$MaxExecutable"
@@ -77,8 +77,8 @@ if (
 if ($result.state -ne 'finished' -or $result.ok -ne $true) {
     throw ('安装后验收未通过：' + ($result | ConvertTo-Json -Depth 8))
 }
-if ($result.version -ne '1.4.24') {
-    throw "安装后验收版本读回不一致：期望 1.4.24，实际 $($result.version)。"
+if ($result.version -ne '1.4.25') {
+    throw "安装后验收版本读回不一致：期望 1.4.25，实际 $($result.version)。"
 }
 if ($exitCode -ne 0) {
     throw "安装后验收内容通过，但专用 3ds Max 进程退出码为 $exitCode。"

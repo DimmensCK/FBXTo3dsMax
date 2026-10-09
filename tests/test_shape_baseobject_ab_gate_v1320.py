@@ -40,7 +40,7 @@ class UserReportedWorldSpaceGateSourceTests(unittest.TestCase):
         )
         for source in (self.runner, self.runner_1322, self.trs_runner):
             with self.subTest(source=source[:40]):
-                self.assertIn('EXPECTED_VERSION = "1.4.24"', source)
+                self.assertIn('EXPECTED_VERSION = "1.4.25"', source)
                 self.assertIn('"gate": {', source)
                 self.assertIn('"sha256": sha256_file(GATE_PATH)', source)
                 self.assertIn('"run_id":', source)

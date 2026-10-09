@@ -5,7 +5,7 @@
     ProductType="Application"
     Name="FBXTo3dsMax"
     Description="把 FBX 目标模型的数据传递给所选的 3ds Max 源模型。"
-        AppVersion="1.4.24"
+        AppVersion="1.4.25"
     UpgradeCode="{B7AD0BB7-C64E-4F41-9767-CA72294639AE}">
   <CompanyDetails Name="Dimmens" />
   <Components Description="post-start-up scripts parts">

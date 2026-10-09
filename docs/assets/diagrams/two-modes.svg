@@ -1,29 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="350" viewBox="0 0 1100 350" role="img" aria-labelledby="title desc">
-  <title id="title">Two transfer workflows / 两种传递流程</title>
-  <desc id="desc">Mode 1 transfers FBX channels into an existing Max node. Mode 2 combines FBX mesh and weights with existing Max scene bones and binding data.</desc>
-  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#297b83"/></marker></defs>
-  <rect width="1100" height="350" rx="16" fill="#f2f6fa"/>
-  <g font-family="Segoe UI,Microsoft YaHei,Arial,sans-serif">
-    <text x="32" y="44" fill="#182f45" font-size="20" font-weight="700">01 · 同拓扑 / Matching topology</text>
-    <rect x="32" y="66" width="284" height="83" rx="12" fill="#ddf3ef" stroke="#8dcec2"/>
-    <text x="174" y="99" fill="#164b4b" font-size="20" text-anchor="middle">FBX 通道 / Channels</text>
-    <text x="174" y="128" fill="#326568" font-size="15" text-anchor="middle">位置 · UV · SG · Normals · Color</text>
-    <path d="M332 107H542" stroke="#297b83" stroke-width="3" marker-end="url(#arrow)"/>
-    <text x="436" y="95" fill="#326568" font-size="15" text-anchor="middle">严格映射 / Verified mapping</text>
-    <rect x="562" y="66" width="506" height="83" rx="12" fill="#e2eafb" stroke="#a9bdde"/>
-    <text x="815" y="99" fill="#263e65" font-size="20" text-anchor="middle">已有 Max 节点 / Existing Max node</text>
-    <text x="815" y="128" fill="#53698c" font-size="15" text-anchor="middle">保留节点 / Retain node</text>
-    <text x="32" y="193" fill="#182f45" font-size="20" font-weight="700">02 · 改拓扑 / Changed topology + Skin</text>
-    <rect x="32" y="216" width="284" height="88" rx="12" fill="#ddf3ef" stroke="#8dcec2"/>
-    <text x="174" y="251" fill="#164b4b" font-size="20" text-anchor="middle">FBX 网格 / Mesh</text>
-    <text x="174" y="280" fill="#326568" font-size="15" text-anchor="middle">通道 + 权重 / Channels + weights</text>
-    <text x="343" y="269" fill="#297b83" font-size="30" text-anchor="middle">+</text>
-    <rect x="370" y="216" width="284" height="88" rx="12" fill="#e2eafb" stroke="#a9bdde"/>
-    <text x="512" y="251" fill="#263e65" font-size="20" text-anchor="middle">Max 骨骼 / Bones</text>
-    <text x="512" y="280" fill="#53698c" font-size="15" text-anchor="middle">绑定 + local data / Binding</text>
-    <path d="M674 260H750" stroke="#297b83" stroke-width="3" marker-end="url(#arrow)"/>
-    <rect x="770" y="216" width="298" height="88" rx="12" fill="#ebedf3" stroke="#bbc3d2"/>
-    <text x="919" y="251" fill="#263e65" font-size="20" text-anchor="middle">替换候选 / Replacement</text>
-    <text x="919" y="280" fill="#53698c" font-size="15" text-anchor="middle">完整读回 / Full readback</text>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc">
+<title id="title">Choose a workflow / 选择两种工作流</title><desc id="desc">Original diagram, not a screenshot. Mode one keeps the receiving Max node and writes selected FBX channels. Mode two validates both Skins, replaces the mesh and combines FBX geometry and weights with the Max skeleton and binding data.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#162b40"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5ce0dc" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="480" rx="22" fill="url(#bg)"/>
+<g font-family="Arial"><text x="36" y="45" font-size="24" font-weight="700" fill="#f2f6ff">Two workflows. One clear data direction.</text>
+<text x="36" y="74" font-size="16" fill="#a8bed3" font-family="Microsoft YaHei">数据始终由 FBX 提供给 Max；两种模式的保留对象不同。</text>
+<rect x="28" y="99" width="1144" height="148" rx="15" fill="#1b3347"/>
+<text x="52" y="134" font-size="19" font-weight="700" fill="#6fe3dd" font-family="Microsoft YaHei">01 · SAME TOPOLOGY / 同拓扑</text>
+<text x="52" y="165" font-size="17" fill="#e2edf5">FBX selected channels</text><text x="52" y="190" font-size="15" fill="#abc2d3" font-family="Microsoft YaHei">点位置 · UV · RGB / Alpha · 材质 · SG / 法线</text>
+<path d="M476 174H646" stroke="#5ce0dc" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="685" y="165" font-size="20" font-weight="700" fill="#f2f6ff">Keep the Max node</text>
+<text x="685" y="193" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">保留 Max 接收节点与用户栈，写入勾选数据</text>
+<text x="52" y="226" font-size="14" fill="#94b2c8">Gate: vertex identity + connectivity + winding + unique face mapping</text>
+<rect x="28" y="263" width="1144" height="155" rx="15" fill="#23334b"/>
+<text x="52" y="299" font-size="19" font-weight="700" fill="#a9b9ff" font-family="Microsoft YaHei">02 · DIFFERENT TOPOLOGY / 异拓扑 + SKIN</text>
+<text x="52" y="330" font-size="17" fill="#e2edf5">FBX mesh + weights</text><text x="52" y="355" font-size="15" fill="#abc2d3" font-family="Microsoft YaHei">新网格与通道 + FBX 逐顶点权重</text>
+<path d="M476 339H646" stroke="#5ce0dc" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="685" y="330" font-size="20" font-weight="700" fill="#f2f6ff">Replace under validation</text>
+<text x="685" y="358" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">结合 Max 骨骼/绑定系统；默认备份旧网格</text>
+<text x="52" y="397" font-size="14" fill="#94b2c8">Gate: one Skin on each mesh + unique bones + complete weight / binding readback</text>
+<text x="36" y="452" font-size="14" fill="#9ab2c8" font-family="Microsoft YaHei">Original schematic / 原创示意 · Not a compatibility or lossless-animation guarantee</text></g></svg>

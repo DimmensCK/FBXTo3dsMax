@@ -47,7 +47,7 @@ RESULT_PATH = os.path.join(
 WORLD_TOLERANCE = 0.001
 MATRIX_TOLERANCE = 1.0e-6
 INITIAL_DIFFERENCE_MINIMUM = 0.25
-EXPECTED_VERSION = "1.4.24"
+EXPECTED_VERSION = "1.4.25"
 
 TRANSFORMS = (
     (
@@ -632,7 +632,7 @@ payload: dict[str, Any] = {
         "run_id": os.urandom(16).hex(),
         "expected_version": EXPECTED_VERSION,
     },
-            "test": "Mode-1 matching TRS core point transfer v1.4.24 gate",
+            "test": "Mode-1 matching TRS core point transfer v1.4.25 gate",
     "scope": (
         "generated Editable Poly/Mesh only; direct production helper; "
         "no FBX, Skin, normals, mapping channels, or user assets"

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""模式二 v1.4.24 发布安全修复的纯 Python 专项回归。"""
+"""模式二 v1.4.25 发布安全修复的纯 Python 专项回归。"""
 
 from __future__ import annotations
 

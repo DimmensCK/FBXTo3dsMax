@@ -222,7 +222,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             failing_path = pathlib.Path(folder) / "failing.py"
             host_path.write_text("# host\n", encoding="utf-8")
             failing_path.write_text(
-                "TOOL_VERSION = '1.4.24'\n"
+                "TOOL_VERSION = '1.4.25'\n"
                 "raise RuntimeError('partial import')\n",
                 encoding="utf-8",
             )
@@ -269,7 +269,25 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
         selfcheck._validate_ui_bridge_source(ui)
 
+        commit_execute = "python.Execute commitCode throwOnError:true clearUndoBuffer:false"
         mutations = {
+            "语言提交桥缺少异常传播": ui.replace(
+                commit_execute,
+                "python.Execute commitCode throwOnError:false clearUndoBuffer:false",
+                1,
+            ),
+            "语言提交桥清空撤销栈": ui.replace(
+                commit_execute,
+                "python.Execute commitCode throwOnError:true clearUndoBuffer:true",
+                1,
+            ),
+            "重复语言提交桥": ui.replace(
+                commit_execute, commit_execute + "\n" + commit_execute, 1,
+            ),
+            "遗漏语言提交桥": ui.replace(commit_execute, "", 1),
+            "额外小写语言调用": ui + (
+                "\npython.execute unexpectedCode throwOnError:false clearUndoBuffer:true\n"
+            ),
             "重新使用不支持的 python.Eval": ui.replace(
                 "succeeded = (F2M_UI_RunStatus == 1)",
                 'succeeded = (python.Eval "__f2m_run_ok") == true',

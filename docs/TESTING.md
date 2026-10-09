@@ -1,12 +1,58 @@
 # 回归测试与验证边界
 
+## 1.4.25 当前结果 / Current results
+
+**实测环境：Windows 11 x64、3ds Max 2023.3.10、内置 Python 3.9.7。** 下表记录本版已完成的实跑结果及明确例外；独立复核与发布读回分开记录。历史1.4.24和1.3.24结果保持独立，不代替本版验收。
+
+**Tested environment: Windows 11 x64, 3ds Max 2023.3.10 and bundled Python 3.9.7.** The table records completed executions and explicit exceptions; independent review and publication readback are separate. Historical results do not qualify this version.
+
+| 检查 / Check | 当前结果 / Current result | 实际范围 / Scope |
+|---|---|---|
+| 纯 Python / Pure Python | **305/305** | 算法、解析、映射、语言事务与源码契约 / Algorithms, parsing, mapping, language transactions and source contracts |
+| 静态检查 / Static check | **32项通过 / 32 targets passed** | 固定安装资源、必要目标、版本及公开内容检查 / Fixed installation resources, required targets, versions and public-content checks |
+| 全新与重复安装 / Fresh and repeat install | **通过 / Passed** | 标准源码安装器与同版本重复安装、32项按来源读回 / Standard source installer, same-version repeat and 32-target origin readback |
+| 隔离配置冷启动 / Isolated-profile cold start | **通过 / Passed** | 自动加载、正式工具栏及原公开UI验证器；新运行通过不解释旧失败 / Automatic loading, installed toolbar and the original public UI verifier; a later success does not explain an earlier failure |
+| 中文源码自检 / Chinese source self-check | **6/6，自然退出0 / 6/6, natural exit 0** | 独立隔离配置下全新安装、冷启动后，从源码contents绝对入口执行原创小样本 / Original small fixtures through the absolute source contents entry after a separate isolated fresh install and cold start |
+| 中文安装副本自检 / Chinese installed self-check | **6/6，自然退出0 / 6/6, natural exit 0** | 实际安装副本、32项清单与六类业务回归 / Actual installed copy,32-target manifest and six business regression categories |
+| 双语界面 / Bilingual UI | **72图已双审 / 72 images reviewed twice** | 6次切换、模式一已有检查缓存/原生语言值变化、模式二正常空缓存、2次同进程重开；两个AI分别逐张查看72原图 / Six switches, a populated Mode 1 check cache and native locale changes, normally empty Mode 2 cache, two same-process reopens; each AI actor viewed all 72 originals |
+| 英文安装副本自检 / English installed self-check | **6/6，自然退出0 / 6/6, natural exit 0** | 实际安装副本；英文已知标题与六类显示名称，原技术诊断及JSON协议保留 / Actual installed copy; English known headings and six display names, with original diagnostics and stable JSON retained |
+| PowerShell安装入口 / PowerShell installer | **功能有限接受 / Functional scope accepted** | 原样公开入口；启动保护与非安装配置阶段自然退出0，实际静默安装及32项读回完成；最终INI变化另行有限复核，原失败收据保留 / Unmodified public entry; startup guard and non-installing profile phase exited naturally 0, actual silent installation and 32-target readback completed; final INI changes received a bounded separate review, with the original failed receipt retained |
+| 激活后失败回滚 / Postactivation rollback | **通过 / Passed** | 单处真实激活后故障；旧包、受管及遗留状态完整恢复，失败新包32项资源保留，锁可重新独占并标准重装 / One actual postactivation fault; old package, managed and legacy state restored, all32 failed-package resources retained, exclusive lock reopened and normal retry completed |
+| 可恢复卸载 / Recoverable uninstall | **通过 / Passed** | 33个包内文件与3个受管文件归档逐字节哈希完整，运行状态清理；未从归档复装 / Matching byte hashes for33 package and3 managed files, with runtime cleanup; archive restoration not exercised |
+
+**PowerShell的限制：** 本次静默安装完成，原生静默消息、安装结果、32项来源与工具栏检查用于功能判断；没有看到或按过可见结果弹窗。安装退出后的INI与先前合格退出快照不完全相等：`Maximized`由1变0，并出现`Size=800 600`窗口布局变化。完整差异经本次有限复核接受；原最终收据仍为失败、要求独立INI复核，**不是三个原始收据全部通过，也不是配置全程字节不变**。这不允许忽略其他安装失败或任意配置变更。
+
+**PowerShell limit:** The actual silent installation, native silent message,32-source readback and toolbar checks support the functional result; no visible result dialog was observed or clicked. The final INI differed from the previously qualified post-exit snapshot: `Maximized` changed from 1 to 0 and a `Size=800 600` window-layout entry appeared. The complete difference received a bounded review for this run. The original final receipt remains failed and requests independent INI review: **this is not three passing original receipts or byte-invariant configuration throughout**, and it does not authorize ignoring other failures or arbitrary changes.
+
+**冷启动的限制：** 早先一次独立运行出现按钮命中遮挡断言失败，原因尚未确定。新诊断运行没有再出现该异常；后来通过不能倒推旧运行当时命中了什么，也不能宣称已定位或修复其原因。
+
+**Cold-start limit:** An earlier isolated run failed the button-hit occlusion assertion; its cause remains unknown. The new diagnostic run did not reproduce it. A later pass neither reconstructs the original hit nor establishes a causal fix.
+
+**源码与文档边界：** 本轮宿主流程绑定同一组32项安装资源。主页、两张真实UI图、本页和项目记忆属于清单之外的文档更新，不改变这些安装资源；更新后的整仓库快照没有被当作原宿主源码快照重新执行全部步骤。完整仓库、下载包及新clone的逐字节读回属于后续发布检查，未在此提前声明通过。
+
+**Source/document boundary:** The host workflows bind the same 32 installation resources. The homepage, two actual UI images, this page and project memory are documentation updates outside that set. They do not change the installation resources, but the complete updated repository snapshot has not been rerun as the original host-tested source snapshot. Remote-tree, archive and fresh-clone byte checks are separate publication checks, not preclaimed results.
+
+所有安装与宿主验收均使用隔离测试配置和自有进程，不能推断已给正常用户配置安装新版。完成项目应有自然退出0、选定原生日志严重错误0、原始日志及后续完整前缀/追加字节/进程身份时间窗、源码与安装来源不变等证据；仅JSON成功不够。
+
+Installation/host acceptance uses isolated test profiles and owned processes; it does not mean the new version was installed into the user's normal profile. Completed checks require natural exit 0, zero selected native severe errors, raw-log evidence with full-prefix/delta/process-time validation where applicable, and unchanged verified source/installation origins. A successful JSON alone is insufficient.
+
+界面检查只覆盖实际宿主字体/DPI和所审原图；属于程序操作与两个AI的逐张审阅，**不是物理鼠标、真人可用性或数学字体证明**。语言偏好验证包括文件保存、6次无环境语言覆盖的新模块读回及2次同一个Max进程重开，**没有验证另一个Max进程的语言偏好冷启动恢复**。已知英文标签与状态不表示原技术诊断全文英语。
+
+UI checks cover the actual host font/DPI and reviewed images through programmatic interaction and two AI image reviews, **not physical-mouse, human-usability or mathematical-font proof**. Preference checks include file saving, six new-module reads without a language override and two reopens in the same Max process, **not preference restoration after starting another Max process**. English labels/states do not imply fully English technical diagnostics.
+
+包描述声明Max 2023–2026，**2024–2026尚未实测**。小型原创拓扑与两骨骼Skin不覆盖复杂生产资产、大模型性能或所有未知故障。单一故障回滚不代表全部失败点；卸载归档逐字节可读不等于已从归档复装。历史27项到32项的跨版本升级未单独验证。
+
+The package declares Max 2023–2026; **2024–2026 remain untested**. Small original topology/two-bone Skin fixtures do not establish complex-asset, large-model performance or unknown-defect coverage. One rollback fault is not every failure point, and byte-readable uninstall archives are not an exercised restoration. The historical 27-target to 32-target upgrade was not tested separately.
+
+## 1.4.24 历史结果 / Historical results
+
 **1.4.24 本轮本地验证（2026-10-09）**：298 项纯回归、32 项静态安装资源检查，以及下表所列真实宿主流程通过。实测环境为 **Windows 11 x64、3ds Max 2023.3.10、内置 Python 3.9.7**。历史 1.3.24 结果在末节单独保留。
 
 **1.4.24 local validation, 2026-10-09:** 298 pure regressions, the 32-target static check and the real-host workflows below passed on **Windows 11 x64 / 3ds Max 2023.3.10 / bundled Python 3.9.7**. The 1.3.24 results remain separate.
 
 [中文使用教程](zh/FBXTo3dsMax_详细说明书.md) · [English user guide](en/USER_GUIDE.md)
 
-## 本轮结果 / Current results
+## 1.4.24 结果 / 1.4.24 results
 
 | 检查 / Check | 结果 / Result | 实际范围 / Scope |
 |---|---|---|
@@ -41,12 +87,20 @@ UI evidence is bounded to the actual host font/DPI and images reviewed by two AI
 ```powershell
 python -B .\tools\check_repository.py
 $env:PYTHONDONTWRITEBYTECODE = '1'
-python -B -m unittest discover -s tests -v
+$testLanguageBefore = $env:F2M_LANGUAGE
+try {
+    $env:F2M_LANGUAGE = 'zh-CN'
+    python -B -m unittest discover -s tests -v
+} finally {
+    $env:F2M_LANGUAGE = $testLanguageBefore
+}
 ```
 
 静态工具只读文件并输出到 stdout，支持 `--json` 与 `--root`。纯测试使用临时/原创数据，不依赖私有模型。仓库不含 FBX、MAX 或 BLEND；拓扑由 `f2m_test_fixtures.py` 生成，Skin 在自检中程序生成并导出。纯回归或 Python 编译不能替代 Max 运行。
 
-Run these commands at the repository root with a deliberately selected Python 3.9+ interpreter or Max's bundled Python. Static checks are read-only; pure tests use temporary/original data. Neither compilation nor pure tests establish real Max correctness.
+部分回归固定断言中文消息。上例只为测试临时指定 `zh-CN`，随后恢复环境变量；不修改用户语言偏好文件。未指定测试语言时，已有英文偏好可能导致这些中文消息断言失败。
+
+Run these commands at the repository root with a deliberately selected Python 3.9+ interpreter or Max's bundled Python. The temporary `zh-CN` environment selects the locale expected by Chinese-message assertions and is restored afterward; it does not write the user's preference file. Static checks are read-only; pure tests use temporary/original data. Neither compilation nor pure tests establish real Max correctness.
 
 ## 2. 独立 Max Batch 自检 / Standalone Max Batch self-check
 
@@ -78,7 +132,7 @@ Text uses LF with automatic binary detection. For the installation fingerprint, 
 
 ## 1.3.24 历史结果（2026-10-09）
 
-下表仅针对源码版本 **1.3.24**，不是当前 1.4.24 的验收结果。实际宿主为 **Windows 11 x64、3ds Max 2023.3.10 / 内置 Python 3.9.7**。安装生命周期使用隔离配置与独立进程；业务数据为运行时原创生成的小型拓扑和两骨骼 Skin 场景，未使用私有或前雇主模型。
+下表仅针对源码版本 **1.3.24**，不替代后续版本的验收结果。实际宿主为 **Windows 11 x64、3ds Max 2023.3.10 / 内置 Python 3.9.7**。安装生命周期使用隔离配置与独立进程；业务数据为运行时原创生成的小型拓扑和两骨骼 Skin 场景，未使用私有或前雇主模型。
 
 | 项目 | 本轮结果 | 证明范围 |
 |---|---|---|

@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.4.24 隔离式交互安装验收。
+FBXTo3dsMax v1.4.25 隔离式交互安装验收。
 
     仅允许由带随机令牌的专用 3ds Max 子进程执行。脚本连续执行两次正式
     拖放安装器，逐轮确认机器状态、最终中文结果载荷、32 项安装哈希和
@@ -15,7 +15,7 @@ global F2M_TopologyHelper
 global F2M_SkinHelper
 global F2M_Helper
 
-local expectedVersion = "1.4.24"
+local expectedVersion = "1.4.25"
 local expectedManifestCount = 32
 local environmentClass = dotNetClass "System.Environment"
 local fileClass = dotNetClass "System.IO.File"
@@ -56,7 +56,7 @@ fn validRunToken value =
     if value == undefined do return false
     local tokenText = value as string
     if tokenText.count != 40 do return false
-    if (substring tokenText 1 8) != "v1.4.24-" do return false
+    if (substring tokenText 1 8) != "v1.4.25-" do return false
     local hexCharacters = "0123456789abcdef"
     for index = 9 to 40 do
     (
@@ -184,7 +184,7 @@ fn requireSuccessfulInstall passIndex =
         )
     local dialogText = F2M_Installer_FinalDialogText as string
     local requiredChineseText = #(
-            "FBXTo3dsMax v1.4.24 安装成功。",
+            "FBXTo3dsMax v1.4.25 安装成功。",
         "顶部",
         "按钮",
         "安装目录：",

@@ -37,7 +37,7 @@ except Exception:  # 允许在普通 Python 中做语法检查
 
 
 TOOL_AUTHOR = "Dimmens"
-TOOL_VERSION = "1.4.24"
+TOOL_VERSION = "1.4.25"
 LAST_RUN_OK = False
 LAST_RUN_REPORT_PATH = ""
 LAST_RUN_SUMMARY = ""
@@ -95,7 +95,7 @@ struct F2M_TopologyHelperStruct
 (
     lastMessage = "",
     apiKind = "topology",
-    apiVersion = "1.4.24",
+    apiVersion = "1.4.25",
 
     fn setLastMessage msg =
     (

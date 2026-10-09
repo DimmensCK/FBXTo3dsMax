@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc">
+<title id="title">Smoothing groups and custom normals / 光滑组与自定义法线</title><desc id="desc">Original conceptual diagram. Smoothing groups encode face-sharing constraints, while custom normals specify corner directions. A native FBX smoothing layer takes priority; direction-only fallback cannot infer identical-direction hard-edge intent.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d30"/><stop offset="1" stop-color="#162b40"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5ce0dc" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="480" rx="22" fill="url(#bg)"/>
+<g font-family="Arial"><text x="36" y="45" font-size="25" font-weight="700" fill="#f2f6ff">Smoothing groups and normals answer different questions.</text>
+<text x="36" y="76" font-size="16" fill="#abc2d3" font-family="Microsoft YaHei">光滑组决定哪些面共享计算法线；自定义法线给出面角的实际方向。</text>
+<rect x="28" y="104" width="555" height="276" rx="15" fill="#1d3548"/><rect x="601" y="104" width="571" height="276" rx="15" fill="#25344c"/>
+<text x="52" y="144" font-size="20" font-weight="700" fill="#6fe3dd">SG / FACE RELATIONSHIPS</text>
+<g fill="#24515d" stroke="#6ed9d5" stroke-width="3"><path d="M65 272L155 194L246 272Z"/><path d="M155 194L338 194L246 272Z"/><path d="M338 194L429 272L246 272Z"/></g>
+<g font-size="17" fill="#dceaf4"><text x="130" y="294">1</text><text x="247" y="228">1</text><text x="354" y="294">2</text></g>
+<path d="M246 272L338 194" stroke="#ffbd75" stroke-width="5"/>
+<text x="52" y="342" font-size="15" fill="#abc2d3">Shared bit → soft relation · no shared bit → hard relation</text>
+<text x="625" y="144" font-size="20" font-weight="700" fill="#b2bfff">NORMALS / CORNER DIRECTIONS</text>
+<g fill="#343d65" stroke="#a1b2ff" stroke-width="3"><path d="M645 273L741 194L837 273Z"/><path d="M741 194L933 194L837 273Z"/><path d="M933 194L1029 273L837 273Z"/></g>
+<g stroke="#5ce0dc" stroke-width="3" marker-end="url(#arrow)"><path d="M741 244L733 182"/><path d="M837 232L861 171"/><path d="M933 244L976 201"/></g>
+<text x="625" y="342" font-size="15" fill="#abc2d3">Explicit directions can preserve shading SG alone cannot</text>
+<text x="36" y="418" font-size="16" fill="#dceaf4">Native SG first → strict constraints → normal readback, with unsupported cases stopped.</text>
+<text x="36" y="449" font-size="14" fill="#9ab2c8" font-family="Microsoft YaHei">Original schematic / 原创示意 · Display colors do not identify the source or prove correctness</text></g></svg>
