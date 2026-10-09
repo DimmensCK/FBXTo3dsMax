@@ -44,7 +44,7 @@ class FixturePrivacyTests(unittest.TestCase):
                 for key in ("topology", "native_smoothing"):
                     path = Path(paths[key])
                     self.assertTrue(path.is_absolute())
-                    self.assertIn(Path(directory), path.parents)
+                    self.assertIn(Path(directory).resolve(strict=True), path.parents)
                     self.assertNotIn(ROOT, path.parents)
                     native = key == "native_smoothing"
                     self.assertEqual(path.read_bytes(), fixture_bytes(native))
