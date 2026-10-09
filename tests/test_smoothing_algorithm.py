@@ -8,6 +8,12 @@ import unittest
 from unittest import mock
 from typing import Dict, Iterable, List, Sequence, Tuple
 
+# Resolve runtime modules from the source distribution without a global PYTHONPATH.
+import sys as _f2m_test_sys
+from pathlib import Path as _F2MTestPath
+_f2m_test_root = _F2MTestPath(__file__).resolve().parents[1]
+_f2m_test_sys.path.insert(0, str(_f2m_test_root / "contents" if (_f2m_test_root / "contents").is_dir() else _f2m_test_root))
+
 import f2m_smoothing as smoothing_impl
 from f2m_smoothing import (
     NonManifoldTopologyError,
@@ -100,7 +106,7 @@ def _wheel(pair_count: int) -> Tuple[List[Face], List[List[int]]]:
 
 class SmoothingAlgorithmTests(unittest.TestCase):
     def test_version_is_v1320(self) -> None:
-        self.assertEqual(TOOL_VERSION, "1.3.24")
+        self.assertEqual(TOOL_VERSION, "1.4.24")
 
     def test_two_triangles_all_soft_from_corner_normals(self) -> None:
         faces = [(0, 1, 2), (0, 2, 3)]

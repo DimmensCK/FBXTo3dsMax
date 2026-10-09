@@ -15,7 +15,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def load_module(filename: str, name: str):
-    path = ROOT / filename
+    path = ROOT / "contents" / filename
     spec = importlib.util.spec_from_file_location(name, str(path))
     if spec is None or spec.loader is None:
         raise RuntimeError(f"无法加载 {path}")
@@ -69,7 +69,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
                 self.assertIn("内部诊断", text)
                 self.assertIn("Traceback", text)
 
-            source = (ROOT / filename).read_text(encoding="utf-8-sig")
+            source = (ROOT / "contents" / filename).read_text(encoding="utf-8-sig")
             self.assertEqual(
                 module.visible_exception_text(
                     RuntimeError("中文前缀：English detail")
@@ -86,24 +86,24 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         sources = {
             filename: (ROOT / filename).read_text(encoding="utf-8-sig")
             for filename in (
-                "FBXTo3dsMax_UI.ms",
-                "Contents/FBXTo3dsMax.mcr",
-                "Contents/f2m_toolbar.py",
+                "contents/FBXTo3dsMax_UI.ms",
+                "contents/FBXTo3dsMax.mcr",
+                "contents/f2m_toolbar.py",
                 "Install_FBXTo3dsMax.ms",
                 "Uninstall_FBXTo3dsMax.ms",
             )
         }
         self.assertNotIn(
             'messageBox ("Python 插件执行失败：\\n\\n" +',
-            sources["FBXTo3dsMax_UI.ms"],
+            sources["contents/FBXTo3dsMax_UI.ms"],
         )
         self.assertNotIn(
             'messageBox ("运行自检失败：\\n\\n" +',
-            sources["FBXTo3dsMax_UI.ms"],
+            sources["contents/FBXTo3dsMax_UI.ms"],
         )
         self.assertNotIn(
             'messageBox ("无法打开 FBXTo3dsMax。\\n\\n" +',
-            sources["Contents/FBXTo3dsMax.mcr"],
+            sources["contents/FBXTo3dsMax.mcr"],
         )
         self.assertNotIn(
             'installError + "\\n\\n日志',
@@ -115,16 +115,16 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         )
 
     def test_direction_labels_and_package_description_are_unambiguous(self) -> None:
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
-        topology = (ROOT / "f2m_topology_transfer.py").read_text(
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        topology = (ROOT / "contents" / "f2m_topology_transfer.py").read_text(
             encoding="utf-8-sig"
         )
-        skin = (ROOT / "f2m_skin_replace.py").read_text(encoding="utf-8-sig")
+        skin = (ROOT / "contents" / "f2m_skin_replace.py").read_text(encoding="utf-8-sig")
         package = (ROOT / "PackageContents.xml").read_text(encoding="utf-8-sig")
 
         self.assertIn('checkbox chk_keep_mat "兼容：改用 Max 源材质"', ui)
         self.assertIn("checked:false visible:false", ui)
-        self.assertIn("完整保留 FBX Skin 数据", ui)
+        self.assertIn("FBX 提供逐顶点权重、Unnormalized 和 DQ 数据", ui)
         self.assertNotIn("替换时保留目标材质", ui)
         self.assertIn("<- FBX 目标模型", topology)
         self.assertIn("Max 源模型 <- FBX 目标模型", skin)
@@ -136,7 +136,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         )
 
     def test_selection_identity_never_uses_ambiguous_name_as_cache_key(self) -> None:
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
         key_start = ui.index("fn selectedTargetsKey")
         key_end = ui.index("fn currentCheckKey", key_start)
         key_source = ui[key_start:key_end]
@@ -150,7 +150,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         self.assertIn("if exactMatches.count == 1", restore_source)
 
     def test_check_cache_matches_original_invalidation_contract(self) -> None:
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
         start = ui.index("on btn_run pressed do")
         run_handler = ui[start:]
         key_start = ui.index("fn currentCheckKey")
@@ -188,7 +188,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         self.assertNotIn("sha256Text", ui)
 
     def test_runtime_module_is_reused_until_path_or_version_changes(self) -> None:
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
 
         self.assertIn("_f2m_module = sys.modules.get(_f2m_module_name)", ui)
         self.assertIn("if not _f2m_reuse:", ui)
@@ -222,7 +222,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             failing_path = pathlib.Path(folder) / "failing.py"
             host_path.write_text("# host\n", encoding="utf-8")
             failing_path.write_text(
-                "TOOL_VERSION = '1.3.20'\n"
+                "TOOL_VERSION = '1.4.24'\n"
                 "raise RuntimeError('partial import')\n",
                 encoding="utf-8",
             )
@@ -240,7 +240,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
                 sys.modules.pop(module_name, None)
 
     def test_ui_uses_supported_maxscript_python_status_bridge(self) -> None:
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
 
         # Autodesk's Python Core Interface exposes Execute/ExecuteFile, but no
         # Eval method.  Calling python.Eval lets the backend finish and then
@@ -256,8 +256,9 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             ui.count(
                 "python.Execute code throwOnError:true clearUndoBuffer:false"
             ),
-            2,
+            3,
         )
+        self.assertIn("initializeLanguage", ui)
         self.assertIn("writeUiDiagnostic", ui)
 
     def test_selfcheck_rejects_ui_bridge_semantic_mutations(self) -> None:
@@ -265,7 +266,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             "f2m_selfcheck.py",
             "_f2m_test_ui_bridge_selfcheck",
         )
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
         selfcheck._validate_ui_bridge_source(ui)
 
         mutations = {
@@ -336,11 +337,11 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             "f2m_selfcheck.py",
             "_f2m_test_release_safety_selfcheck",
         )
-        ui = (ROOT / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
-        topology = (ROOT / "f2m_topology_transfer.py").read_text(
+        ui = (ROOT / "contents" / "FBXTo3dsMax_UI.ms").read_text(encoding="utf-8-sig")
+        topology = (ROOT / "contents" / "f2m_topology_transfer.py").read_text(
             encoding="utf-8-sig"
         )
-        skin = (ROOT / "f2m_skin_replace.py").read_text(encoding="utf-8-sig")
+        skin = (ROOT / "contents" / "f2m_skin_replace.py").read_text(encoding="utf-8-sig")
 
         selfcheck._validate_ui_bridge_source(ui)
         selfcheck._validate_transfer_release_source(topology, skin)
@@ -373,7 +374,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             )
 
     def test_shape_readback_uses_scale_aware_max_precision_tolerance(self) -> None:
-        topology = (ROOT / "f2m_topology_transfer.py").read_text(
+        topology = (ROOT / "contents" / "f2m_topology_transfer.py").read_text(
             encoding="utf-8-sig"
         )
 
@@ -394,7 +395,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
         )
 
     def test_topology_fbx_import_is_readback_verified_and_restored(self) -> None:
-        topology = (ROOT / "f2m_topology_transfer.py").read_text(
+        topology = (ROOT / "contents" / "f2m_topology_transfer.py").read_text(
             encoding="utf-8-sig"
         )
 

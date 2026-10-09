@@ -1,6 +1,8 @@
-# FBXTo3dsMax v1.3.24 使用参考
+# FBXTo3dsMax 1.4.24 使用教程与参考
 
-作者：Dimmens。安装见 [INSTALL_中文.md](INSTALL_中文.md)，概览见 [README_中文.md](README_中文.md)。本参考描述当前可读源码版；历史发行流水和私有资产验证记录不作为公开使用步骤。
+作者：Dimmens。[English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) · [安装](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md)。
+
+本教程定义可读源码版的操作和证明标准。当前测试状态及历史 1.3.24 的独立范围见测试说明，旧版结果不自动证明后续版本。
 
 ## 术语与匹配
 
@@ -14,7 +16,9 @@
 
 ## 操作与高级选项
 
-先保存场景副本，选择接收模型，选择模式和 FBX，再点击“检查 FBX/匹配”。检查会实际隔离导入并验证，随后恢复名称、选择与导入器设置，生成报告。
+先保存场景副本，选择接收模型，选择模式和 FBX，再点击 **检查 FBX/匹配 / Check FBX / Match**。检查会实际隔离导入并验证，随后恢复名称、选择与导入器设置，生成报告。读报告后再 **开始执行 / Run Transfer**，核对视觉、通道/Skin、动画与保存重载，再扩大对象范围。
+
+顶部 **语言 / Language** 下拉框可选 **中文 / English**。切换原位更新窗口，不丢失模式、FBX、选项与检查状态；选择会保存供下次使用。用户摘要跟随所选语言，原始技术诊断可能保留原语种。
 
 正式执行前阅读报告。更换 FBX、模式、选中对象或隐藏范围时重新检查；只改变传递通道可继续执行。每次正式执行仍重新导入和验证当前数据，检查缓存不会替代写前验证。
 
@@ -48,6 +52,16 @@
 顺序为变形、材质/ID、UV、SG、RGB、Alpha、最后法线。基础通道采用写前快照和写后读回，必要的 ChannelInfo 临时修改器只能在栈底安全塌陷；持久法线修改器不塌陷。
 
 模式一按对象建立事务。某对象失败会尝试恢复该对象；此前已经成功的其它对象不会自动被撤销。
+
+### 形状传递示意
+
+| 传递前 | 传递后 |
+|---|---|
+| ![传递前的历史形状示意](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![传递后的历史形状示意](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
+
+作者授权的历史示意，不是当前版验收录像，不附带模型。图片显示场景网格，不定义左/右是 FBX 或 Max 的固定约定。
+
+[观看约 10 秒的历史结果检查片段](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)（v1.3.23）：展示变形结果和绑定查看，没有展示完整操作，也不是本版验收证据。
 
 ## 光滑组：来源和边界
 
@@ -117,9 +131,9 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 
 自检启动独立 3ds Max Batch，覆盖源码/版本、纯算法、过程网格、法线、原创合成 FBX 同拓扑与 Skin 替换链路。仓库不携带模型文件；运行时由 `f2m_test_fixtures.py` 提供原创简单网格、UV/法线/原生 SG，`f2m_selfcheck.py` 在 Max 中构建并导出两骨骼 Skin 场景；文件放到用户本地数据目录。它不会重置当前交互场景；全部六类通过、Batch 自然退出码为 0 才成功。超时、取消、非零退出或强制清理均失败。
 
-这些较小的原创回归样本不等于历史私有大型资产或性能压力测试覆盖。自检不能证明未知缺陷不存在，也不能代替安装验证、冷启动按钮验证或真实场景副本验收。开发者说明见 [docs/TESTING.md](docs/TESTING.md)。
+这些较小的原创回归样本不等于历史私有大型资产或性能压力测试覆盖。自检不能证明未知缺陷不存在，也不能代替安装验证、冷启动按钮验证或真实场景副本验收。开发者说明见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
 
-历史真机环境为 Windows 11 x64、Max 2023.3.10 / Python 3.9.7。XML 声明 2023–2026，但 2024–2026 未验证。
+历史真机环境为 Windows 11 x64、Max 2023.3.10 / Python 3.9.7。XML 声明 2023–2026，但 2024–2026 未验证；当前版的具体证据见测试说明。
 
 | 现象 | 先检查 |
 |---|---|
@@ -132,3 +146,14 @@ Skin 精确复制到原 FBX Skin 的栈位，不支持无 local data 的普通�
 | 自检失败 | 自检报告、内部诊断、自然退出码；不要只看绿色结果 |
 
 反馈问题时提供版本、脱敏报告、最小重现步骤；优先用程序生成场景，无需公开正式项目资产。
+
+## 容易误解的地方
+
+- **安装失败不能忽略。** 结果中的事务失败不是正常提示；先保留日志、解决错误，不直接使用未完成的安装。
+- **相同数量不等于同拓扑。** 顶点身份、连接、绕序和唯一映射也必须成立。
+- **不要为光滑组制造非流形网格。** 非流形等无法严格表达的约束会被阻断；这不是增强稳定性的做法。
+- **“保留蒙皮”不等于任意编辑都无损。** 双方 Skin、骨骼、权重、绑定及读回都必须合格，也不复制整个旧动画/父子层级。
+- **法线颜色不代表来源。** 以方向和 Specified/Explicit 状态验证；F2M 修改器只可在测试副本暂时开关比较，不应删除或塌陷。
+- **不强制使用特定配套导出插件。** 导出工具可以不同，但 FBX 必须满足本文的网格/通道/Skin 合同。
+
+安装副本同目录提供本教程及 `README_中文.md`、`INSTALL_中文.md`；英文完整教程为 `USER_GUIDE_EN.md`。网页图片和导航指向维护中的仓库内容。

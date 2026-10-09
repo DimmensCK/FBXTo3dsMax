@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.3.24 可恢复卸载器。
+FBXTo3dsMax v1.4.24 可恢复卸载器。
 
 插件文件不会被永久删除；已验证的插件包、MacroScript 与图标会移动到
 ApplicationPlugins 扫描路径之外的时间戳归档。
@@ -23,6 +23,31 @@ global F2M_Helper
     local packageMutationLock = undefined
     local finalDialogTitle = ""
     local finalDialogText = ""
+
+    -- Display preference only; no license or 3ds Max configuration is changed.
+    local displayEnglish = false
+    try
+    (
+        local displayEnvironment = dotNetClass "System.Environment"
+        local selectedLanguage = displayEnvironment.GetEnvironmentVariable "F2M_LANGUAGE"
+        if selectedLanguage != "en" and selectedLanguage != "zh-CN" do
+        (
+            local localData = displayEnvironment.GetEnvironmentVariable "LOCALAPPDATA"
+            if localData != undefined and localData != "" do
+            (
+                local preferencePath = pathClass.Combine localData "FBXTo3dsMax\\language.txt"
+                if fileClass.Exists preferencePath do
+                    selectedLanguage = trimRight (trimLeft (fileClass.ReadAllText preferencePath))
+            )
+        )
+        displayEnglish = selectedLanguage == "en"
+    )
+    catch (displayEnglish = false)
+    fn localized chineseText englishText =
+    (
+        if displayEnglish then englishText else chineseText
+    )
+
 
     fn joinPath basePath childPath =
     (
@@ -200,7 +225,7 @@ global F2M_Helper
         try
         (
             python.Execute "import __main__, os, sys\n_f2m_pre_main = vars(__main__)\n_f2m_pre_b2m = _f2m_pre_main.get('b2m')\nif getattr(_f2m_pre_b2m, '__name__', None) in ('b2m_topology_transfer', 'b2m_skin_replace') and getattr(_f2m_pre_b2m, '__file__', None):\n    _f2m_pre_dir = os.path.normcase(os.path.abspath(os.path.dirname(_f2m_pre_b2m.__file__)))\n    sys.path[:] = [_f2m_pre_path for _f2m_pre_path in sys.path if not _f2m_pre_path or os.path.normcase(os.path.abspath(_f2m_pre_path)) != _f2m_pre_dir]\n    if isinstance(_f2m_pre_main.get('tool_dir'), str) and os.path.normcase(os.path.abspath(_f2m_pre_main['tool_dir'])) == _f2m_pre_dir:\n        _f2m_pre_main.pop('tool_dir', None)\n    _f2m_pre_main.pop('b2m', None)\nfor _f2m_pre_name in ('_f2m_pre_main', '_f2m_pre_b2m', '_f2m_pre_dir', '_f2m_pre_path', '_f2m_pre_name'):\n    globals().pop(_f2m_pre_name, None)\n" throwOnError:true clearUndoBuffer:false
-            python.Execute "import __main__, builtins, os, sys\n_f2m_api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\nif _f2m_api:\n    _f2m_api.get('uninstall', lambda: 0)()\nif hasattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API'):\n    delattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API')\n_f2m_old_names = ('b2m_topology_transfer', 'b2m_skin_replace')\n_f2m_old_dirs = {os.path.normcase(os.path.abspath(os.path.dirname(getattr(sys.modules.get(_f2m_name), '__file__', '') or ''))) for _f2m_name in _f2m_old_names if getattr(sys.modules.get(_f2m_name), '__file__', None)}\n_f2m_known_modules = _f2m_old_names + ('f2m_topology_transfer', 'f2m_skin_replace', 'f2m_smoothing', 'f2m_fbx_metadata', 'f2m_selfcheck', 'f2m_test_fixtures', '_f2m_sc_fixture_integrity', '_f2m_sc_fixture_algorithm', '_f2m_sc_fixture_topology', '_fbx_to_3dsmax_toolbar_runtime', '_fbx_to_3dsmax_topology_runtime', '_fbx_to_3dsmax_skin_runtime', '_fbx_to_3dsmax_selfcheck_runtime', '_f2m_smoothing_runtime', '_f2m_fbx_metadata_runtime', '_f2m_sc_topology_integrity', '_f2m_sc_skin_integrity', '_f2m_sc_smoothing_integrity', '_f2m_sc_fbx_metadata_integrity', '_f2m_sc_smoothing_runtime', '_f2m_sc_fbx_metadata_runtime', '_f2m_sc_topology_procedural', '_f2m_sc_topology_fbx', '_f2m_sc_skin_fbx')\nfor _f2m_name in _f2m_known_modules:\n    sys.modules.pop(_f2m_name, None)\nif _f2m_old_dirs:\n    sys.path[:] = [_f2m_path for _f2m_path in sys.path if not _f2m_path or os.path.normcase(os.path.abspath(_f2m_path)) not in _f2m_old_dirs]\n_f2m_main = vars(__main__)\n_f2m_b2m = _f2m_main.get('b2m')\nif getattr(_f2m_b2m, '__name__', None) in _f2m_old_names:\n    _f2m_main.pop('b2m', None)\n_f2m_tool_dir = _f2m_main.get('tool_dir')\nif isinstance(_f2m_tool_dir, str) and _f2m_old_dirs and os.path.normcase(os.path.abspath(_f2m_tool_dir)) in _f2m_old_dirs:\n    _f2m_main.pop('tool_dir', None)\nfor _f2m_name in ('_f2m_module_path', '_f2m_module_name', '_f2m_spec', '_f2m_module', '__f2m_run_ok', '_f2m_sc_path', '_f2m_sc_name', '_f2m_sc_spec', '_f2m_sc', '_f2m_sc_result', '__f2m_sc_ok', '__f2m_sc_text', '__f2m_sc_report'):\n    _f2m_main.pop(_f2m_name, None)\nfor _f2m_cleanup_name in ('_f2m_api', '_f2m_old_names', '_f2m_old_dirs', '_f2m_known_modules', '_f2m_main', '_f2m_b2m', '_f2m_tool_dir', '_f2m_name', '_f2m_path', '_f2m_cleanup_name'):\n    globals().pop(_f2m_cleanup_name, None)\n" throwOnError:true clearUndoBuffer:false
+            python.Execute "import __main__, builtins, os, sys\n_f2m_api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\nif _f2m_api:\n    _f2m_api.get('uninstall', lambda: 0)()\nif hasattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API'):\n    delattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API')\n_f2m_old_names = ('b2m_topology_transfer', 'b2m_skin_replace')\n_f2m_old_dirs = {os.path.normcase(os.path.abspath(os.path.dirname(getattr(sys.modules.get(_f2m_name), '__file__', '') or ''))) for _f2m_name in _f2m_old_names if getattr(sys.modules.get(_f2m_name), '__file__', None)}\n_f2m_known_modules = _f2m_old_names + ('f2m_i18n', 'f2m_report_i18n', '_fbx_to_3dsmax_i18n_runtime', '_f2m_report_i18n_runtime', 'f2m_topology_transfer', 'f2m_skin_replace', 'f2m_smoothing', 'f2m_fbx_metadata', 'f2m_selfcheck', 'f2m_test_fixtures', '_f2m_sc_fixture_integrity', '_f2m_sc_fixture_algorithm', '_f2m_sc_fixture_topology', '_fbx_to_3dsmax_toolbar_runtime', '_fbx_to_3dsmax_topology_runtime', '_fbx_to_3dsmax_skin_runtime', '_fbx_to_3dsmax_selfcheck_runtime', '_f2m_smoothing_runtime', '_f2m_fbx_metadata_runtime', '_f2m_sc_topology_integrity', '_f2m_sc_skin_integrity', '_f2m_sc_smoothing_integrity', '_f2m_sc_fbx_metadata_integrity', '_f2m_sc_smoothing_runtime', '_f2m_sc_fbx_metadata_runtime', '_f2m_sc_topology_procedural', '_f2m_sc_topology_fbx', '_f2m_sc_skin_fbx')\nfor _f2m_name in _f2m_known_modules:\n    sys.modules.pop(_f2m_name, None)\nif _f2m_old_dirs:\n    sys.path[:] = [_f2m_path for _f2m_path in sys.path if not _f2m_path or os.path.normcase(os.path.abspath(_f2m_path)) not in _f2m_old_dirs]\n_f2m_main = vars(__main__)\n_f2m_b2m = _f2m_main.get('b2m')\nif getattr(_f2m_b2m, '__name__', None) in _f2m_old_names:\n    _f2m_main.pop('b2m', None)\n_f2m_tool_dir = _f2m_main.get('tool_dir')\nif isinstance(_f2m_tool_dir, str) and _f2m_old_dirs and os.path.normcase(os.path.abspath(_f2m_tool_dir)) in _f2m_old_dirs:\n    _f2m_main.pop('tool_dir', None)\nfor _f2m_name in ('_f2m_module_path', '_f2m_module_name', '_f2m_spec', '_f2m_module', '__f2m_run_ok', '_f2m_sc_path', '_f2m_sc_name', '_f2m_sc_spec', '_f2m_sc', '_f2m_sc_result', '__f2m_sc_ok', '__f2m_sc_text', '__f2m_sc_report'):\n    _f2m_main.pop(_f2m_name, None)\nfor _f2m_cleanup_name in ('_f2m_api', '_f2m_old_names', '_f2m_old_dirs', '_f2m_known_modules', '_f2m_main', '_f2m_b2m', '_f2m_tool_dir', '_f2m_name', '_f2m_path', '_f2m_cleanup_name'):\n    globals().pop(_f2m_cleanup_name, None)\n" throwOnError:true clearUndoBuffer:false
             F2M_TopologyHelper = undefined
             F2M_SkinHelper = undefined
             F2M_Helper = undefined
@@ -230,7 +255,7 @@ global F2M_Helper
     (
         acquirePackageMutationLock workRoot
         local packageXml = joinPath packagePath "PackageContents.xml"
-        local versionPath = joinPath packagePath "Contents\\FBXTo3dsMax.version"
+        local versionPath = joinPath packagePath "contents\\FBXTo3dsMax.version"
 
         if directoryClass.Exists packagePath do
         (
@@ -287,7 +312,7 @@ global F2M_Helper
             directoryClass.Move packagePath packageArchive
             packageMoved = true
 
-            local archivedVersion = joinPath packageArchive "Contents\\FBXTo3dsMax.version"
+            local archivedVersion = joinPath packageArchive "contents\\FBXTo3dsMax.version"
             local archivedXml = joinPath packageArchive "PackageContents.xml"
             if (not (fileClass.Exists archivedVersion)) or (not (fileClass.Exists archivedXml)) do
             (
@@ -303,12 +328,12 @@ global F2M_Helper
         close stream
         stream = undefined
 
-        finalDialogTitle = "FBXTo3dsMax - 卸载完成"
+        finalDialogTitle = (localized "FBXTo3dsMax - 卸载完成" "FBXTo3dsMax - Uninstalled")
         finalDialogText = (
-            "FBXTo3dsMax 已从自动加载中移除。\n\n" +
-            "没有永久删除任何文件。可恢复归档位于：\n" +
+            (localized "FBXTo3dsMax 已从自动加载中移除。\n\n" "FBXTo3dsMax was removed from automatic loading.\n\n") +
+            (localized "没有永久删除任何文件。可恢复归档位于：\n" "Files were archived for recovery at:\n") +
             archiveRoot +
-            "\n\n请重启 3ds Max，以清除当前会话中缓存的 MacroScript 动作。"
+            (localized "\n\n请重启 3ds Max，以清除当前会话中缓存的 MacroScript 动作。" "\n\nRestart 3ds Max to release cached MacroScript actions.")
         )
     )
     catch
@@ -330,7 +355,7 @@ global F2M_Helper
             if packageMoved and (directoryClass.Exists packageArchive) and (not (directoryClass.Exists packagePath)) do
             (
                 directoryClass.Move packageArchive packagePath
-                if (not (fileClass.Exists (joinPath packagePath "PackageContents.xml"))) or (not (fileClass.Exists (joinPath packagePath "Contents\\FBXTo3dsMax.version"))) do
+                if (not (fileClass.Exists (joinPath packagePath "PackageContents.xml"))) or (not (fileClass.Exists (joinPath packagePath "contents\\FBXTo3dsMax.version"))) do
                 (
                     append rollbackWarnings ("已恢复插件包的读回失败：" + packagePath)
                 )
@@ -344,7 +369,7 @@ global F2M_Helper
         (
             if runtimeCleanupAttempted do
             (
-                local bootstrapPath = joinPath packagePath "Contents\\FBXTo3dsMax_Bootstrap.ms"
+                local bootstrapPath = joinPath packagePath "contents\\FBXTo3dsMax_Bootstrap.ms"
                 if fileClass.Exists bootstrapPath then
                 (
                     if (fileIn bootstrapPath quiet:true) != true do
@@ -367,11 +392,11 @@ global F2M_Helper
         -- 确保卸载失败时不会丢弃用户修改。
         restoreMovedFiles()
 
-        finalDialogTitle = "FBXTo3dsMax - 卸载失败"
+        finalDialogTitle = (localized "FBXTo3dsMax - 卸载失败" "FBXTo3dsMax - Uninstall failed")
         finalDialogText = (
-            "FBXTo3dsMax 卸载失败，卸载器已尝试回滚。\n\n" +
-            (if uninstallDiagnostic != "" then ("内部诊断文件：\n" + uninstallDiagnostic) else "内部诊断文件写入失败，请保留当前卸载归档。") +
-            (if rollbackWarnings.count > 0 then ("\n\n警告：" + (rollbackWarnings.count as string) + " 项回滚检查失败。请保留归档，并在重试前检查相关路径。") else "")
+            (localized "FBXTo3dsMax 卸载失败，卸载器已尝试回滚。\n\n" "Uninstall failed; rollback was attempted.\n\n") +
+            (if uninstallDiagnostic != "" then ((localized "内部诊断文件：\n" "Diagnostic file:\n") + uninstallDiagnostic) else (localized "内部诊断文件写入失败，请保留当前卸载归档。" "The diagnostic file could not be written. Preserve the uninstall archive.")) +
+            (if rollbackWarnings.count > 0 then ((localized "\n\n警告：" "\n\nWarning: ") + (rollbackWarnings.count as string) + (localized " 项回滚检查失败。请保留归档，并在重试前检查相关路径。" " rollback checks failed. Preserve the archive and inspect the affected paths before retrying.")) else "")
         )
     )
     -- 先释放跨进程锁，再显示可能长期停留的结果对话框。

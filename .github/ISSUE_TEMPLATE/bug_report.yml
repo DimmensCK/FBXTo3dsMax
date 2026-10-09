@@ -1,0 +1,43 @@
+name: Bug / 问题报告
+description: Report a reproducible problem / 提供可重现的问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use an original minimal scene. Do not upload production models, personal paths, account details or tokens.
+        请用原创最小场景；不要上传正式模型、个人路径、账号或令牌。完整教程 / Full guides: [中文](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) · [English](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
+  - type: input
+    id: versions
+    attributes:
+      label: Versions / 版本
+      description: Plug-in, full Max and Windows versions / 插件、Max 完整版本及 Windows 版本
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: UI language / 界面语言
+      options:
+        - 中文
+        - English
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps / 操作步骤
+      description: Include mode, channels and a minimal reproduction / 包含模式、通道和最小重现
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual result / 期望与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence / 脱敏证据
+      description: Relevant report excerpt, self-check natural exit, or screenshot / 相关报告片段、自检自然退出状态或截图

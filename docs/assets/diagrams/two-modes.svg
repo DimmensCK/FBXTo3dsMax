@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="350" viewBox="0 0 1100 350" role="img" aria-labelledby="title desc">
+  <title id="title">Two transfer workflows / 两种传递流程</title>
+  <desc id="desc">Mode 1 transfers FBX channels into an existing Max node. Mode 2 combines FBX mesh and weights with existing Max scene bones and binding data.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#297b83"/></marker></defs>
+  <rect width="1100" height="350" rx="16" fill="#f2f6fa"/>
+  <g font-family="Segoe UI,Microsoft YaHei,Arial,sans-serif">
+    <text x="32" y="44" fill="#182f45" font-size="20" font-weight="700">01 · 同拓扑 / Matching topology</text>
+    <rect x="32" y="66" width="284" height="83" rx="12" fill="#ddf3ef" stroke="#8dcec2"/>
+    <text x="174" y="99" fill="#164b4b" font-size="20" text-anchor="middle">FBX 通道 / Channels</text>
+    <text x="174" y="128" fill="#326568" font-size="15" text-anchor="middle">位置 · UV · SG · Normals · Color</text>
+    <path d="M332 107H542" stroke="#297b83" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="436" y="95" fill="#326568" font-size="15" text-anchor="middle">严格映射 / Verified mapping</text>
+    <rect x="562" y="66" width="506" height="83" rx="12" fill="#e2eafb" stroke="#a9bdde"/>
+    <text x="815" y="99" fill="#263e65" font-size="20" text-anchor="middle">已有 Max 节点 / Existing Max node</text>
+    <text x="815" y="128" fill="#53698c" font-size="15" text-anchor="middle">保留节点 / Retain node</text>
+    <text x="32" y="193" fill="#182f45" font-size="20" font-weight="700">02 · 改拓扑 / Changed topology + Skin</text>
+    <rect x="32" y="216" width="284" height="88" rx="12" fill="#ddf3ef" stroke="#8dcec2"/>
+    <text x="174" y="251" fill="#164b4b" font-size="20" text-anchor="middle">FBX 网格 / Mesh</text>
+    <text x="174" y="280" fill="#326568" font-size="15" text-anchor="middle">通道 + 权重 / Channels + weights</text>
+    <text x="343" y="269" fill="#297b83" font-size="30" text-anchor="middle">+</text>
+    <rect x="370" y="216" width="284" height="88" rx="12" fill="#e2eafb" stroke="#a9bdde"/>
+    <text x="512" y="251" fill="#263e65" font-size="20" text-anchor="middle">Max 骨骼 / Bones</text>
+    <text x="512" y="280" fill="#53698c" font-size="15" text-anchor="middle">绑定 + local data / Binding</text>
+    <path d="M674 260H750" stroke="#297b83" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="770" y="216" width="298" height="88" rx="12" fill="#ebedf3" stroke="#bbc3d2"/>
+    <text x="919" y="251" fill="#263e65" font-size="20" text-anchor="middle">替换候选 / Replacement</text>
+    <text x="919" y="280" fill="#53698c" font-size="15" text-anchor="middle">完整读回 / Full readback</text>
+  </g>
+</svg>

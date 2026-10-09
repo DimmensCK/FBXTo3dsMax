@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mode-2 scale-aware world-position tolerance regressions for v1.3.24."""
+"""Mode-2 scale-aware world-position tolerance regressions for v1.4.24."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE_PATH = ROOT / "f2m_skin_replace.py"
+ENGINE_PATH = ROOT / "contents" / "f2m_skin_replace.py"
 
 # Numeric float32 round-trip regression at a large world-space coordinate.
 # Only the boundary values are retained; no scene or private object names.

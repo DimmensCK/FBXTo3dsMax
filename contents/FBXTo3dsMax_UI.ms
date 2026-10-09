@@ -1,20 +1,27 @@
 /*
 FBX 到 3ds Max 数据传递工具
-中文启动界面
+中文 / English 启动界面
 */
 
 try(destroyDialog F2M_Transfer_Rollout)catch()
 
 global F2M_UI_RunStatus
+global F2M_UI_LanguageCode
+global F2M_UI_SourceTexts
+global F2M_UI_EnglishTexts
 
 rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
 (
     local toolAuthor = "Dimmens"
-    local toolVersion = "1.3.24"
+    local toolVersion = "1.4.24"
     local scriptDir = getFilenamePath (getSourceFileName())
     local pyTopologyFile = scriptDir + "f2m_topology_transfer.py"
     local pyReplaceFile = scriptDir + "f2m_skin_replace.py"
     local pySelfCheckFile = scriptDir + "f2m_selfcheck.py"
+    local pyLanguageFile = scriptDir + "f2m_i18n.py"
+    local currentLanguage = "zh-CN"
+    local changingLanguage = false
+    local warningTextSource = "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。"
     local currentMode = 1
     local advancedOpen = false
     local checkDone = false
@@ -22,42 +29,44 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     local lastFbxKey = ""
     local executeConfirmSelectionKey = ""
 
-    groupBox grp_mode "选择模式" pos:[12,18] width:436 height:92
-    dotNetControl btn_mode_topo "System.Windows.Forms.Button" pos:[28,44] width:190 height:48
-    dotNetControl btn_mode_replace "System.Windows.Forms.Button" pos:[238,44] width:190 height:48
+    dropdownlist ddl_language "语言 / Language" items:#("中文", "English") selection:1 pos:[24,4] width:260 height:3
 
-    groupBox grp_file "FBX 文件" pos:[12,118] width:436 height:86
-    editText edt_fbx "FBX 文件：" pos:[24,144] width:330 height:20 text:""
-    button btn_pick "选择..." pos:[360,142] width:70 height:24
-    label lbl_target "传递数据前优先检查 FBX" pos:[24,176] width:286 height:24
-    button btn_check "检查 FBX/匹配" pos:[306,174] width:124 height:24
+    groupBox grp_mode "选择模式" pos:[12,52] width:436 height:92
+    dotNetControl btn_mode_topo "System.Windows.Forms.Button" pos:[28,78] width:190 height:48
+    dotNetControl btn_mode_replace "System.Windows.Forms.Button" pos:[238,78] width:190 height:48
 
-    groupBox grp_topo "传递数据" pos:[12,214] width:436 height:116
-    checkbox chk_shape "变形" pos:[28,240] width:80 height:18 checked:true
-    checkbox chk_matid "材质与 ID" pos:[138,240] width:100 height:18 checked:false
-    checkbox chk_normals "顶点法线" pos:[258,240] width:110 height:18 checked:false
-    checkbox chk_uv1 "传递 UV 1" pos:[28,266] width:110 height:18 checked:false
-    checkbox chk_uv2 "传递 UV 2" pos:[158,266] width:110 height:18 checked:false
-    checkbox chk_uv3 "传递 UV 3" pos:[288,266] width:110 height:18 checked:false
-    checkbox chk_vc "顶点色 RGB" pos:[28,292] width:130 height:18 checked:false
-    checkbox chk_alpha "顶点 Alpha" pos:[166,292] width:130 height:18 checked:false
-    checkbox chk_smoothing "光滑组" pos:[306,292] width:110 height:18 checked:false
+    groupBox grp_file "FBX 文件" pos:[12,152] width:436 height:86
+    editText edt_fbx "FBX 文件：" pos:[24,178] width:330 height:20 text:""
+    button btn_pick "选择..." pos:[360,176] width:70 height:24
+    label lbl_target "传递数据前优先检查 FBX" pos:[24,210] width:286 height:24
+    button btn_check "检查 FBX/匹配" pos:[306,208] width:124 height:24
 
-    groupBox grp_replace "替换网格并保留蒙皮" pos:[12,214] width:436 height:150 visible:false
-    label lbl_replace_1 "使用 FBX 目标网格替换所选 Max 源模型；一对一可直接匹配，其它情况按同名匹配。" pos:[28,242] width:390 height:32 visible:false
-    label lbl_replace_2 "要求 FBX 目标网格和 Max 源模型都带 Skin；完整保留 FBX Skin 数据，只把骨骼映射到场景同名骨骼。" pos:[28,286] width:390 height:48 visible:false
+    groupBox grp_topo "传递数据" pos:[12,248] width:436 height:116
+    checkbox chk_shape "变形" pos:[28,274] width:80 height:18 checked:true
+    checkbox chk_matid "材质与 ID" pos:[138,274] width:100 height:18 checked:false
+    checkbox chk_normals "顶点法线" pos:[258,274] width:110 height:18 checked:false
+    checkbox chk_uv1 "传递 UV 1" pos:[28,300] width:110 height:18 checked:false
+    checkbox chk_uv2 "传递 UV 2" pos:[158,300] width:110 height:18 checked:false
+    checkbox chk_uv3 "传递 UV 3" pos:[288,300] width:110 height:18 checked:false
+    checkbox chk_vc "顶点色 RGB" pos:[28,326] width:130 height:18 checked:false
+    checkbox chk_alpha "顶点 Alpha" pos:[166,326] width:130 height:18 checked:false
+    checkbox chk_smoothing "光滑组" pos:[306,326] width:125 height:18 checked:false
 
-    button btn_advanced "高级选项..." pos:[24,336] width:120 height:24
-    button btn_selfcheck "运行插件自检" pos:[306,336] width:124 height:24
-    groupBox grp_advanced "高级选项" pos:[12,370] width:436 height:74 visible:false
-    checkbox chk_backup "替换时隐藏备份旧网格" pos:[28,396] width:190 height:18 checked:true visible:false
-    checkbox chk_keep_mat "兼容：改用 Max 源材质" pos:[238,396] width:180 height:18 checked:false visible:false
-    checkbox chk_keep_imported "保留临时导入节点用于排查" pos:[28,422] width:200 height:18 checked:false visible:false
-    checkbox chk_hidden "允许处理隐藏对象" pos:[238,422] width:150 height:18 checked:true visible:false
+    groupBox grp_replace "替换网格并保留蒙皮" pos:[12,248] width:436 height:150 visible:false
+    label lbl_replace_1 "使用 FBX 目标网格替换所选 Max 源模型；一对一可直接匹配，其它情况按同名匹配。" pos:[28,276] width:390 height:32 visible:false
+    label lbl_replace_2 "双方必须带 Skin。Max 源 Skin 提供场景骨骼与绑定数据；FBX 提供逐顶点权重、Unnormalized 和 DQ 数据。" pos:[28,320] width:390 height:60 visible:false
 
-    label lbl_warn "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。" pos:[24,370] width:410 height:28
-    button btn_run "开始执行" pos:[155,402] width:150 height:26
-        label lbl_meta "作者：Dimmens    版本：1.3.24" pos:[24,436] width:220 height:12
+    button btn_advanced "高级选项..." pos:[24,370] width:120 height:24
+    button btn_selfcheck "运行插件自检" pos:[306,370] width:124 height:24
+    groupBox grp_advanced "高级选项" pos:[12,404] width:436 height:74 visible:false
+    checkbox chk_backup "替换时隐藏备份旧网格" pos:[28,430] width:190 height:18 checked:true visible:false
+    checkbox chk_keep_mat "兼容：改用 Max 源材质" pos:[238,430] width:180 height:18 checked:false visible:false
+    checkbox chk_keep_imported "保留临时导入节点用于排查" pos:[28,456] width:200 height:18 checked:false visible:false
+    checkbox chk_hidden "允许处理隐藏对象" pos:[238,456] width:150 height:18 checked:true visible:false
+
+    label lbl_warn "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。" pos:[24,404] width:410 height:44
+    button btn_run "开始执行" pos:[155,436] width:150 height:26
+    label lbl_meta "作者：Dimmens    版本：1.4.24" pos:[24,470] width:410 height:14
 
     fn pyString s =
     (
@@ -69,6 +78,45 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         t = substituteString t "\n" "\\n"
         t = substituteString t "\t" "\\t"
         "\"" + t + "\""
+    )
+
+    fn initializeLanguage requestedLocale:undefined persist:true =
+    (
+        local code = "import os, sys, importlib.util, builtins\nfrom pymxs import runtime as rt\n"
+        code += "p = os.path.abspath(" + pyString pyLanguageFile + ")\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n"
+        code += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n"
+        code += "    sys.modules.pop(name, None)\n    spec = importlib.util.spec_from_file_location(name, p)\n"
+        code += "    if spec is None or spec.loader is None: raise RuntimeError('Language module loader missing')\n"
+        code += "    m = importlib.util.module_from_spec(spec)\n    sys.modules[name] = m\n"
+        code += "    try: spec.loader.exec_module(m)\n    except BaseException:\n        if sys.modules.get(name) is m: sys.modules.pop(name, None)\n        raise\n"
+        code += "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.24' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language module identity/version mismatch')\n"
+        code += "for api in ('translate', 'get_language', 'set_language', 'ui_catalog_sources', 'ui_catalog_english'):\n    if not callable(getattr(m, api, None)): raise RuntimeError('Language API missing: ' + api)\n"
+        if requestedLocale != undefined do
+            code += "m.set_language(" + pyString requestedLocale + ", persist=" + (if persist then "True" else "False") + ")\n"
+        code += "rt.globalVars.set(rt.Name('F2M_UI_LanguageCode'), m.get_language())\n"
+        code += "rt.globalVars.set(rt.Name('F2M_UI_SourceTexts'), rt.Array(*m.ui_catalog_sources()))\n"
+        code += "rt.globalVars.set(rt.Name('F2M_UI_EnglishTexts'), rt.Array(*m.ui_catalog_english()))\n"
+        code += "api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\nif isinstance(api, dict) and callable(api.get('refresh_language')): api['refresh_language']()\n"
+        python.Execute code throwOnError:true clearUndoBuffer:false
+        if F2M_UI_LanguageCode != "zh-CN" and F2M_UI_LanguageCode != "en" do throw "Unsupported language readback"
+        currentLanguage = F2M_UI_LanguageCode
+        currentLanguage
+    )
+
+    fn tr sourceText =
+    (
+        if currentLanguage == "en" and F2M_UI_SourceTexts != undefined and F2M_UI_EnglishTexts != undefined then
+        (
+            local index = findItem F2M_UI_SourceTexts sourceText
+            if index > 0 and index <= F2M_UI_EnglishTexts.count then F2M_UI_EnglishTexts[index] else sourceText
+        )
+        else sourceText
+    )
+
+    fn setWarning sourceText =
+    (
+        warningTextSource = sourceText
+        lbl_warn.text = tr sourceText
     )
 
     fn selectedUvText =
@@ -166,9 +214,9 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         )
 
         lbl_warn.pos = [24,nextY]
-        btn_run.pos = [155,nextY + 32]
-        lbl_meta.pos = [24,nextY + 66]
-        try(setDialogSize F2M_Transfer_Rollout [460,nextY + 92])catch()
+        btn_run.pos = [155,nextY + 48]
+        lbl_meta.pos = [24,nextY + 82]
+        try(setDialogSize F2M_Transfer_Rollout [460,nextY + 108])catch()
     )
 
     fn safeLower s =
@@ -235,14 +283,14 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     (
         checkDone = false
         checkedKey = ""
-        lbl_warn.text = "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。"
+        setWarning "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。"
     )
 
     fn markOptionsChanged =
     (
         if checkDone do
         (
-            lbl_warn.text = "已检查当前 FBX/选择；只改变传递数据选项时可直接执行。"
+            setWarning "已检查当前 FBX/选择；只改变传递数据选项时可直接执行。"
         )
     )
 
@@ -251,13 +299,13 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         if keyValue == "" do
         (
             markNeedCheck()
-            lbl_warn.text = "无法取得所选节点的稳定句柄，本次检查结果不会缓存。"
+            setWarning "无法取得所选节点的稳定句柄，本次检查结果不会缓存。"
             return false
         )
         checkDone = true
         checkedKey = keyValue
         lastFbxKey = normalizedFbxPath()
-        lbl_warn.text = "已执行检查。请确认报告没有严重错误，再开始执行。"
+        setWarning "已执行检查。请确认报告没有严重错误，再开始执行。"
         true
     )
 
@@ -338,7 +386,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         local selectionKey = selectedTargetsKey()
         if selectionKey == "" then
         (
-            messageBox "无法取得所选节点的稳定句柄。请重新选择 Max 源模型后再试。" title:"FBX 到 3ds Max"
+            messageBox (tr "无法取得所选节点的稳定句柄。请重新选择 Max 源模型后再试。") title:(tr "FBX 到 3ds Max")
             false
         )
         else
@@ -348,7 +396,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         )
         else
         (
-            local go = queryBox "开始执行前请确认当前 Max 文件已经保存或另存备份。\n\n同一组选中 Max 源模型只会提示一次；更换选中对象后会再次提示。\n\n是否继续？" title:"FBX 到 3ds Max"
+            local go = queryBox (tr "开始执行前请确认当前 Max 文件已经保存或另存备份。\n\n同一组选中 Max 源模型只会提示一次；更换选中对象后会再次提示。\n\n是否继续？") title:(tr "FBX 到 3ds Max")
             if go do executeConfirmSelectionKey = selectionKey
             go
         )
@@ -371,7 +419,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         chk_keep_mat.visible = state
         chk_keep_imported.visible = state
         chk_hidden.visible = state
-        btn_advanced.text = if state then "隐藏高级选项" else "高级选项..."
+        btn_advanced.text = tr (if state then "隐藏高级选项" else "高级选项...")
         layoutDialog()
     )
 
@@ -379,8 +427,8 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     (
         local isReplace = currentMode == 2
 
-        setModeButtonVisual btn_mode_topo (not isReplace) "模型完全一致" "传递数据"
-        setModeButtonVisual btn_mode_replace isReplace "模型不一致" "替换并保留蒙皮"
+        setModeButtonVisual btn_mode_topo (not isReplace) (tr "模型完全一致") (tr "传递数据")
+        setModeButtonVisual btn_mode_replace isReplace (tr "模型不一致") (tr "替换并保留蒙皮")
 
         grp_topo.visible = not isReplace
         chk_shape.visible = not isReplace
@@ -399,11 +447,51 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         layoutDialog()
     )
 
+    fn applyLanguage =
+    (
+        -- Only display properties change. Cache keys, options and scene identity stay intact.
+        changingLanguage = true
+        F2M_Transfer_Rollout.title = tr "FBX 到 3ds Max 数据传递"
+        ddl_language.selection = if currentLanguage == "en" then 2 else 1
+        grp_mode.text = tr "选择模式"
+        grp_file.text = tr "FBX 文件"
+        edt_fbx.caption = tr "FBX 文件："
+        btn_pick.text = tr "选择..."
+        lbl_target.text = tr "传递数据前优先检查 FBX"
+        btn_check.text = tr "检查 FBX/匹配"
+        grp_topo.text = tr "传递数据"
+        chk_shape.text = tr "变形"
+        chk_matid.text = tr "材质与 ID"
+        chk_normals.text = tr "顶点法线"
+        chk_uv1.text = tr "传递 UV 1"
+        chk_uv2.text = tr "传递 UV 2"
+        chk_uv3.text = tr "传递 UV 3"
+        chk_vc.text = tr "顶点色 RGB"
+        chk_alpha.text = tr "顶点 Alpha"
+        chk_smoothing.text = tr "光滑组"
+        grp_replace.text = tr "替换网格并保留蒙皮"
+        lbl_replace_1.text = tr "使用 FBX 目标网格替换所选 Max 源模型；一对一可直接匹配，其它情况按同名匹配。"
+        lbl_replace_2.text = tr "双方必须带 Skin。Max 源 Skin 提供场景骨骼与绑定数据；FBX 提供逐顶点权重、Unnormalized 和 DQ 数据。"
+        btn_selfcheck.text = tr "运行插件自检"
+        grp_advanced.text = tr "高级选项"
+        chk_backup.text = tr "替换时隐藏备份旧网格"
+        chk_keep_mat.text = tr "兼容：改用 Max 源材质"
+        chk_keep_imported.text = tr "保留临时导入节点用于排查"
+        chk_hidden.text = tr "允许处理隐藏对象"
+        lbl_warn.text = tr warningTextSource
+        btn_run.text = tr "开始执行"
+        lbl_meta.text = (tr "作者：") + toolAuthor + "    " + (tr "版本：") + toolVersion
+        updateModeUI()
+        setAdvancedVisible advancedOpen
+        changingLanguage = false
+        true
+    )
+
     fn selectedTargetOk =
     (
         if selection.count < 1 then
         (
-            messageBox "请先在 Max 场景里选中至少 1 个 Max 源模型网格。" title:"FBX 到 3ds Max"
+            messageBox (tr "请先在 Max 场景里选中至少 1 个 Max 源模型网格。") title:(tr "FBX 到 3ds Max")
             false
         )
         else true
@@ -422,13 +510,13 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
 
         if not doesFileExist pyFile then
         (
-            messageBox ("找不到 Python 文件：\n" + pyFile) title:"FBX 到 3ds Max"
+            messageBox ((tr "找不到 Python 文件：\n") + pyFile) title:(tr "FBX 到 3ds Max")
             return false
         )
 
         if fbxPath == "" or not doesFileExist fbxPath then
         (
-            messageBox "请先选择一个有效的 FBX 文件。" title:"FBX 到 3ds Max"
+            messageBox (tr "请先选择一个有效的 FBX 文件。") title:(tr "FBX 到 3ds Max")
             return false
         )
 
@@ -499,9 +587,9 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         (
             local uiException = getCurrentException()
             local uiDiagnostic = writeUiDiagnostic uiException
-            local uiMessage = "插件执行失败。请查看本次传递报告或内部诊断文件；如果没有生成报告，请重新安装插件。"
-            if uiDiagnostic != "" do uiMessage += ("\n\n内部诊断文件：\n" + uiDiagnostic)
-            messageBox uiMessage title:"FBX 到 3ds Max"
+            local uiMessage = tr "插件执行失败。请查看本次传递报告或内部诊断文件；如果没有生成报告，请重新安装插件。"
+            if uiDiagnostic != "" do uiMessage += ((tr "\n\n内部诊断文件：\n") + uiDiagnostic)
+            messageBox uiMessage title:(tr "FBX 到 3ds Max")
             succeeded = false
         )
         succeeded
@@ -511,7 +599,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
     (
         if not doesFileExist pySelfCheckFile then
         (
-            messageBox ("找不到自检文件：\n" + pySelfCheckFile) title:"FBXTo3dsMax 自检"
+            messageBox ((tr "找不到自检文件：\n") + pySelfCheckFile) title:(tr "FBXTo3dsMax 自检")
             return false
         )
 
@@ -542,14 +630,14 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         )
         catch
         (
-            messageBox "无法启动插件自检。请重新安装插件；如果问题仍存在，请保留安装日志。" title:"FBXTo3dsMax 自检" beep:true
+            messageBox (tr "无法启动插件自检。请重新安装插件；如果问题仍存在，请保留安装日志。") title:(tr "FBXTo3dsMax 自检") beep:true
             false
         )
     )
 
     on btn_pick pressed do
     (
-        local f = getOpenFileName caption:"选择 Maya / Blender / 其它软件导出的 FBX" types:"FBX (*.fbx)|*.fbx|所有文件 (*.*)|*.*|"
+        local f = getOpenFileName caption:(tr "选择 Maya / Blender / 其它软件导出的 FBX") types:(tr "FBX (*.fbx)|*.fbx|所有文件 (*.*)|*.*|")
         if f != undefined do
         (
             edt_fbx.text = f
@@ -601,11 +689,33 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
 
     on btn_selfcheck pressed do runSelfCheck()
 
+    on ddl_language selected index do
+    (
+        if not changingLanguage do
+        (
+            local previousLanguage = currentLanguage
+            try
+            (
+                initializeLanguage requestedLocale:(if index == 2 then "en" else "zh-CN") persist:false
+                applyLanguage()
+                initializeLanguage requestedLocale:currentLanguage persist:true
+            )
+            catch
+            (
+                local languageDiagnostic = writeUiDiagnostic (getCurrentException())
+                try(initializeLanguage requestedLocale:previousLanguage persist:false)catch()
+                currentLanguage = previousLanguage
+                try(applyLanguage())catch()
+                changingLanguage = false
+                messageBox ((tr "无法保存或切换语言。请保留内部诊断文件。") + "\n\n" + languageDiagnostic) title:"FBXTo3dsMax"
+            )
+        )
+    )
+
     on F2M_Transfer_Rollout open do
     (
-        updateModeUI()
-        setAdvancedVisible advancedOpen
-        layoutDialog()
+        initializeLanguage()
+        applyLanguage()
     )
 
     on btn_check pressed do
@@ -627,8 +737,8 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
         (
             checkDone = false
             checkedKey = ""
-            lbl_warn.text = "FBX、模式、选中对象或隐藏处理设置变化后需要重新检查。"
-            messageBox "请先点击“检查 FBX/匹配”。只改变传递数据选项不需要重新检查；如果换了 FBX、模式、选中对象或隐藏处理设置，需要重新检查。" title:"FBX 到 3ds Max"
+            setWarning "FBX、模式、选中对象或隐藏处理设置变化后需要重新检查。"
+            messageBox (tr "请先点击“检查 FBX/匹配”。只改变传递数据选项不需要重新检查；如果换了 FBX、模式、选中对象或隐藏处理设置，需要重新检查。") title:(tr "FBX 到 3ds Max")
         )
         else
         (
@@ -636,13 +746,15 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
             (
                 -- 模式二成功替换后旧句柄会失效，因此同时保留名称用于回退。
                 local selectionIdentityBeforeRun = captureSelectionHandlesAndNames()
-                lbl_warn.text = "正在传递数据，请等待；复杂模型会在完成安全写入和回读后返回。"
+                setWarning "正在传递数据，请等待；复杂模型会在完成安全写入和回读后返回。"
                 btn_run.enabled = false
+                ddl_language.enabled = false
                 try(setWaitCursor())catch()
                 try(windows.processPostedMessages())catch()
                 local transferSucceeded = runPython false
                 try(setArrowCursor())catch()
                 btn_run.enabled = true
+                ddl_language.enabled = true
                 restoreSelectionByHandlesOrNames selectionIdentityBeforeRun[1] selectionIdentityBeforeRun[2]
                 if transferSucceeded then
                 (
@@ -650,15 +762,15 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:506
                     (
                         -- 模式二成功后已替换节点，选择句柄自然变化，必须重新检查。
                         markNeedCheck()
-                        lbl_warn.text = "替换完成。Max 源模型节点已经变化；再次运行前请重新检查。"
+                        setWarning "替换完成。Max 源模型节点已经变化；再次运行前请重新检查。"
                     )
                     else
                     (
-                        lbl_warn.text = "传递完成。当前 FBX、模式和 Max 源模型未变化时，可调整传递选项后直接再次执行。"
+                        setWarning "传递完成。当前 FBX、模式和 Max 源模型未变化时，可调整传递选项后直接再次执行。"
                     )
                 )
                 else
-                    lbl_warn.text = "传递未完成。请查看中文报告或内部诊断；若 FBX、模式、Max 源模型和隐藏设置未变化，可修正选项后直接重试。"
+                    setWarning "传递未完成。请查看报告或内部诊断；若 FBX、模式、Max 源模型和隐藏设置未变化，可修正选项后直接重试。"
             )
         )
     )

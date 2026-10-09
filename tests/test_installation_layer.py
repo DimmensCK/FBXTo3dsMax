@@ -19,26 +19,26 @@ import uuid
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "Contents" / "FBXTo3dsMax.files"
-TOOLBAR = ROOT / "Contents" / "f2m_toolbar.py"
+MANIFEST = ROOT / "contents" / "FBXTo3dsMax.files"
+TOOLBAR = ROOT / "contents" / "f2m_toolbar.py"
 PACKAGE_CONTENTS = ROOT / "PackageContents.xml"
 REQUIRED_DESTINATIONS = {
     "PackageContents.xml",
-    r"Contents\LICENSE",
-    r"Contents\FBXTo3dsMax_Bootstrap.ms",
-    r"Contents\FBXTo3dsMax.files",
-    r"Contents\FBXTo3dsMax.version",
-    r"Contents\FBXTo3dsMax_UI.ms",
-    r"Contents\FBXTo3dsMax.mcr",
-    r"Contents\f2m_toolbar.py",
-    r"Contents\f2m_topology_transfer.py",
-    r"Contents\f2m_skin_replace.py",
-    r"Contents\f2m_smoothing.py",
-    r"Contents\f2m_fbx_metadata.py",
-    r"Contents\f2m_selfcheck.py",
-    r"Contents\FBXTo3dsMax_详细说明书.md",
-    r"Contents\tests\max_normals_safety.py",
-    r"Contents\f2m_test_fixtures.py",
+    r"contents\LICENSE",
+    r"contents\FBXTo3dsMax_Bootstrap.ms",
+    r"contents\FBXTo3dsMax.files",
+    r"contents\FBXTo3dsMax.version",
+    r"contents\FBXTo3dsMax_UI.ms",
+    r"contents\FBXTo3dsMax.mcr",
+    r"contents\f2m_toolbar.py",
+    r"contents\f2m_topology_transfer.py",
+    r"contents\f2m_skin_replace.py",
+    r"contents\f2m_smoothing.py",
+    r"contents\f2m_fbx_metadata.py",
+    r"contents\f2m_selfcheck.py",
+    r"contents\FBXTo3dsMax_详细说明书.md",
+    r"contents\tests\max_normals_safety.py",
+    r"contents\f2m_test_fixtures.py",
 }
 MODULE_NAMES = {
     "f2m_fbx_metadata",
@@ -135,7 +135,7 @@ class _PackageCycleMock:
             records.append((destination, source_hash))
 
         installed_manifest = (
-            stage / "Contents" / "FBXTo3dsMax.install-manifest.sha256"
+            stage / "contents" / "FBXTo3dsMax.install-manifest.sha256"
         )
         installed_manifest.write_text(
             "".join(f"{destination}|{digest}\n" for destination, digest in records),
@@ -147,7 +147,7 @@ class _PackageCycleMock:
             backup = (
                 self.work_root
                 / "Backups"
-                / ("1.3.24-" + token)
+                / ("1.4.24-" + token)
                 / "FBXTo3dsMax"
             )
             backup.parent.mkdir(parents=True)
@@ -190,11 +190,11 @@ class PackageContentsCompatibilityTests(unittest.TestCase):
 
     def test_every_production_python_execute_preserves_the_undo_buffer(self):
         for relative in (
-            "FBXTo3dsMax_UI.ms",
+            "contents/FBXTo3dsMax_UI.ms",
             "Install_FBXTo3dsMax.ms",
             "Uninstall_FBXTo3dsMax.ms",
-            "Contents/FBXTo3dsMax.mcr",
-            "Contents/FBXTo3dsMax_Bootstrap.ms",
+            "contents/FBXTo3dsMax.mcr",
+            "contents/FBXTo3dsMax_Bootstrap.ms",
         ):
             source = (ROOT / relative).read_text(encoding="utf-8-sig")
             execute_lines = [
@@ -401,6 +401,10 @@ class _ToolButton:
         self._height = 0
         self.clicked = _Signal()
         self.deleted = False
+        self.polished = False
+        self.preferred_size = _Size(156, 38)
+        self.minimum_hint = _Size(148, 36)
+        self.geometry_updates = 0
 
     def setObjectName(self, value):
         self._object_name = value
@@ -443,7 +447,24 @@ class _ToolButton:
         pass
 
     def setStyleSheet(self, _value):
-        pass
+        self.style_sheet = _value
+        self.polished = False
+
+    def ensurePolished(self):
+        self.polished = True
+
+    def sizeHint(self):
+        if not self.polished:
+            raise RuntimeError("Unpolished mock cannot provide the styled size")
+        return self.preferred_size
+
+    def minimumSizeHint(self):
+        if not self.polished:
+            raise RuntimeError("Unpolished mock cannot provide the styled minimum")
+        return self.minimum_hint
+
+    def updateGeometry(self):
+        self.geometry_updates += 1
 
     def width(self):
         return self._width
@@ -594,6 +615,37 @@ class _GuiApplication:
 
 
 class InstallationLayerTests(unittest.TestCase):
+    def test_both_installer_required_lists_are_literal_manifest_subsets(self):
+        entries = _manifest_entries()
+        manifest = {PureWindowsPath(target).as_posix().casefold()
+                    for _source, target in entries}
+        self.assertEqual(len(manifest), 32)
+        native = (ROOT / "Install_FBXTo3dsMax.ms").read_text("utf-8-sig")
+        powershell = (ROOT / "tools/Install_FBXTo3dsMax.ps1").read_text("utf-8-sig")
+        patterns = (
+            (native, r"local\s+requiredManifestDestinations\s*=\s*#\((.*?)\)\s*for\s+requiredDestination\b", r'"((?:\\.|[^"\\])*)"', True),
+            (powershell, r"foreach\s*\(\s*\$requiredDestination\s+in\s+@\((.*?)\)\s*\)", r'"([^"\r\n]*)"', False),
+        )
+        required_sets = []
+        for source, pattern, literal, escaped in patterns:
+            blocks = re.findall(pattern, source, re.DOTALL)
+            self.assertEqual(len(blocks), 1)
+            self.assertIsNone(re.search(r"[^,\s]", re.sub(literal, "", blocks[0])))
+            values = re.findall(literal, blocks[0])
+            normalized = [PureWindowsPath(value.replace("\\\\", "\\")
+                          if escaped else value).as_posix().casefold() for value in values]
+            self.assertTrue(normalized)
+            self.assertEqual(len(normalized), len(set(normalized)))
+            required = set(normalized)
+            self.assertFalse(required - manifest, sorted(required - manifest))
+            for target in required:
+                self.assertNotIn(PureWindowsPath(target).suffix, (".fbx", ".max", ".blend"))
+            for target in ("contents/f2m_test_fixtures.py", "contents/f2m_i18n.py",
+                           "contents/f2m_report_i18n.py", "contents/license"):
+                self.assertIn(target, required)
+            required_sets.append(required)
+        self.assertEqual(required_sets[0], required_sets[1])
+
     def test_native_installer_requirements_match_the_public_source_manifest(self):
         installer = (ROOT / "Install_FBXTo3dsMax.ms").read_text(
             encoding="utf-8-sig"
@@ -627,7 +679,7 @@ class InstallationLayerTests(unittest.TestCase):
                 self.assertNotEqual(path.suffix, ".fbx")
 
         entries = _manifest_entries()
-        self.assertEqual(len(entries), 27)
+        self.assertEqual(len(entries), 32)
         manifest_targets = {
             PureWindowsPath(destination).as_posix().casefold()
             for _source, destination in entries
@@ -640,12 +692,12 @@ class InstallationLayerTests(unittest.TestCase):
 
     def test_manifest_and_transaction_cycle(self):
         entries = _manifest_entries()
-        self.assertEqual(len(entries), 27)
+        self.assertEqual(len(entries), 32)
         with tempfile.TemporaryDirectory(prefix="FBXTo3dsMax-install-mock-") as temp:
             package = _PackageCycleMock(Path(temp))
 
             self.assertIsNone(package.install())
-            stale = package.target / "Contents" / "stale-from-old-version.py"
+            stale = package.target / "contents" / "stale-from-old-version.py"
             stale.write_text("stale", encoding="utf-8")
 
             backup = package.install()
@@ -851,14 +903,14 @@ class InstallationLayerTests(unittest.TestCase):
             harness,
         )
         self.assertIn("F2M_Installer_FinalDialogText", harness)
-        self.assertIn("FBXTo3dsMax v1.3.24 安装成功。", harness)
+        self.assertIn("FBXTo3dsMax v1.4.24 安装成功。", harness)
         self.assertIn("中文结果载荷=通过", harness)
         self.assertIn("F2M_STALE_TOPOLOGY_SENTINEL", harness)
         self.assertIn("F2M_STALE_SKIN_SENTINEL", harness)
         self.assertIn("F2M_STALE_ALIAS_SENTINEL", harness)
         self.assertIn("Helper缓存清理=通过", harness)
-        self.assertIn("expectedManifestCount = 27", harness)
-        self.assertIn("安装清单=27/27", harness)
+        self.assertIn("expectedManifestCount = 32", harness)
+        self.assertIn("安装清单=32/32", harness)
         self.assertIn("quitMax #noPrompt", harness)
 
         wrapper = (
@@ -869,7 +921,7 @@ class InstallationLayerTests(unittest.TestCase):
         self.assertIn("_has_exact_python_host_identity", wrapper)
         self.assertIn('args[index + 1].lower() == "pythonhost"', wrapper)
         self.assertIn(
-            're.fullmatch(r"v1\\.3\\.24-[0-9a-fA-F]{32}", run_token)',
+            're.fullmatch(r"v1\\.4\\.24-[0-9a-fA-F]{32}", run_token)',
             wrapper,
         )
         self.assertNotIn("v1\\.3\\.19-", wrapper)
@@ -879,10 +931,10 @@ class InstallationLayerTests(unittest.TestCase):
         verifier = (
             ROOT / "tests" / "max_installed_interactive_verify.py"
         ).read_text(encoding="utf-8-sig")
-        self.assertIn('EXPECTED_VERSION = "1.3.24"', verifier)
+        self.assertIn('EXPECTED_VERSION = "1.4.24"', verifier)
         self.assertIn("FBXTo3dsMax.version", verifier)
         self.assertIn("installed_version = _read_installed_version()", verifier)
-        self.assertNotIn('"version": "1.3.24"', verifier)
+        self.assertNotIn('"version": "1.4.24"', verifier)
 
         for runner_name, token_name in (
             ("run_install_v1319_harness.ps1", "F2M_INSTALL_HARNESS_TOKEN"),
@@ -902,7 +954,7 @@ class InstallationLayerTests(unittest.TestCase):
             )
             if runner_name == "run_installed_verify_v1319.ps1":
                 self.assertIn(
-                    "$result.version -ne '1.3.24'",
+                    "$result.version -ne '1.4.24'",
                     runner,
                     runner_name,
                 )
@@ -911,7 +963,7 @@ class InstallationLayerTests(unittest.TestCase):
         for relative in (
             "Install_FBXTo3dsMax.ms",
             "Uninstall_FBXTo3dsMax.ms",
-            os.path.join("Contents", "FBXTo3dsMax.mcr"),
+            os.path.join("contents", "FBXTo3dsMax.mcr"),
         ):
             text = (ROOT / relative).read_text(encoding="utf-8-sig")
             for name in MODULE_NAMES:
@@ -930,7 +982,7 @@ class InstallationLayerTests(unittest.TestCase):
         )
         self.assertNotIn("fn log message", installer)
         bootstrap = (
-            ROOT / "Contents" / "FBXTo3dsMax_Bootstrap.ms"
+            ROOT / "contents" / "FBXTo3dsMax_Bootstrap.ms"
         ).read_text(encoding="utf-8-sig")
         self.assertNotIn("fn log message", bootstrap)
         for relative in (
@@ -1009,7 +1061,7 @@ class InstallationLayerTests(unittest.TestCase):
         self.assertIn("def cancel_shutdown", toolbar)
 
         bootstrap = (
-            ROOT / "Contents" / "FBXTo3dsMax_Bootstrap.ms"
+            ROOT / "contents" / "FBXTo3dsMax_Bootstrap.ms"
         ).read_text(encoding="utf-8-sig")
         for callback in (
             "#preWorkspaceChange",
@@ -1063,14 +1115,18 @@ class InstallationLayerTests(unittest.TestCase):
         )
         self.assertIn("verifyToolbar()", installer)
         self.assertIn("安装成功", installer)
-        self.assertNotIn("installed successfully", installer)
-        self.assertNotIn("Install failed", installer)
+        self.assertIn("installed successfully", installer)
+        self.assertIn('fn localized chineseText englishText', installer)
+        self.assertIn('if displayEnglish then englishText else chineseText', installer)
+        self.assertIn('selectedLanguage == "en"', installer)
+        self.assertIn('localized "FBXTo3dsMax - 安装失败" "FBXTo3dsMax - Installation failed"', installer)
 
         uninstaller = (ROOT / "Uninstall_FBXTo3dsMax.ms").read_text(
             encoding="utf-8-sig"
         )
         self.assertIn("FBXTo3dsMax - 卸载完成", uninstaller)
-        self.assertNotIn("Uninstall failed", uninstaller)
+        self.assertIn('localized "FBXTo3dsMax - 卸载失败" "FBXTo3dsMax - Uninstall failed"', uninstaller)
+        self.assertIn('if displayEnglish then englishText else chineseText', uninstaller)
         self.assertIn('.rollback-generated"', uninstaller)
         self.assertIn(
             "fileClass.Move originalPath regeneratedPath",
@@ -1081,11 +1137,252 @@ class InstallationLayerTests(unittest.TestCase):
             uninstaller,
         )
 
-        macro = (ROOT / "Contents" / "FBXTo3dsMax.mcr").read_text(
+        macro = (ROOT / "contents" / "FBXTo3dsMax.mcr").read_text(
             encoding="utf-8-sig"
         )
-        self.assertIn('toolTip:"打开 FBXTo3dsMax"', macro)
-        self.assertNotIn('toolTip:"Open FBXTo3dsMax"', macro)
+        self.assertIn('toolTip:"FBXTo3dsMax"', macro)
+        self.assertIn("localizedMessage", macro)
+        self.assertIn("m.translate", macro)
+
+    def _toolbar_sizing_namespace(self):
+        import ast
+
+        source = TOOLBAR.read_text(encoding="utf-8-sig")
+        tree = ast.parse(source)
+        functions = [
+            node for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name in ("_fit_button_size", "refresh_language")
+        ]
+        namespace = {"QtCore": types.SimpleNamespace(QSize=_Size)}
+        exec(compile(ast.Module(body=functions, type_ignores=[]), str(TOOLBAR), "exec"), namespace)
+        return namespace
+
+    def test_toolbar_minimum_uses_polished_style_hints_and_keeps_floor(self):
+        namespace = self._toolbar_sizing_namespace()
+        button = _ToolButton(None)
+        # Hints stand for current font/icon/padding; their values are supplied by Qt.
+        cases = (
+            ((180, 45), (180, 45), (180, 45)),
+            ((236, 51), (214, 56), (236, 56)),
+            ((96, 27), (101, 29), (118, 34)),
+        )
+        for preferred, minimum, expected in cases:
+            with self.subTest(preferred=preferred, minimum=minimum):
+                button.preferred_size = _Size(*preferred)
+                button.minimum_hint = _Size(*minimum)
+                button.setStyleSheet("changed actual style")
+                namespace["_fit_button_size"](button)
+                self.assertTrue(button.polished)
+                self.assertEqual((button.width(), button.height()), expected)
+        self.assertEqual(button.geometry_updates, len(cases))
+
+    def test_toolbar_creation_measures_after_text_icon_and_stylesheet(self):
+        import ast
+
+        namespace = self._toolbar_sizing_namespace()
+        tree = ast.parse(TOOLBAR.read_text(encoding="utf-8-sig"))
+        manager = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "_ToolbarManager")
+        factory = next(node for node in manager.body if isinstance(node, ast.FunctionDef) and node.name == "_make_button_action")
+        test = self
+
+        class StyledButton(_ToolButton):
+            def ensurePolished(self):
+                test.assertEqual(self.text(), "FBX 转 MAX")
+                test.assertFalse(self.icon().isNull())
+                test.assertIn("font-weight: 600", self.style_sheet)
+                super().ensurePolished()
+
+        namespace.update(
+            QtWidgets=types.SimpleNamespace(QWidgetAction=_WidgetAction, QToolButton=StyledButton),
+            ACTION_OBJECT_NAME="FBXTo3dsMax.OpenWidgetAction", BUTTON_OBJECT_NAME="FBXTo3dsMax.TopButton",
+            BUTTON_TEXT="FBX 转 MAX", BUTTON_TOOLTIP="打开 FBXTo3dsMax",
+            _t=lambda value: value, _text_beside_icon=lambda: "text-beside-icon", _run_macro=lambda _checked=False: None,
+        )
+        exec(compile(ast.Module(body=[factory], type_ignores=[]), str(TOOLBAR), "exec"), namespace)
+        action, button = namespace["_make_button_action"](None, None, _Icon("actual-icon"))
+        self.assertIs(action.widget, button)
+        self.assertEqual((button.width(), button.height()), (156, 38))
+        self.assertEqual(button.geometry_updates, 1)
+
+    def test_toolbar_language_refresh_remeasures_same_button_action_and_timers(self):
+        namespace = self._toolbar_sizing_namespace()
+        button = _ToolButton(None)
+        action = object()
+        timers = [object(), object(), object()]
+        manager = types.SimpleNamespace(
+            shutting_down=False, button=button, widget_action=action,
+            _retry_timers=timers, fallback_toolbar=None,
+        )
+        locale = ["zh-CN"]
+        api = {}
+        namespace.update(
+            _manager=manager, BUTTON_TEXT="FBX 转 MAX", BUTTON_TOOLTIP="打开 FBXTo3dsMax",
+            API_SLOT="test_toolbar_api", builtins=types.SimpleNamespace(test_toolbar_api=api),
+            _t=lambda value: {"FBX 转 MAX": "FBX to MAX", "打开 FBXTo3dsMax": "Open FBXTo3dsMax"}.get(value, value)
+            if locale[0] == "en" else value,
+            _language_module=lambda: types.SimpleNamespace(get_language=lambda: locale[0]),
+        )
+        for language, hint, expected_text in (
+            ("zh-CN", (180, 45), "FBX 转 MAX"),
+            ("en", (222, 48), "FBX to MAX"),
+            ("zh-CN", (180, 45), "FBX 转 MAX"),
+        ):
+            locale[0] = language
+            button.preferred_size = _Size(*hint)
+            button.minimum_hint = _Size(*hint)
+            self.assertTrue(namespace["refresh_language"]())
+            self.assertEqual(button.text(), expected_text)
+            self.assertEqual((button.width(), button.height()), hint)
+            self.assertEqual(api["language"], language)
+            self.assertIs(manager.button, button)
+            self.assertIs(manager.widget_action, action)
+            self.assertIs(manager._retry_timers, timers)
+        self.assertEqual(button.geometry_updates, 3)
+
+    def test_toolbar_shutdown_refresh_does_not_touch_button_size(self):
+        namespace = self._toolbar_sizing_namespace()
+        button = _ToolButton(None)
+        namespace.update(
+            _manager=types.SimpleNamespace(shutting_down=True, button=button, fallback_toolbar=None),
+            BUTTON_TEXT="FBX 转 MAX", BUTTON_TOOLTIP="打开 FBXTo3dsMax",
+            API_SLOT="test_toolbar_api", builtins=types.SimpleNamespace(),
+        )
+        self.assertTrue(namespace["refresh_language"]())
+        self.assertFalse(button.polished)
+        self.assertEqual(button.geometry_updates, 0)
+
+    def _toolbar_install_layout_case(self, second_main_fails=False,
+                                     fallback_fails=False):
+        import ast
+
+        # Execute the actual manager and verifier with existing Qt substitutes.
+        tree = ast.parse(TOOLBAR.read_text(encoding="utf-8-sig"))
+        selected = [node for node in tree.body
+                    if (isinstance(node, ast.ClassDef)
+                        and node.name == "_ToolbarManager")
+                    or (isinstance(node, ast.FunctionDef)
+                        and node.name in ("_fit_button_size", "_global_rect",
+                                          "_delete_qobject"))]
+        main = _MainWindow()
+        main_toolbar = _ToolBar("Main", main)
+        main_toolbar.setObjectName("Main Toolbar")
+        main_toolbar.show()
+        main.addToolBar("top", main_toolbar)
+        previous_fallback = _ToolBar("Previous fallback", main)
+        previous_fallback.setObjectName("FBXTo3dsMax.FallbackToolbar")
+        previous_fallback.show()
+        main.addToolBar("top", previous_fallback)
+        events, created, verified = [], [], []
+        previous_active = _ToolButton.active_button
+        self.addCleanup(setattr, _ToolButton, "active_button", previous_active)
+
+        class LayoutApplication(_Application):
+            @staticmethod
+            def processEvents():
+                events.append(len(events) + 1)
+                # Model a real layout change after the first successful verify.
+                if len(events) == 2 and second_main_fails:
+                    main_toolbar.hide()
+                if len(events) == 3 and fallback_fails:
+                    for toolbar in main.toolbars:
+                        if toolbar.objectName() == "FBXTo3dsMax.FallbackToolbar":
+                            toolbar.hide()
+
+        namespace = {
+            "os": os, "ICON_PATH": str(ROOT / "contents/icons/FBXTo3dsMax.svg"),
+            "qtmax": types.SimpleNamespace(GetQMaxMainWindow=lambda: main),
+            "QtCore": types.SimpleNamespace(QSize=_Size, QPoint=_Point, QRect=_Rect),
+            "QtGui": types.SimpleNamespace(QIcon=_Icon,
+                                            QGuiApplication=_GuiApplication),
+            "QtWidgets": types.SimpleNamespace(QToolBar=_ToolBar,
+                QToolButton=_ToolButton, QWidgetAction=_WidgetAction,
+                QApplication=LayoutApplication),
+            "MAIN_TOOLBAR_OBJECT_NAME": "Main Toolbar",
+            "LEGACY_TOOLBAR_OBJECT_NAME": "FBXTo3dsMax.Toolbar",
+            "FALLBACK_TOOLBAR_OBJECT_NAME": "FBXTo3dsMax.FallbackToolbar",
+            "ACTION_OBJECT_NAME": "FBXTo3dsMax.OpenWidgetAction",
+            "BUTTON_OBJECT_NAME": "FBXTo3dsMax.TopButton",
+            "BUTTON_TEXT": "FBX 转 MAX", "BUTTON_TOOLTIP": "打开 FBXTo3dsMax",
+            "_t": lambda value: value, "_top_toolbar_area": lambda: "top",
+            "_text_beside_icon": lambda: "text-beside-icon",
+            "_run_macro": lambda _checked=False: None,
+        }
+        exec(compile(ast.Module(body=selected, type_ignores=[]), str(TOOLBAR),
+                     "exec"), namespace)
+        manager = namespace["_ToolbarManager"]()
+        factory, verify = manager._make_button_action, manager.verify
+
+        def create(host, icon):
+            pair = factory(host, icon)
+            created.append(pair)
+            return pair
+
+        def observe_verify():
+            status = verify()
+            verified.append((manager.host_toolbar.objectName(), status["ok"]))
+            return status
+
+        manager._make_button_action = create
+        manager.verify = observe_verify
+        return manager, main, main_toolbar, previous_fallback, events, created, verified
+
+    def test_toolbar_second_main_layout_failure_uses_one_verified_fallback(self):
+        manager, main, main_toolbar, previous, events, created, verified = (
+            self._toolbar_install_layout_case(second_main_fails=True))
+        status = manager.install()
+        self.assertTrue(status["ok"])
+        self.assertEqual(status["host"], "备用工具栏")
+        self.assertEqual(verified, [("Main Toolbar", True),
+                                   ("Main Toolbar", False),
+                                   ("FBXTo3dsMax.FallbackToolbar", True)])
+        self.assertEqual(events, [1, 2, 3])
+        self.assertTrue(previous.deleted)
+        self.assertEqual(main_toolbar.actions(), [])
+        self.assertEqual(len(created), 2)
+        self.assertTrue(all(item.deleted for item in created[0]))
+        self.assertTrue(all(not item.deleted for item in created[1]))
+        actions = [(toolbar, action) for toolbar in main.toolbars
+                   for action in toolbar.actions()
+                   if action.objectName() == "FBXTo3dsMax.OpenWidgetAction"]
+        self.assertEqual(len(actions), 1)
+        self.assertIs(actions[0][0], manager.fallback_toolbar)
+        self.assertIs(actions[0][1], manager.widget_action)
+        self.assertIs(manager.button, created[1][1])
+
+    def test_toolbar_second_main_and_fallback_failures_cleanup_and_raise(self):
+        manager, main, _main_toolbar, previous, events, created, verified = (
+            self._toolbar_install_layout_case(second_main_fails=True,
+                                              fallback_fails=True))
+        with self.assertRaisesRegex(RuntimeError, "顶部按钮当前不可见"):
+            manager.install()
+        self.assertEqual(verified, [("Main Toolbar", True),
+                                   ("Main Toolbar", False),
+                                   ("FBXTo3dsMax.FallbackToolbar", False)])
+        self.assertEqual(events, [1, 2, 3])
+        self.assertTrue(previous.deleted)
+        self.assertEqual(len(created), 2)
+        self.assertTrue(all(item.deleted for pair in created for item in pair))
+        self.assertFalse([action for toolbar in main.toolbars
+                          for action in toolbar.actions()
+                          if action.objectName() == "FBXTo3dsMax.OpenWidgetAction"])
+
+    def test_toolbar_second_main_verify_pass_retains_main_without_fallback(self):
+        manager, main, main_toolbar, previous, events, created, verified = (
+            self._toolbar_install_layout_case())
+        status = manager.install()
+        self.assertTrue(status["ok"])
+        self.assertEqual(status["host"], "主工具栏")
+        self.assertEqual(verified, [("Main Toolbar", True), ("Main Toolbar", True)])
+        self.assertEqual(events, [1, 2])
+        self.assertTrue(previous.deleted)
+        self.assertEqual(main.toolbars, [main_toolbar])
+        self.assertIsNone(manager.fallback_toolbar)
+        self.assertEqual(len(created), 1)
+        self.assertIs(manager.widget_action, created[0][0])
+        self.assertIs(manager.button, created[0][1])
+        self.assertTrue(all(not item.deleted for item in created[0]))
+        self.assertEqual(main_toolbar.actions(), [manager.widget_action])
 
     def test_toolbar_is_idempotent_and_dispatches_macro(self):
         main_window = _MainWindow()

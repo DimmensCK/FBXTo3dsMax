@@ -27,12 +27,12 @@ class TopologyUndoRedoGateV1320Tests(unittest.TestCase):
             self.gate,
         )
         self.assertIn(
-            'MODULE_PATH = os.path.join(ROOT, "f2m_topology_transfer.py")',
+            'MODULE_PATH = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")',
             self.gate,
         )
         self.assertIn("spec_from_file_location", self.gate)
         self.assertIn("os.path.abspath(module.__file__)", self.gate)
-        self.assertIn('VERSION = "1.3.20"', self.gate)
+        self.assertIn('VERSION = "1.4.24"', self.gate)
         self.assertNotIn("Blender To 3dsMax", self.gate + self.runner)
 
     def test_gate_requires_launcher_token_and_records_all_identity_hashes(self):

@@ -8,7 +8,7 @@ import unittest
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-TOPOLOGY_PATH = ROOT / "f2m_topology_transfer.py"
+TOPOLOGY_PATH = ROOT / "contents" / "f2m_topology_transfer.py"
 
 
 def _python_function_source(source: str, name: str) -> str:

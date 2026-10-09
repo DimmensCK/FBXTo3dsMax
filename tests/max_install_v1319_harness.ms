@@ -1,8 +1,8 @@
 /*
-FBXTo3dsMax v1.3.24 隔离式交互安装验收。
+FBXTo3dsMax v1.4.24 隔离式交互安装验收。
 
     仅允许由带随机令牌的专用 3ds Max 子进程执行。脚本连续执行两次正式
-    拖放安装器，逐轮确认机器状态、最终中文结果载荷、27 项安装哈希和
+    拖放安装器，逐轮确认机器状态、最终中文结果载荷、32 项安装哈希和
     可见顶部按钮，写出带同一令牌的新鲜结果后退出该专用子进程。
 */
 
@@ -15,8 +15,8 @@ global F2M_TopologyHelper
 global F2M_SkinHelper
 global F2M_Helper
 
-local expectedVersion = "1.3.24"
-local expectedManifestCount = 27
+local expectedVersion = "1.4.24"
+local expectedManifestCount = 32
 local environmentClass = dotNetClass "System.Environment"
 local fileClass = dotNetClass "System.IO.File"
 local pathClass = dotNetClass "System.IO.Path"
@@ -56,7 +56,7 @@ fn validRunToken value =
     if value == undefined do return false
     local tokenText = value as string
     if tokenText.count != 40 do return false
-    if (substring tokenText 1 8) != "v1.3.24-" do return false
+    if (substring tokenText 1 8) != "v1.4.24-" do return false
     local hexCharacters = "0123456789abcdef"
     for index = 9 to 40 do
     (
@@ -184,7 +184,7 @@ fn requireSuccessfulInstall passIndex =
         )
     local dialogText = F2M_Installer_FinalDialogText as string
     local requiredChineseText = #(
-            "FBXTo3dsMax v1.3.24 安装成功。",
+            "FBXTo3dsMax v1.4.24 安装成功。",
         "顶部",
         "按钮",
         "安装目录：",
@@ -205,7 +205,7 @@ fn requireSuccessfulInstall passIndex =
 fn verifyInstalledPackage passIndex =
 (
     local packageRoot = pathConfig.appendPath (getDir #privateExchangeStoreInstallPath) "FBXTo3dsMax"
-    local contentsRoot = pathConfig.appendPath packageRoot "Contents"
+    local contentsRoot = pathConfig.appendPath packageRoot "contents"
     local versionPath = pathConfig.appendPath contentsRoot "FBXTo3dsMax.version"
     local manifestPath = pathConfig.appendPath contentsRoot "FBXTo3dsMax.install-manifest.sha256"
     local uiPath = pathConfig.appendPath contentsRoot "FBXTo3dsMax_UI.ms"
@@ -308,7 +308,7 @@ local finalText = if failureText == "" then
     "令牌=" + runToken + "\r\n" +
     "进程=" + processId + "\r\n" +
     "覆盖安装次数=2\r\n" +
-    "安装清单=27/27\r\n" +
+    "安装清单=32/32\r\n" +
     "中文结果载荷=通过\r\n" +
     "Helper缓存清理=通过\r\n" +
     "顶部按钮=通过\r\n"

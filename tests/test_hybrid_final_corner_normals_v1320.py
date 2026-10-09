@@ -4,6 +4,12 @@ import re
 import unittest
 from pathlib import Path
 
+# Resolve runtime modules from the source distribution without a global PYTHONPATH.
+import sys as _f2m_test_sys
+from pathlib import Path as _F2MTestPath
+_f2m_test_root = _F2MTestPath(__file__).resolve().parents[1]
+_f2m_test_sys.path.insert(0, str(_f2m_test_root / "contents" if (_f2m_test_root / "contents").is_dir() else _f2m_test_root))
+
 import f2m_topology_transfer as topology
 
 

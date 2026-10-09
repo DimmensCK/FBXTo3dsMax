@@ -16,12 +16,13 @@ import pymxs
 
 rt = pymxs.runtime
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 os.makedirs(os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "FBXTo3dsMax", "Validation"), exist_ok=True)
 RESULT = os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "FBXTo3dsMax", "Validation", "_max_topology_mapping_channels_result.json")
 
 
 def load_topology() -> Any:
-    path = os.path.join(ROOT, "f2m_topology_transfer.py")
+    path = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")
     name = "_f2m_mapping_channels_runtime"
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:

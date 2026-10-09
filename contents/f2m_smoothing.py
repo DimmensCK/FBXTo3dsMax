@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Deterministic face-corner-normal to 3ds Max smoothing-group conversion.
 
-This v1.3.24 module is deliberately independent from pymxs.  It operates on an
+This v1.4.24 module is deliberately independent from pymxs.  It operates on an
 evaluated polygon mesh and returns one unsigned 32-bit smoothing mask per
 face.  Conversion is fail-closed: malformed/non-manifold topology, ambiguous
 normal data, an exhausted bounded coloring search, or an unrepresentable set of
@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Dict, Hashable, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 
-TOOL_VERSION = "1.3.24"
+TOOL_VERSION = "1.4.24"
 MAX_SMOOTHING_GROUPS = 32
 UINT32_MASK = 0xFFFFFFFF
 INT32_SIGN_BIT = 0x80000000

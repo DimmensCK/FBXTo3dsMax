@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE = ROOT / "f2m_skin_replace.py"
+ENGINE = ROOT / "contents" / "f2m_skin_replace.py"
 
 
 class Mode2BindingBoundaryTests(unittest.TestCase):

@@ -23,12 +23,13 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 RESULT = os.path.join(
     ROOT,
     "tests",
     "_max_smoothing_write_safety_result.json",
 )
-CORE_PATH = os.path.join(ROOT, "f2m_topology_transfer.py")
+CORE_PATH = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")
 SIGNED_MASKS = (0, 1, -2147483648, -1)
 UNIQUE_MASK_MIN_REPEAT_COUNT = 100
 UNIQUE_MASK_HARD_LIMIT_SECONDS = 5.0
@@ -59,7 +60,7 @@ def _load_topology() -> Any:
     actual = os.path.normcase(os.path.abspath(str(module.__file__)))
     if actual != os.path.normcase(path):
         raise RuntimeError(f"核心模块来源不一致：{actual} != {path}")
-    if str(module.TOOL_VERSION) != "1.3.20":
+    if str(module.TOOL_VERSION) != "1.4.24":
         raise RuntimeError(f"加载到错误插件版本：{module.TOOL_VERSION}")
     module.ensure_runtime()
     return module
@@ -664,7 +665,7 @@ def main() -> None:
     payload: Dict[str, Any] = {
         "schema_version": 1,
         "test": "FBXTo3dsMax smoothing write safety",
-        "tool_version": "1.3.20",
+        "tool_version": "1.4.24",
         "started_at_utc": started_at,
         "finished_at_utc": None,
         "overall_status": "running",

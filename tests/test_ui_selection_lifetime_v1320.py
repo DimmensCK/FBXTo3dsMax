@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""UI selection-lifetime regression checks for the v1.3.20 repair."""
+"""UI selection-lifetime regression checks for the v1.4.24 repair."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import unittest
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-UI_PATH = ROOT / "FBXTo3dsMax_UI.ms"
+UI_PATH = ROOT / "contents" / "FBXTo3dsMax_UI.ms"
 
 
 def read_ui() -> str:

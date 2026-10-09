@@ -1,4 +1,4 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 
 <#
 .SYNOPSIS
@@ -34,14 +34,40 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
-$launcherRoot = $PSScriptRoot
+$launcherRoot = Split-Path -Parent $PSScriptRoot
 $installerPath = Join-Path $launcherRoot "Install_FBXTo3dsMax.ms"
-$manifestPath = Join-Path $launcherRoot "Contents\FBXTo3dsMax.files"
+$manifestPath = Join-Path $launcherRoot "contents\FBXTo3dsMax.files"
 $packageXmlPath = Join-Path $launcherRoot "PackageContents.xml"
-$versionPath = Join-Path $launcherRoot "Contents\FBXTo3dsMax.version"
+$versionPath = Join-Path $launcherRoot "contents\FBXTo3dsMax.version"
 $expectedPackageName = "FBXTo3dsMax"
 $expectedUpgradeCode = "{B7AD0BB7-C64E-4F41-9767-CA72294639AE}"
 $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+$displayLanguage = $env:F2M_LANGUAGE
+if ($displayLanguage -notin @('en', 'zh-CN')) {
+    $displayLanguage = 'zh-CN'
+    if ($env:LOCALAPPDATA) {
+        $preferencePath = Join-Path $env:LOCALAPPDATA 'FBXTo3dsMax\language.txt'
+        if (Test-Path -LiteralPath $preferencePath -PathType Leaf) {
+            try {
+                $savedLanguage = [IO.File]::ReadAllText($preferencePath, $strictUtf8).Trim()
+                if ($savedLanguage -in @('en', 'zh-CN')) { $displayLanguage = $savedLanguage }
+            }
+            catch { $displayLanguage = 'zh-CN' }
+        }
+    }
+}
+function Select-LocalizedText([string]$Chinese, [string]$English) {
+    if ($displayLanguage -eq 'en') { return $English }
+    return $Chinese
+}
+
+# Preserve the original technical exception; a localized summary must not hide it.
+trap {
+    if ($displayLanguage -eq 'en') {
+        Write-Warning 'The launcher failed. The original technical diagnostic follows; installation success has not been established.'
+    }
+    throw
+}
 
 function Resolve-FBXTo3dsMaxMaxExecutable {
     param(
@@ -149,20 +175,23 @@ function Assert-FBXTo3dsMaxSourceManifest {
 
     foreach ($requiredDestination in @(
         "PackageContents.xml",
-        "Contents\FBXTo3dsMax_Bootstrap.ms",
-        "Contents\FBXTo3dsMax.files",
-        "Contents\FBXTo3dsMax.version",
-        "Contents\FBXTo3dsMax_UI.ms",
-        "Contents\FBXTo3dsMax.mcr",
-        "Contents\f2m_toolbar.py",
-        "Contents\f2m_topology_transfer.py",
-        "Contents\f2m_skin_replace.py",
-        "Contents\f2m_smoothing.py",
-        "Contents\f2m_fbx_metadata.py",
-        "Contents\f2m_selfcheck.py",
-        "Contents\FBXTo3dsMax_详细说明书.md",
-        "Contents\tests\max_normals_safety.py",
-        "Contents\tests\fixtures\native_smoothing_source.fbx"
+        "contents\FBXTo3dsMax_Bootstrap.ms",
+        "contents\FBXTo3dsMax.files",
+        "contents\FBXTo3dsMax.version",
+        "contents\FBXTo3dsMax_UI.ms",
+        "contents\FBXTo3dsMax.mcr",
+        "contents\f2m_toolbar.py",
+        "contents\f2m_topology_transfer.py",
+        "contents\f2m_skin_replace.py",
+        "contents\f2m_smoothing.py",
+        "contents\f2m_fbx_metadata.py",
+        "contents\f2m_selfcheck.py",
+        "contents\FBXTo3dsMax_详细说明书.md",
+        "contents\tests\max_normals_safety.py",
+        "contents\f2m_test_fixtures.py",
+        "contents\LICENSE",
+        "contents\f2m_i18n.py",
+        "contents\f2m_report_i18n.py"
     )) {
         if (-not $destinations.ContainsKey($requiredDestination)) {
             throw "安装清单缺少必要的目标文件：$requiredDestination"
@@ -276,6 +305,7 @@ finally {
 }
 
 Write-Host ""
-Write-Host "已启动 3ds Max $maxYear（进程号 $($maxProcess.Id)）。" -ForegroundColor Green
-Write-Host "标准事务式安装器 Install_FBXTo3dsMax.ms 将执行安装。"
-Write-Host "此 PowerShell 启动器没有复制任何插件文件。插件 v$declaredVersion 的预检已通过，安装清单共 $manifestEntryCount 项。"
+Write-Host (Select-LocalizedText "已启动 3ds Max $maxYear（进程号 $($maxProcess.Id)）。" "Started 3ds Max $maxYear (PID $($maxProcess.Id)).") -ForegroundColor Green
+Write-Host (Select-LocalizedText '标准事务式安装器 Install_FBXTo3dsMax.ms 将执行安装。' 'The standard transactional installer Install_FBXTo3dsMax.ms will run in Max.')
+Write-Host (Select-LocalizedText "插件 v$declaredVersion 的预检已通过，安装清单共 $manifestEntryCount 项。" "Package v$declaredVersion passed preflight with $manifestEntryCount manifest entries.")
+Write-Host (Select-LocalizedText '启动成功不代表安装成功。请查看 Max 的安装结果对话框；此启动器不会等待安装完成。' 'A successful launch does not prove installation. Check the Max result dialog; this launcher does not wait for the installation transaction.')

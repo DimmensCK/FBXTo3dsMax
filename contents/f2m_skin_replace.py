@@ -12,6 +12,8 @@ FBX 到 3ds Max 数据传递工具
 from __future__ import annotations
 
 import hashlib
+import importlib.util
+import sys
 import os
 import re
 import math
@@ -32,7 +34,7 @@ except Exception:  # 允许在普通 Python 中做语法检查
 
 
 TOOL_AUTHOR = "Dimmens"
-TOOL_VERSION = "1.3.24"
+TOOL_VERSION = "1.4.24"
 LAST_RUN_OK = False
 LAST_RUN_REPORT_PATH = ""
 LAST_RUN_SUMMARY = ""
@@ -49,6 +51,40 @@ MODE2_WORLD_POSITION_ROUNDTRIP_FLOOR = 0.000002
 MODE2_WORLD_POSITION_SCALE_FACTOR = 0.000002
 
 
+def _language_runtime() -> Any:
+    """Load the exact sibling presentation module; reject stale/foreign copies."""
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), "f2m_i18n.py"))
+    name = "_fbx_to_3dsmax_i18n_runtime"
+    module = sys.modules.get(name)
+    def valid(value: Any) -> bool:
+        return bool(value is not None
+            and os.path.normcase(os.path.abspath(str(getattr(value, "__file__", "")))) == os.path.normcase(path)
+            and str(getattr(value, "TOOL_VERSION", "")) == TOOL_VERSION
+            and getattr(value, "_F2M_IMPORT_COMPLETE", False) is True
+            and callable(getattr(value, "translate", None))
+            and callable(getattr(value, "get_language", None)))
+    if not valid(module):
+        sys.modules.pop(name, None)
+        spec = importlib.util.spec_from_file_location(name, path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError("Cannot load the plug-in language module: " + path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        try:
+            spec.loader.exec_module(module)
+            if not valid(module):
+                raise RuntimeError("Plug-in language module identity/version/API mismatch: " + path)
+        except BaseException:
+            if sys.modules.get(name) is module:
+                sys.modules.pop(name, None)
+            raise
+    return module
+
+
+def _display_text(text: Any) -> str:
+    return str(_language_runtime().translate(str(text or "")))
+
+
 HELPER_SCRIPT = r'''
 global F2M_Helper
 global F2M_SkinHelper
@@ -57,7 +93,7 @@ struct F2M_SkinHelperStruct
 (
     lastMessage = "",
     apiKind = "skin",
-    apiVersion = "1.3.24",
+    apiVersion = "1.4.24",
 
     fn setLastMessage msg =
     (
@@ -1621,7 +1657,7 @@ class TransferLog:
         self.lines.append(text)
         if rt is not None:
             try:
-                rt.format("%\n", text)
+                rt.format("%\n", _display_text(text))
             except Exception:
                 pass
 
@@ -5415,7 +5451,7 @@ def write_log_file(text: str, run_id: str = "") -> str:
         try:
             os.makedirs(folder, exist_ok=True)
             with open(path, "w", encoding="utf-8") as handle:
-                handle.write(text)
+                handle.write(_display_text(text))
             return path
         except Exception as exc:
             failures.append(f"{path}：{exc}")
@@ -5469,6 +5505,8 @@ def write_diagnostic_file(diagnostics: Sequence[str], run_id: str) -> str:
 
 def visible_exception_text(exc: BaseException) -> str:
     text = str(exc).strip()
+    if _language_runtime().get_language() == "en":
+        return text or "底层操作失败，未返回可读原因。"
     if not text:
         return "底层操作失败，未返回可读原因。"
     # Autodesk、Python、Qt 或第三方模块的异常经常中英混合。面向用户的
@@ -5495,7 +5533,7 @@ def show_check_message(ctx: TransferContext, title: str, log_path: str) -> None:
     body += f"\n\n更多内容：\n{log_path or '报告文件写入失败，请查看 MaxScript Listener。'}"
 
     try:
-        rt.messageBox(body, title=title, beep=bool(errors or warnings))
+        rt.messageBox(_display_text(body), title=_display_text(title), beep=bool(errors or warnings))
     except Exception:
         pass
 
@@ -5508,7 +5546,7 @@ def show_missing_transfer_attributes(ctx: TransferContext, log_path: str) -> Non
     body += "\n".join(f"- {item}" for item in items)
     body += f"\n\n其它可用属性已继续执行。\n\n更多内容：\n{log_path or '报告文件写入失败，请查看 MaxScript Listener。'}"
     try:
-        rt.messageBox(body, title="FBX 到 3ds Max 属性缺失提醒", beep=True)
+        rt.messageBox(_display_text(body), title=_display_text("FBX 到 3ds Max 属性缺失提醒"), beep=True)
     except Exception:
         pass
 
@@ -5540,8 +5578,8 @@ def show_execution_failure(ctx: TransferContext, log_path: str) -> None:
     )
     try:
         rt.messageBox(
-            body,
-            title="FBX 到 3ds Max 传递未完成",
+            _display_text(body),
+            title=_display_text("FBX 到 3ds Max 传递未完成"),
             beep=True,
         )
     except Exception:
@@ -5777,9 +5815,9 @@ def _run_transfer_impl(options: TransferOptions) -> str:
         if options.show_ui:
             try:
                 rt.messageBox(
-                    f"{error_text}\n\n报告："
-                    f"{log_path or '写入失败，请查看 MaxScript 侦听器。'}",
-                    title="FBX 到 3ds Max 数据传递",
+                    _display_text(f"{error_text}\n\n报告："
+                    f"{log_path or '写入失败，请查看 MaxScript 侦听器。'}"),
+                    title=_display_text("FBX 到 3ds Max 数据传递"),
                     beep=True,
                 )
             except Exception:
@@ -7065,5 +7103,5 @@ if __name__ == "__main__":
         ensure_runtime()
         print("F2M_HELPER_OK")
     else:
-        rt.messageBox("请通过 FBXTo3dsMax_UI.ms 启动中文界面。", title="FBX 到 3ds Max")
+        rt.messageBox(_display_text("请通过 FBXTo3dsMax_UI.ms 启动中文界面。"), title=_display_text("FBX 到 3ds Max"))
 

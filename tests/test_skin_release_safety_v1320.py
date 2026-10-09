@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""模式二 v1.3.20 发布安全修复的纯 Python 专项回归。"""
+"""模式二 v1.4.24 发布安全修复的纯 Python 专项回归。"""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "f2m_skin_replace.py"
+MODULE_PATH = ROOT / "contents" / "f2m_skin_replace.py"
 
 
 def load_module(name: str):

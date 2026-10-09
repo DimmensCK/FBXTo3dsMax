@@ -12,12 +12,13 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 RESULT = os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "FBXTo3dsMax", "Validation", "_max_procedural_selfcheck_result.txt")
 os.makedirs(os.path.dirname(RESULT), exist_ok=True)
 
 
 def load_selfcheck():
-    path = os.path.join(ROOT, "f2m_selfcheck.py")
+    path = os.path.join(RUNTIME_ROOT, "f2m_selfcheck.py")
     spec = importlib.util.spec_from_file_location("_f2m_max_procedural_selfcheck", path)
     if spec is None or spec.loader is None:
         raise RuntimeError("Unable to create self-check module spec.")

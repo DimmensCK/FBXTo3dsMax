@@ -1,0 +1,34 @@
+# FBXTo3dsMax v1.4.24 source installation manifest / 源码安装清单
+# Repository source path|Installed package path
+PackageContents.xml|PackageContents.xml
+contents\FBXTo3dsMax_Bootstrap.ms|contents\FBXTo3dsMax_Bootstrap.ms
+contents\FBXTo3dsMax.mcr|contents\FBXTo3dsMax.mcr
+contents\f2m_toolbar.py|contents\f2m_toolbar.py
+contents\icons\FBXTo3dsMax.svg|contents\icons\FBXTo3dsMax.svg
+contents\FBXTo3dsMax.version|contents\FBXTo3dsMax.version
+contents\FBXTo3dsMax.files|contents\FBXTo3dsMax.files
+contents\FBXTo3dsMax_UI.ms|contents\FBXTo3dsMax_UI.ms
+contents\f2m_topology_transfer.py|contents\f2m_topology_transfer.py
+contents\f2m_skin_replace.py|contents\f2m_skin_replace.py
+contents\f2m_smoothing.py|contents\f2m_smoothing.py
+contents\f2m_fbx_metadata.py|contents\f2m_fbx_metadata.py
+contents\f2m_selfcheck.py|contents\f2m_selfcheck.py
+contents\f2m_test_fixtures.py|contents\f2m_test_fixtures.py
+contents\f2m_i18n.py|contents\f2m_i18n.py
+contents\f2m_report_i18n.py|contents\f2m_report_i18n.py
+contents\VERSION.txt|contents\VERSION.txt
+docs\development\CHANGELOG_中文.md|contents\CHANGELOG_中文.md
+docs\zh\README_中文.md|contents\README_中文.md
+docs\zh\INSTALL_中文.md|contents\INSTALL_中文.md
+docs\zh\FBXTo3dsMax_详细说明书.md|contents\FBXTo3dsMax_详细说明书.md
+docs\en\README.md|contents\README_EN.md
+docs\en\INSTALL.md|contents\INSTALL_EN.md
+docs\en\USER_GUIDE.md|contents\USER_GUIDE_EN.md
+tests\max_core_smoke.py|contents\tests\max_core_smoke.py
+tests\max_fbx_integration.py|contents\tests\max_fbx_integration.py
+tests\max_normals_safety.py|contents\tests\max_normals_safety.py
+tests\max_ui_parse.py|contents\tests\max_ui_parse.py
+tests\test_smoothing_algorithm.py|contents\tests\test_smoothing_algorithm.py
+tests\test_fbx_metadata.py|contents\tests\test_fbx_metadata.py
+Uninstall_FBXTo3dsMax.ms|contents\Uninstall_FBXTo3dsMax.ms
+LICENSE|contents\LICENSE

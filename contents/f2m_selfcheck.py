@@ -33,7 +33,7 @@ except Exception:
     rt = None
 
 
-TOOL_VERSION = "1.3.24"
+TOOL_VERSION = "1.4.24"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CHILD_ENV = "F2M_SELFCHECK_CHILD"
 RESULT_ENV = "F2M_SELFCHECK_RESULT"
@@ -42,7 +42,7 @@ CANCEL_ENV = "F2M_SELFCHECK_CANCEL"
 CONTROLLER_SLOT = "_FBXTO3DSMAX_SELFCHECK_CONTROLLER"
 SELF_CHECK_TIMEOUT_SECONDS = 300
 SELF_CHECK_EXIT_GRACE_SECONDS = 5
-EXPECTED_INSTALL_MANIFEST_COUNT = 27
+EXPECTED_INSTALL_MANIFEST_COUNT = 32
 MAX_LOG_PATH_ENV = "F2M_SELFCHECK_MAX_LOG"
 MAX_LOG_TIME_SLOP_SECONDS = 3.0
 MAX_LOG_TAIL_FINGERPRINT_BYTES = 256
@@ -57,6 +57,40 @@ MAX_LOG_PREFIX = re.compile(
     r"^(?P<stamp>\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})"
     r"\s+\S+:\s+\[(?P<pid>\d+)\]"
 )
+
+
+def _language_runtime() -> Any:
+    """Load the exact sibling presentation module; reject stale/foreign copies."""
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), "f2m_i18n.py"))
+    name = "_fbx_to_3dsmax_i18n_runtime"
+    module = sys.modules.get(name)
+    def valid(value: Any) -> bool:
+        return bool(value is not None
+            and os.path.normcase(os.path.abspath(str(getattr(value, "__file__", "")))) == os.path.normcase(path)
+            and str(getattr(value, "TOOL_VERSION", "")) == TOOL_VERSION
+            and getattr(value, "_F2M_IMPORT_COMPLETE", False) is True
+            and callable(getattr(value, "translate", None))
+            and callable(getattr(value, "get_language", None)))
+    if not valid(module):
+        sys.modules.pop(name, None)
+        spec = importlib.util.spec_from_file_location(name, path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError("Cannot load the plug-in language module: " + path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        try:
+            spec.loader.exec_module(module)
+            if not valid(module):
+                raise RuntimeError("Plug-in language module identity/version/API mismatch: " + path)
+        except BaseException:
+            if sys.modules.get(name) is module:
+                sys.modules.pop(name, None)
+            raise
+    return module
+
+
+def _display_text(text: Any) -> str:
+    return str(_language_runtime().translate(str(text or "")))
 
 
 @dataclass
@@ -84,6 +118,8 @@ def _localize_visible_text(value: Any) -> str:
     """在已知回归标签进入用户报告前将其转换为中文。"""
 
     text = str(value or "").strip()
+    if _language_runtime().get_language() == "en":
+        return _display_text(text)
     replacements = (
         ("plain:", "普通自动法线："),
         ("inverse_transpose:", "法线逆转置："),
@@ -147,7 +183,7 @@ def _localize_visible_text(value: Any) -> str:
     residual = re.sub(r"[A-Za-z]:[\\/][^\r\n]*", "", residual)
     residual = re.sub(r"\b[\w.-]+\.py\b", "", residual, flags=re.IGNORECASE)
     if re.search(r"[A-Za-z]{2,}", residual):
-        return "检查已完成；未本地化的底层技术明细已从普通报告隐藏。"
+        return text
     return text
 
 
@@ -194,7 +230,7 @@ def _atomic_write_text(path: str, value: str) -> None:
     temporary = destination + ".tmp-" + uuid.uuid4().hex
     try:
         with open(temporary, "w", encoding="utf-8") as handle:
-            handle.write(str(value))
+            handle.write(value)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, destination)
@@ -423,9 +459,11 @@ def _prepend_native_log_failure_to_report(
     if not report_path or not os.path.isfile(report_path):
         return ""
     marker = "【父控制器最终判定】"
+    display_marker = _display_text(marker)
+    english_marker = str(_language_runtime().translate(marker, locale="en"))
     with open(report_path, "r", encoding="utf-8-sig") as handle:
         original = handle.read()
-    if original.startswith(marker):
+    if original.startswith((marker, english_marker)):
         return report_path
 
     if bool(audit.get("checked", False)):
@@ -439,13 +477,16 @@ def _prepend_native_log_failure_to_report(
             "不能确认没有 MAXScript 内存收集错误。"
         )
     prefix = (
-        marker
+        display_marker
         + "\n"
-        + "自检失败："
-        + reason
-        + "\n原生日志："
-        + str(audit.get("path", "") or "未找到")
-        + "\n说明：下方六项业务检查结果不能覆盖上述原生进程错误。\n"
+        + _display_text("自检失败：")
+        + _display_text(str(reason))
+        + "\n"
+        + _display_text("原生日志：")
+        + (str(audit.get("path", "")) if audit.get("path") else _display_text("未找到"))
+        + "\n"
+        + _display_text("说明：下方六项业务检查结果不能覆盖上述原生进程错误。")
+        + "\n"
         + "=" * 72
         + "\n\n"
     )
@@ -513,15 +554,20 @@ def _prepend_process_exit_failure_to_report(
     if not report_path or not os.path.isfile(report_path):
         return ""
     marker = "【父控制器进程退出门禁】"
+    display_marker = _display_text(marker)
+    english_marker = str(_language_runtime().translate(marker, locale="en"))
     with open(report_path, "r", encoding="utf-8-sig") as handle:
         original = handle.read()
-    if original.startswith(marker):
+    if original.startswith((marker, english_marker)):
         return report_path
     prefix = (
-        marker
-        + "\n自检失败："
-        + str(reason)
-        + "\n说明：下方保留子进程原始业务报告及其它父控制器门禁信息。\n"
+        display_marker
+        + "\n"
+        + _display_text("自检失败：")
+        + _display_text(str(reason))
+        + "\n"
+        + _display_text("说明：下方保留子进程原始业务报告及其它父控制器门禁信息。")
+        + "\n"
         + "=" * 72
         + "\n\n"
     )
@@ -649,6 +695,11 @@ def _validate_child_environment() -> Dict[str, str]:
 
 def _load_local(filename: str, module_name: str) -> Any:
     path = os.path.abspath(os.path.join(ROOT, filename))
+    # Source tests live beside contents; installed tests live inside contents.
+    # Only that fixed test subtree may use the repository parent.
+    if (not os.path.isfile(path)
+            and filename.replace("\\", "/").startswith("tests/")):
+        path = os.path.abspath(os.path.join(os.path.dirname(ROOT), filename))
     if not os.path.isfile(path):
         raise FileNotFoundError(path)
     sys.modules.pop(module_name, None)
@@ -887,7 +938,11 @@ def _validate_ui_bridge_source(ui_text: str) -> None:
     protected_execute = (
         "python.Execute code throwOnError:true clearUndoBuffer:false"
     )
-    if ui_text.count(protected_execute) != 2:
+    execute_lines = [line for line in ui_text.splitlines()
+                     if "python.Execute" in line and not line.lstrip().startswith("--")]
+    if (ui_text.count(protected_execute) != 3
+            or len(execute_lines) != 3
+            or any(protected_execute not in line for line in execute_lines)):
         raise RuntimeError(
             "界面的传递或自检入口可能清空用户撤销栈，或异常传播选项不完整。"
         )
@@ -1374,6 +1429,8 @@ def _module_check() -> str:
         "f2m_fbx_metadata.py",
         "f2m_selfcheck.py",
         "f2m_test_fixtures.py",
+        "f2m_i18n.py",
+        "f2m_report_i18n.py",
     )
     missing = [name for name in required if not os.path.isfile(os.path.join(ROOT, name))]
     if missing:
@@ -1384,12 +1441,16 @@ def _module_check() -> str:
     smoothing = _load_local("f2m_smoothing.py", "_f2m_sc_smoothing_integrity")
     metadata = _load_local("f2m_fbx_metadata.py", "_f2m_sc_fbx_metadata_integrity")
     fixtures = _load_local("f2m_test_fixtures.py", "_f2m_sc_fixture_integrity")
+    i18n = _language_runtime()
+    report_i18n = _load_local("f2m_report_i18n.py", "_f2m_sc_report_i18n_integrity")
     versions = {
         "topology": str(getattr(topology, "TOOL_VERSION", "")),
         "skin": str(getattr(skin, "TOOL_VERSION", "")),
         "smoothing": str(getattr(smoothing, "TOOL_VERSION", "")),
         "metadata": str(getattr(metadata, "TOOL_VERSION", "")),
         "fixtures": str(getattr(fixtures, "TOOL_VERSION", "")),
+        "i18n": str(getattr(i18n, "TOOL_VERSION", "")),
+        "report_i18n": str(getattr(report_i18n, "TOOL_VERSION", "")),
     }
     if any(value != TOOL_VERSION for value in versions.values()):
         raise RuntimeError(f"版本不同步：{versions}")
@@ -1942,6 +2003,27 @@ def _procedural_max_check() -> str:
     )
 
 
+def _assert_native_smoothing_report(native_report: str, raw_summary: str) -> None:
+    """Require the actual native-source message in its raw or displayed form.
+
+    The engine's summary is untranslated. A full technical report message can
+    remain in its original language, so translating only its method fragment
+    does not describe what the report writer actually saved.
+    """
+    source_field = " 来源：FBX 原生平滑层 / Autodesk 精确导入。"
+    report_lines = native_report.splitlines()
+    for message in raw_summary.splitlines():
+        if not message.startswith("  - ") or source_field not in message:
+            continue
+        rendered_lines = _display_text(message).splitlines()
+        if message in report_lines or any(
+            report_lines[index:index + len(rendered_lines)] == rendered_lines
+            for index in range(len(report_lines))
+        ):
+            return
+    raise AssertionError("原生 LayerElementSmoothing 生产分支没有进入报告。")
+
+
 def _topology_fbx_check() -> str:
     _require_runtime()
     transfer_normals_enabled = (
@@ -2129,8 +2211,7 @@ def _topology_fbx_check() -> str:
         encoding="utf-8",
     ) as handle:
         native_report = handle.read()
-    if "FBX 原生平滑层 / Autodesk 精确导入" not in native_report:
-        raise AssertionError("原生 LayerElementSmoothing 生产分支没有进入报告。")
+    _assert_native_smoothing_report(native_report, topology.LAST_RUN_SUMMARY)
     stage("END")
     return (
         "程序生成的 FBX 的无原生层 DSATUR、预检、UV"
@@ -2408,12 +2489,12 @@ def _write_report(checks: Iterable[Check], run_id: str) -> Dict[str, Any]:
         f"{'通过' if all_ok else '失败'}：{ok_count}/{len(check_list)} 项通过。"
     )
     lines = [
-        summary,
-        "说明：自检覆盖已知关键不变量和内置样本，不能证明不存在所有未知缺陷。",
+        _display_text(summary),
+        _display_text("说明：自检覆盖已知关键不变量和内置样本，不能证明不存在所有未知缺陷。"),
         "=" * 72,
     ]
     for item in check_list:
-        lines.append(f"[{'通过' if item.ok else '失败'}] {item.name}（{item.elapsed_ms} 毫秒）")
+        lines.append(_display_text(f"[{'通过' if item.ok else '失败'}] {item.name}（{item.elapsed_ms} 毫秒）"))
         lines.append(_localize_visible_text(item.detail))
         lines.append("")
     path = os.path.join(_report_folder(), f"FBXTo3dsMax_自检_{run_id}.txt")
@@ -2577,6 +2658,82 @@ def _new_process_paths() -> Dict[str, str]:
     }
 
 
+def _display_selfcheck_summary(result: Dict[str, Any]) -> str:
+    """Render exact typed gate prefixes; keep protocol and unknown tails opaque."""
+
+    summary = str(result.get("summary", "自检结束。") or "").strip()
+    reasons: List[Tuple[str, str]] = []
+    observed = result.get("child_process_exit_observed")
+    code = result.get("child_process_exit_code")
+    forced = result.get("child_process_completion_stop_requested")
+    natural = result.get("child_process_natural_exit")
+    if (
+        result.get("child_process_exit_failure") is True
+        and result.get("child_process_exit_gate_passed") is False
+        and type(observed) is bool
+        and type(forced) is bool
+        and type(natural) is bool
+        and ((observed and type(code) is int) or (not observed and code is None))
+        and natural == (observed and not forced)
+        and not (natural and code == 0)
+    ):
+        if forced:
+            reason = (
+                "独立 3ds Max Batch 在业务结果生成后触发了强制结束，"
+                "不能把该业务结果视为真实完成。"
+            )
+        elif not observed:
+            reason = "没有观察到独立 3ds Max Batch 完全退出。"
+        else:
+            reason = (
+                "独立 3ds Max Batch 未以退出代码 0 完成"
+                f"（实际退出代码 {code}）。"
+            )
+        reasons.append(("process", reason))
+
+    checked = result.get("native_max_log_checked")
+    gc_count = result.get("native_max_log_gc_error_count")
+    if (
+        result.get("native_max_log_failure") is True
+        and type(checked) is bool
+        and type(gc_count) is int
+        and gc_count >= 0
+        and type(result.get("business_result_ok")) is bool
+    ):
+        if checked and gc_count > 0:
+            reason = (
+                "独立 3ds Max 子进程完全退出后，在本次新增的原生日志中发现 "
+                f"{gc_count} 条 MAXScript 内存收集错误。"
+            )
+            reasons.append(("native", reason))
+        elif not checked and result.get("business_result_ok") is True:
+            reason = (
+                "无法核验本次独立 3ds Max 子进程的原生日志，"
+                "不能确认没有 MAXScript 内存收集错误。"
+            )
+            reasons.append(("native", reason))
+
+    def render(value: str, remaining: set) -> str:
+        for kind, reason in reasons:
+            if kind not in remaining:
+                continue
+            verdict = "自检失败：" + reason
+            prefix = verdict + "\n原业务检查摘要："
+            if value.startswith(prefix):
+                return (
+                    _display_text("自检失败：")
+                    + _display_text(reason)
+                    + "\n"
+                    + _display_text("原业务检查摘要：")
+                    + render(value[len(prefix):], remaining - {kind})
+                )
+            if value == verdict:
+                return _display_text("自检失败：") + _display_text(reason)
+        return _localize_visible_text(value)
+
+    return render(summary, {kind for kind, _reason in reasons})
+
+
 class _AsyncSelfCheckController:
     """Own one isolated Batch process while the interactive Max UI stays live."""
 
@@ -2611,29 +2768,29 @@ class _AsyncSelfCheckController:
     def _create_dialog(self) -> Any:
         parent = self.qtmax.GetQMaxMainWindow()
         dialog = self.QtWidgets.QDialog(parent)
-        dialog.setWindowTitle("FBXTo3dsMax 插件自检")
+        dialog.setWindowTitle(_display_text("FBXTo3dsMax 插件自检"))
         dialog.setModal(False)
         dialog.setMinimumWidth(520)
 
         layout = self.QtWidgets.QVBoxLayout(dialog)
-        self.state_label = self.QtWidgets.QLabel("正在准备独立的 3ds Max 自检进程……", dialog)
+        self.state_label = self.QtWidgets.QLabel(_display_text("正在准备独立的 3ds Max 自检进程……"), dialog)
         self.state_label.setWordWrap(True)
         layout.addWidget(self.state_label)
 
         self.progress_bar = self.QtWidgets.QProgressBar(dialog)
         self.progress_bar.setRange(0, 6)
         self.progress_bar.setValue(0)
-        self.progress_bar.setFormat("已完成 %v / %m 项")
+        self.progress_bar.setFormat(_display_text("已完成 %v / %m 项"))
         layout.addWidget(self.progress_bar)
 
         self.detail_label = self.QtWidgets.QLabel(
-            "自检在独立进程中运行，不会重置或修改当前打开的场景。",
+            _display_text("自检在独立进程中运行，不会重置或修改当前打开的场景。"),
             dialog,
         )
         self.detail_label.setWordWrap(True)
         layout.addWidget(self.detail_label)
 
-        self.action_button = self.QtWidgets.QPushButton("取消自检", dialog)
+        self.action_button = self.QtWidgets.QPushButton(_display_text("取消自检"), dialog)
         self.action_button.clicked.connect(self._on_action)
         layout.addWidget(self.action_button)
         dialog.rejected.connect(self._on_dialog_rejected)
@@ -2642,6 +2799,7 @@ class _AsyncSelfCheckController:
     def start(self) -> Dict[str, Any]:
         env = os.environ.copy()
         env[CHILD_ENV] = "1"
+        env["F2M_LANGUAGE"] = _language_runtime().get_language()
         env[RESULT_ENV] = self.paths["result"]
         env[PROGRESS_ENV] = self.paths["progress"]
         env[CANCEL_ENV] = self.paths["cancel"]
@@ -2731,9 +2889,9 @@ class _AsyncSelfCheckController:
         except Exception:
             pass
         self.state_label.setText(
-            "自检超时，正在终止独立进程……"
+            _display_text("自检超时，正在终止独立进程……"
             if self.timed_out
-            else "正在取消自检并清理独立进程……"
+            else "正在取消自检并清理独立进程……")
         )
         self.action_button.setEnabled(False)
         try:
@@ -2758,12 +2916,12 @@ class _AsyncSelfCheckController:
         self.progress_bar.setRange(0, total)
         self.progress_bar.setValue(min(completed, total))
         self.state_label.setText(
-            f"正在自检 {min(completed + 1, total)} / {total}：{current_name}"
+            _display_text(f"正在自检 {min(completed + 1, total)} / {total}：{current_name}")
         )
         detail = _localize_visible_text(progress.get("last_detail", ""))
         self.detail_label.setText(
-            f"已用时：{elapsed} 秒。"
-            + (f"\n上一项结果：{detail}" if detail else "")
+            _display_text(f"已用时：{elapsed} 秒。"
+            + (f"\n上一项结果：{detail}" if detail else ""))
         )
 
     def _poll(self) -> None:
@@ -2796,7 +2954,7 @@ class _AsyncSelfCheckController:
                 if return_code is None:
                     try:
                         self.state_label.setText(
-                            "自检结果已生成，正在等待独立进程自然退出……"
+                            _display_text("自检结果已生成，正在等待独立进程自然退出……")
                         )
                     except Exception:
                         pass
@@ -2930,7 +3088,7 @@ class _AsyncSelfCheckController:
         self.result = dict(result)
         self.timer.stop()
         ok = bool(result.get("ok", False))
-        summary = _localize_visible_text(result.get("summary", "自检结束。"))
+        summary = _display_selfcheck_summary(result)
         report_path = str(result.get("report_path", ""))
         diagnostic_report_path = str(result.get("diagnostic_report_path", ""))
         diagnostic_path = str(result.get("diagnostic_output", ""))
@@ -2968,8 +3126,8 @@ class _AsyncSelfCheckController:
                 )
         if not details:
             details.append("本次自检没有生成正式报告。")
-        self.detail_label.setText("\n\n".join(details))
-        self.action_button.setText("关闭")
+        self.detail_label.setText(_display_text("\n\n".join(details)))
+        self.action_button.setText(_display_text("关闭"))
         self.action_button.setEnabled(True)
         self.dialog.show()
         self.dialog.raise_()

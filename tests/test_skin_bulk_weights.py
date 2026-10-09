@@ -14,7 +14,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def load_module(name: str):
-    path = ROOT / "f2m_skin_replace.py"
+    path = ROOT / "contents" / "f2m_skin_replace.py"
     spec = importlib.util.spec_from_file_location(name, str(path))
     if spec is None or spec.loader is None:
         raise RuntimeError(f"无法加载 {path}")

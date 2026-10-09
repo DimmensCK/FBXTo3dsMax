@@ -9,8 +9,8 @@ import unittest
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-TOPOLOGY_PATH = ROOT / "f2m_topology_transfer.py"
-SKIN_PATH = ROOT / "f2m_skin_replace.py"
+TOPOLOGY_PATH = ROOT / "contents" / "f2m_topology_transfer.py"
+SKIN_PATH = ROOT / "contents" / "f2m_skin_replace.py"
 
 
 def _maxscript_function_source(source: str, name: str) -> str:

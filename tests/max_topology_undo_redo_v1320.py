@@ -27,8 +27,9 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 FIXTURE = os.path.join(ROOT, "tests", "fixtures", "topology_source.fbx")
-MODULE_PATH = os.path.join(ROOT, "f2m_topology_transfer.py")
+MODULE_PATH = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")
 DEFAULT_RESULT = os.path.join(
     ROOT,
     "tests",
@@ -58,7 +59,7 @@ else:
     RESULT_CONFIGURATION_ERROR = (
         "Refused unsafe gate result path: " + _requested_result
     )
-VERSION = "1.3.20"
+VERSION = "1.4.24"
 FINAL_NORMAL_MODIFIER = "F2M_顶点法线"
 MODULE_NAME = "_f2m_topology_undo_redo_v1320"
 SG_REPORT_MARKER = "光滑组完成：已写入并回读验证"

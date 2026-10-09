@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
+  <title id="title">FBXTo3dsMax</title>
+  <desc id="desc">Readable source tools for bringing FBX geometry and data into an existing 3ds Max scene.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" x2="1"><stop stop-color="#101c2e"/><stop offset="1" stop-color="#172d41"/></linearGradient>
+    <linearGradient id="accent" x1="0" x2="1"><stop stop-color="#64e1ce"/><stop offset="1" stop-color="#87b8ff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="240" rx="20" fill="url(#background)"/>
+  <g fill="none" stroke="#64e1ce" stroke-width="2" opacity=".7">
+    <path d="M78 66 130 42 183 66 183 126 130 154 78 126Z M78 66 130 94 183 66 M130 94V154 M130 42V94 M78 126 130 94 183 126"/>
+    <circle cx="130" cy="94" r="5" fill="#64e1ce"/>
+  </g>
+  <path d="M219 98H279M265 84 280 98 265 112" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="323" y="108" fill="#f4f8ff" font-size="53" font-family="Segoe UI,Arial,sans-serif" font-weight="700">FBXTo3dsMax</text>
+  <text x="325" y="151" fill="#bad0e3" font-size="23" font-family="Segoe UI,Arial,sans-serif">Your mesh. Your scene. Readable source.</text>
+  <text x="79" y="201" fill="#88a6bd" font-size="17" font-family="Segoe UI,Arial,sans-serif">Dimmens</text>
+  <rect x="961" y="172" width="173" height="32" rx="16" fill="#233e52"/>
+  <text x="1047" y="194" fill="#b2efe3" font-size="15" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">MIT · OPEN SOURCE</text>
+</svg>

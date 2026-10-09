@@ -10,7 +10,7 @@ $ErrorActionPreference = 'Stop'
 $testsRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $projectRoot = [IO.Path]::GetFullPath((Split-Path -Parent $testsRoot))
 $scriptPath = if ([string]::IsNullOrWhiteSpace($SelfCheckScript)) {
-    Join-Path $projectRoot 'f2m_selfcheck.py'
+    Join-Path $projectRoot 'contents\f2m_selfcheck.py'
 }
 else {
     [IO.Path]::GetFullPath($SelfCheckScript)

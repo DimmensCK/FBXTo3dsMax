@@ -2,7 +2,9 @@
 <#
 Run the source regression suite in a dedicated 3ds Max Batch process.
 The current interactive scene and installed package are never used as targets.
-All artifacts are retained under LOCALAPPDATA, including failed runs.
+All artifacts are retained under LOCALAPPDATA, including failed runs. This
+source runner inherits normal Max user configuration; it does not isolate a
+user profile or validate the installed package's native directory routing.
 #>
 [CmdletBinding()]
 param(
@@ -65,14 +67,48 @@ function Get-ByteHash([byte[]]$Bytes) {
     return [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($Bytes))
 }
 
+function Assert-FullLogPrefix([byte[]]$Before, [byte[]]$After) {
+    if ($Before.Length -gt 32MB -or $After.Length -gt 32MB) {
+        throw 'Max.log snapshot exceeds the 32 MB reader limit.'
+    }
+    if ($After.Length -lt $Before.Length) {
+        throw 'Max.log was truncated; the complete original prefix is unavailable.'
+    }
+    $prefix = [byte[]]::new($Before.Length)
+    [Array]::Copy($After, 0, $prefix, 0, $Before.Length)
+    if ((Get-ByteHash $prefix) -cne (Get-ByteHash $Before)) {
+        throw 'Max.log original prefix changed; refusing reset/replacement fallback.'
+    }
+    return $true
+}
+
+function Write-NewArtifactBytes([string]$Path, [byte[]]$Bytes) {
+    $stream = [IO.File]::Open($Path, [IO.FileMode]::CreateNew,
+        [IO.FileAccess]::Write, [IO.FileShare]::Read)
+    try { $stream.Write($Bytes, 0, $Bytes.Length) }
+    finally { $stream.Dispose() }
+}
+
 function Get-SourceHashes {
     $hashes = [ordered]@{}
-    foreach ($relative in @(
-        'f2m_topology_transfer.py', 'f2m_skin_replace.py', 'f2m_smoothing.py',
-        'f2m_fbx_metadata.py', 'f2m_selfcheck.py', 'f2m_test_fixtures.py', 'FBXTo3dsMax_UI.ms',
-        'Contents\f2m_toolbar.py', 'Contents\FBXTo3dsMax_Bootstrap.ms',
-        'Contents\FBXTo3dsMax.mcr', 'VERSION.txt'
-    )) {
+    $sourceNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($line in [IO.File]::ReadAllLines((Join-Path $projectRoot 'contents\FBXTo3dsMax.files'))) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed -or $trimmed.StartsWith('#')) { continue }
+        $parts = $trimmed.Split('|')
+        if ($parts.Count -ne 2) { throw 'Malformed installation source manifest.' }
+        $relative = $parts[0].Trim()
+        if ([IO.Path]::IsPathRooted($relative) -or $relative.Contains(':') -or
+            @($relative -split '[\\/]' | Where-Object { -not $_ -or $_ -in '.', '..' }).Count) {
+            throw 'Unsafe installation source path.'
+        }
+        [void]$sourceNames.Add($relative)
+    }
+    foreach ($relative in @('Install_FBXTo3dsMax.ms', 'Uninstall_FBXTo3dsMax.ms',
+        'tools\run_selfcheck.ps1', 'tools\Install_FBXTo3dsMax.ps1')) {
+        [void]$sourceNames.Add($relative)
+    }
+    foreach ($relative in @($sourceNames | Sort-Object)) {
         $path = Join-Path $projectRoot $relative
         $hashes[$relative] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
     }
@@ -160,9 +196,9 @@ if ([IO.Path]::GetFileName($MaxBatchExecutable) -ine '3dsmaxbatch.exe') {
 }
 $maxRoot = [IO.Path]::GetDirectoryName($MaxBatchExecutable)
 $projectRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
-$scriptPath = Join-Path $projectRoot 'f2m_selfcheck.py'
+$scriptPath = Join-Path $projectRoot 'contents\f2m_selfcheck.py'
 if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath (Join-Path $projectRoot 'Contents\FBXTo3dsMax.files') -PathType Leaf)) {
+    -not (Test-Path -LiteralPath (Join-Path $projectRoot 'contents\FBXTo3dsMax.files') -PathType Leaf)) {
     throw 'Cannot locate the source project from this launcher.'
 }
 if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
@@ -177,6 +213,7 @@ $artifactRoot = Join-Path $env:LOCALAPPDATA 'FBXTo3dsMax\Validation'
 $runDirectory = Join-Path $artifactRoot (
     'selfcheck_' + [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmss') + '_' + $runId
 )
+if (Test-Path -LiteralPath $runDirectory) { throw 'Validation run directory collision.' }
 [void][IO.Directory]::CreateDirectory($runDirectory)
 $resultPath = Join-Path $runDirectory 'result.json'
 $progressPath = Join-Path $runDirectory 'progress.json'
@@ -185,11 +222,18 @@ $listenerPath = Join-Path $runDirectory 'listener.log'
 $metaPath = Join-Path $runDirectory 'validation.json'
 $beforeHashes = Get-SourceHashes
 $logCheckpoints = @{}
+$maxLogEvidence = [Collections.Generic.List[object]]::new()
+$fullPrefixVerified = $false
+$logIndex = 0
 foreach ($path in @(Get-MaxLogPaths)) {
     $length = (Get-Item -LiteralPath $path).Length
-    $tailStart = [Math]::Max(0, $length - 256)
-    $tail = Read-LogBytes $path $tailStart ([int]($length - $tailStart))
-    $logCheckpoints[$path] = @{ length = $length; tail_start = $tailStart; tail_hash = Get-ByteHash $tail }
+    if ($length -gt 32MB) { throw "Pre-launch Max.log exceeds the bounded reader: $path" }
+    $bytes = Read-LogBytes $path 0 ([int]$length)
+    $beforePath = Join-Path $runDirectory ('native_' + $logIndex + '.before.bin')
+    Write-NewArtifactBytes $beforePath $bytes
+    $logCheckpoints[$path] = @{ length = $length; bytes = $bytes;
+        sha256 = Get-ByteHash $bytes; before_path = $beforePath; index = $logIndex }
+    $logIndex += 1
 }
 
 $owned = @{}
@@ -277,21 +321,55 @@ try {
         [int]$progress['completed'] -eq 6 -and [int]$progress['total'] -eq 6
     )
     $finishedAtUtc = [DateTime]::UtcNow
+    $verifiedLogPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     $structuredPattern = '^\s*(?<stamp>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})\s+\S+:\s+\[0*' +
         [regex]::Escape([string]$enginePid) + '\]\s+\[[^\]]+\]\s+'
     foreach ($path in @(Get-MaxLogPaths)) {
         $length = (Get-Item -LiteralPath $path).Length
-        $offset = 0L
+        if ($length -gt 32MB) { throw "Post-launch Max.log exceeds the bounded reader: $path" }
         if ($logCheckpoints.ContainsKey($path)) {
             $checkpoint = $logCheckpoints[$path]
-            if ($length -ge $checkpoint.length) {
-                $tail = Read-LogBytes $path $checkpoint.tail_start ([int]($checkpoint.length - $checkpoint.tail_start))
-                if ((Get-ByteHash $tail) -eq $checkpoint.tail_hash) { $offset = $checkpoint.length }
-            }
         }
+        else {
+            # A log first created by this launch has an explicitly empty before
+            # snapshot. This is distinct from accepting a changed old prefix.
+            $beforePath = Join-Path $runDirectory ('native_' + $logIndex + '.before.bin')
+            $empty = [byte[]]::new(0)
+            Write-NewArtifactBytes $beforePath $empty
+            $checkpoint = @{ length = 0L; bytes = $empty; sha256 = Get-ByteHash $empty;
+                before_path = $beforePath; index = $logIndex }
+            $logIndex += 1
+        }
+        $rawPath = Join-Path $runDirectory ('native_' + $checkpoint.index + '.raw.bin')
+        $deltaPath = Join-Path $runDirectory ('native_' + $checkpoint.index + '.delta.bin')
+        $raw = Read-LogBytes $path 0 ([int]$length)
+        Write-NewArtifactBytes $rawPath $raw
+        $evidence = [ordered]@{ source = $path; existed_before = $logCheckpoints.ContainsKey($path);
+            before_path = $checkpoint.before_path; before_bytes = $checkpoint.length;
+            before_sha256 = $checkpoint.sha256; raw_path = $rawPath; raw_bytes = $length;
+            raw_sha256 = Get-ByteHash $raw; full_prefix_verified = $false;
+            delta_path = ''; delta_bytes = $null; delta_sha256 = ''; matched_engine_pid = $false }
+        $maxLogEvidence.Add($evidence)
+        if ((Get-FileHash -LiteralPath $checkpoint.before_path -Algorithm SHA256).Hash -cne $checkpoint.sha256) {
+            throw 'Saved pre-launch Max.log snapshot changed.'
+        }
+        if ((Get-FileHash -LiteralPath $rawPath -Algorithm SHA256).Hash -cne $evidence.raw_sha256) {
+            throw 'Saved complete Max.log snapshot differs from the captured bytes.'
+        }
+        [void](Assert-FullLogPrefix $checkpoint.bytes $raw)
+        $evidence.full_prefix_verified = $true
+        [void]$verifiedLogPaths.Add($path)
+        $offset = [long]$checkpoint.length
         $count = $length - $offset
-        if ($count -gt 32MB) { throw "Max.log delta exceeds the bounded reader: $path" }
-        $bytes = Read-LogBytes $path $offset ([int]$count)
+        $bytes = [byte[]]::new([int]$count)
+        [Array]::Copy($raw, [int]$offset, $bytes, 0, [int]$count)
+        Write-NewArtifactBytes $deltaPath $bytes
+        $evidence.delta_path = $deltaPath
+        $evidence.delta_bytes = $count
+        $evidence.delta_sha256 = Get-ByteHash $bytes
+        if ((Get-FileHash -LiteralPath $deltaPath -Algorithm SHA256).Hash -cne $evidence.delta_sha256) {
+            throw 'Saved appended Max.log delta differs from the captured bytes.'
+        }
         $utf8 = [Text.UTF8Encoding]::new($false, $true)
         try { $logText = $utf8.GetString($bytes) }
         catch { $logText = [Text.Encoding]::GetEncoding('gb18030').GetString($bytes) }
@@ -305,8 +383,15 @@ try {
             $pidLines.Add($line)
             $matched = $true
         }
-        if ($matched) { $logSources.Add($path) }
+        if ($matched) { $logSources.Add($path); $evidence.matched_engine_pid = $true }
     }
+    foreach ($path in $logCheckpoints.Keys) {
+        if (-not $verifiedLogPaths.Contains($path)) {
+            throw "A pre-launch Max.log disappeared or was not fully verified: $path"
+        }
+    }
+    $fullPrefixVerified = $maxLogEvidence.Count -gt 0 -and
+        @($maxLogEvidence | Where-Object { $_.full_prefix_verified -ne $true }).Count -eq 0
     $pidLines.ToArray() | Set-Content -LiteralPath (Join-Path $runDirectory 'engine.Max.log') -Encoding UTF8
     $severePattern = 'MAXScript 内存收集错误|MAXScript Garbage Collection Error|' +
         'Unknown system exception|Exception in MAXScript Garbage Collector|Access violation|' +
@@ -319,6 +404,7 @@ try {
     if ($exitCode -ne 0) { throw "Batch exited with code $exitCode." }
     if (-not $businessPassed) { throw 'Self-check business assertions did not pass 6/6.' }
     if ($pidLines.Count -eq 0) { throw "No fresh structured Max.log evidence for engine PID $enginePid." }
+    if (-not $fullPrefixVerified) { throw 'Complete native-log prefix verification did not pass.' }
     if ($nativeErrors.Count -ne 0) { throw "Engine PID $enginePid emitted $($nativeErrors.Count) native severe errors." }
     if (-not $sourceUnchanged) { throw 'Production source hashes changed during validation.' }
     $remaining = @(Get-MaxProcesses | Where-Object { $owned.ContainsKey([int]$_.ProcessId) })
@@ -342,7 +428,7 @@ finally {
         }
     }
     $meta = [ordered]@{
-        schema_version = 1
+        schema_version = 2
         run_id = $runId
         ok = [string]::IsNullOrEmpty($failure)
         source_script = $scriptPath
@@ -357,6 +443,9 @@ finally {
         source_hashes_unchanged = $sourceUnchanged
         source_sha256 = $beforeHashes
         max_log_sources = $logSources.ToArray()
+        native_full_prefix_verified = $fullPrefixVerified
+        max_log_evidence = $maxLogEvidence.ToArray()
+        configuration_scope = 'normal user configuration; dedicated scene/process, no profile isolation'
         pid_log_line_count = $pidLines.Count
         native_severe_error_count = $nativeErrors.Count
         native_severe_error_lines = @($nativeErrors | Select-Object -First 20)

@@ -9,8 +9,8 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIN_PATH = ROOT / "f2m_skin_replace.py"
-TOPOLOGY_PATH = ROOT / "f2m_topology_transfer.py"
+SKIN_PATH = ROOT / "contents" / "f2m_skin_replace.py"
+TOPOLOGY_PATH = ROOT / "contents" / "f2m_topology_transfer.py"
 
 
 def load_module(path: Path, name: str):

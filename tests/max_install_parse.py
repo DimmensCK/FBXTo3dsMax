@@ -17,8 +17,8 @@ RESULT = os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "
 SCRIPT_FILES = (
     "Install_FBXTo3dsMax.ms",
     "Uninstall_FBXTo3dsMax.ms",
-    os.path.join("Contents", "FBXTo3dsMax_Bootstrap.ms"),
-    os.path.join("Contents", "FBXTo3dsMax.mcr"),
+    os.path.join("contents", "FBXTo3dsMax_Bootstrap.ms"),
+    os.path.join("contents", "FBXTo3dsMax.mcr"),
     os.path.join("tests", "max_install_v1319_harness.ms"),
 )
 

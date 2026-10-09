@@ -36,6 +36,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 GATE_PATH = os.path.abspath(__file__)
 RESULT_PATH = os.path.join(
     ROOT,
@@ -46,7 +47,7 @@ RESULT_PATH = os.path.join(
 WORLD_TOLERANCE = 0.001
 MATRIX_TOLERANCE = 1.0e-6
 INITIAL_DIFFERENCE_MINIMUM = 0.25
-EXPECTED_VERSION = "1.3.24"
+EXPECTED_VERSION = "1.4.24"
 
 TRANSFORMS = (
     (
@@ -80,7 +81,7 @@ def sha256_file(path: str) -> str:
 
 
 def load_module(filename: str, module_name: str) -> Any:
-    path = os.path.join(ROOT, filename)
+    path = os.path.join(RUNTIME_ROOT, filename)
     sys.modules.pop(module_name, None)
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
@@ -631,7 +632,7 @@ payload: dict[str, Any] = {
         "run_id": os.urandom(16).hex(),
         "expected_version": EXPECTED_VERSION,
     },
-            "test": "Mode-1 matching TRS core point transfer v1.3.24 gate",
+            "test": "Mode-1 matching TRS core point transfer v1.4.24 gate",
     "scope": (
         "generated Editable Poly/Mesh only; direct production helper; "
         "no FBX, Skin, normals, mapping channels, or user assets"

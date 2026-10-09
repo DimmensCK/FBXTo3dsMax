@@ -15,7 +15,7 @@ from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "f2m_selfcheck.py"
+MODULE_PATH = ROOT / "contents" / "f2m_selfcheck.py"
 
 
 def load_selfcheck():
@@ -173,7 +173,7 @@ class NativeMaxLogGateTests(unittest.TestCase):
             }
             report_path = os.path.join(folder, "自检报告.txt")
             pathlib.Path(report_path).write_text(
-                "FBXTo3dsMax v1.3.20 自检通过：6/6 项通过。\n",
+                "FBXTo3dsMax v1.4.24 自检通过：6/6 项通过。\n",
                 encoding="utf-8",
             )
             log_path = os.path.join(folder, "Max.log")
@@ -263,7 +263,7 @@ class NativeMaxLogGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             report_path = os.path.join(folder, "自检报告.txt")
             pathlib.Path(report_path).write_text(
-                "FBXTo3dsMax v1.3.20 自检通过：6/6 项通过。\n",
+                "FBXTo3dsMax v1.4.24 自检通过：6/6 项通过。\n",
                 encoding="utf-8",
             )
             controller.completed_result["report_path"] = report_path
@@ -302,7 +302,7 @@ class NativeMaxLogGateTests(unittest.TestCase):
         )
         self.assertTrue(controller._finish.call_args.kwargs["keep_output"])
         self.assertTrue(rewritten_report.startswith("【父控制器进程退出门禁】"))
-        self.assertIn("FBXTo3dsMax v1.3.20 自检通过", rewritten_report)
+        self.assertIn("FBXTo3dsMax v1.4.24 自检通过", rewritten_report)
 
     def test_unreadable_native_log_cannot_leave_green_result(self) -> None:
         with tempfile.TemporaryDirectory() as folder:

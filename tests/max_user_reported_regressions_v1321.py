@@ -21,6 +21,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 GATE_PATH = os.path.abspath(__file__)
 
 
@@ -50,7 +51,7 @@ TEMP_DIR = os.path.join(os.environ["LOCALAPPDATA"], "FBXTo3dsMax", "Tests")
 TEMP_MAX = os.path.join(TEMP_DIR, f"mode2_003_{uuid.uuid4().hex}.max")
 POSITION_TOLERANCE = 0.001
 BOOLEAN_IMPORTER_PARAMS = {"Animation", "Skin", "SmoothingGroups"}
-EXPECTED_VERSION = "1.3.24"
+EXPECTED_VERSION = "1.4.24"
 
 
 def sha256_file(path: str) -> str:
@@ -62,7 +63,7 @@ def sha256_file(path: str) -> str:
 
 
 def load_module(filename: str, module_name: str) -> Any:
-    path = os.path.join(ROOT, filename)
+    path = os.path.join(RUNTIME_ROOT, filename)
     sys.modules.pop(module_name, None)
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:

@@ -19,6 +19,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 FIXTURE = os.path.join(ROOT, "tests", "fixtures", "skin_source.fbx")
 RESULT = os.path.join(
     ROOT,
@@ -36,7 +37,7 @@ def sha256_file(path: str) -> str:
 
 
 def load_skin_module() -> Any:
-    path = os.path.join(ROOT, "f2m_skin_replace.py")
+    path = os.path.join(RUNTIME_ROOT, "f2m_skin_replace.py")
     name = "_f2m_mode2_target_authority_v1320"
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
@@ -55,7 +56,7 @@ def load_skin_module() -> Any:
 
 payload = {
     "ok": False,
-        "version": "1.3.24",
+        "version": "1.4.24",
     "run_token": uuid.uuid4().hex,
     "engine_pid": os.getpid(),
     "started_at_utc_epoch": time.time(),

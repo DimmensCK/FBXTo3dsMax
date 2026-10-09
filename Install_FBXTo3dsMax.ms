@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.3.24 事务式拖放安装器。
+FBXTo3dsMax v1.4.24 事务式拖放安装器。
 
 源文件夹不会作为运行目录。安装器先完整暂存插件包、核对哈希，再以目录
 切换方式放入当前用户的 ApplicationPlugins；旧版插件包和已确认归属的
@@ -19,7 +19,7 @@ F2M_Installer_FinalDialogTitle = ""
 F2M_Installer_FinalDialogText = ""
 
 (
-    local installerVersion = "1.3.24"
+    local installerVersion = "1.4.24"
     local installerPath = getSourceFileName()
     local fileClass = dotNetClass "System.IO.File"
     local directoryClass = dotNetClass "System.IO.Directory"
@@ -52,6 +52,31 @@ F2M_Installer_FinalDialogText = ""
     local packageMutationLock = undefined
     local finalDialogTitle = ""
     local finalDialogText = ""
+
+    -- Display preference only; no license or 3ds Max configuration is changed.
+    local displayEnglish = false
+    try
+    (
+        local displayEnvironment = dotNetClass "System.Environment"
+        local selectedLanguage = displayEnvironment.GetEnvironmentVariable "F2M_LANGUAGE"
+        if selectedLanguage != "en" and selectedLanguage != "zh-CN" do
+        (
+            local localData = displayEnvironment.GetEnvironmentVariable "LOCALAPPDATA"
+            if localData != undefined and localData != "" do
+            (
+                local preferencePath = pathClass.Combine localData "FBXTo3dsMax\\language.txt"
+                if fileClass.Exists preferencePath do
+                    selectedLanguage = trimRight (trimLeft (fileClass.ReadAllText preferencePath))
+            )
+        )
+        displayEnglish = selectedLanguage == "en"
+    )
+    catch (displayEnglish = false)
+    fn localized chineseText englishText =
+    (
+        if displayEnglish then englishText else chineseText
+    )
+
 
     -- PowerShell 备用启动器以 -silent 抑制欢迎页和安全消息，避免它们在
     -- 安装时禁用 Max 主窗口。命令行脚本会在 Max 完成启动后执行；到这里
@@ -332,9 +357,9 @@ F2M_Installer_FinalDialogText = ""
             local originalHash = record[4]
             local extension = toLower (pathClass.GetExtension originalPath)
             local oldTemplate = if extension == ".mcr" then
-                (joinPath packageRoot "Contents\\FBXTo3dsMax.mcr")
+                (joinPath packageRoot "contents\\FBXTo3dsMax.mcr")
             else
-                (joinPath packageRoot "Contents\\icons\\FBXTo3dsMax.svg")
+                (joinPath packageRoot "contents\\icons\\FBXTo3dsMax.svg")
 
             if not existedBefore then
             (
@@ -528,7 +553,7 @@ F2M_Installer_FinalDialogText = ""
         try
         (
             python.Execute "import __main__, os, sys\n_f2m_pre_main = vars(__main__)\n_f2m_pre_b2m = _f2m_pre_main.get('b2m')\nif getattr(_f2m_pre_b2m, '__name__', None) in ('b2m_topology_transfer', 'b2m_skin_replace') and getattr(_f2m_pre_b2m, '__file__', None):\n    _f2m_pre_dir = os.path.normcase(os.path.abspath(os.path.dirname(_f2m_pre_b2m.__file__)))\n    sys.path[:] = [_f2m_pre_path for _f2m_pre_path in sys.path if not _f2m_pre_path or os.path.normcase(os.path.abspath(_f2m_pre_path)) != _f2m_pre_dir]\n    if isinstance(_f2m_pre_main.get('tool_dir'), str) and os.path.normcase(os.path.abspath(_f2m_pre_main['tool_dir'])) == _f2m_pre_dir:\n        _f2m_pre_main.pop('tool_dir', None)\n    _f2m_pre_main.pop('b2m', None)\nfor _f2m_pre_name in ('_f2m_pre_main', '_f2m_pre_b2m', '_f2m_pre_dir', '_f2m_pre_path', '_f2m_pre_name'):\n    globals().pop(_f2m_pre_name, None)\n" throwOnError:true clearUndoBuffer:false
-            python.Execute "import __main__, builtins, os, sys\n_f2m_api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\nif _f2m_api:\n    _f2m_api.get('uninstall', lambda: 0)()\nif hasattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API'):\n    delattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API')\n_f2m_old_names = ('b2m_topology_transfer', 'b2m_skin_replace')\n_f2m_old_dirs = {os.path.normcase(os.path.abspath(os.path.dirname(getattr(sys.modules.get(_f2m_name), '__file__', '') or ''))) for _f2m_name in _f2m_old_names if getattr(sys.modules.get(_f2m_name), '__file__', None)}\n_f2m_known_modules = _f2m_old_names + ('f2m_topology_transfer', 'f2m_skin_replace', 'f2m_smoothing', 'f2m_fbx_metadata', 'f2m_selfcheck', 'f2m_test_fixtures', '_f2m_sc_fixture_integrity', '_f2m_sc_fixture_algorithm', '_f2m_sc_fixture_topology', '_fbx_to_3dsmax_toolbar_runtime', '_fbx_to_3dsmax_topology_runtime', '_fbx_to_3dsmax_skin_runtime', '_fbx_to_3dsmax_selfcheck_runtime', '_f2m_smoothing_runtime', '_f2m_fbx_metadata_runtime', '_f2m_sc_topology_integrity', '_f2m_sc_skin_integrity', '_f2m_sc_smoothing_integrity', '_f2m_sc_fbx_metadata_integrity', '_f2m_sc_smoothing_runtime', '_f2m_sc_fbx_metadata_runtime', '_f2m_sc_topology_procedural', '_f2m_sc_topology_fbx', '_f2m_sc_skin_fbx')\nfor _f2m_name in _f2m_known_modules:\n    sys.modules.pop(_f2m_name, None)\nif _f2m_old_dirs:\n    sys.path[:] = [_f2m_path for _f2m_path in sys.path if not _f2m_path or os.path.normcase(os.path.abspath(_f2m_path)) not in _f2m_old_dirs]\n_f2m_main = vars(__main__)\n_f2m_b2m = _f2m_main.get('b2m')\nif getattr(_f2m_b2m, '__name__', None) in _f2m_old_names:\n    _f2m_main.pop('b2m', None)\n_f2m_tool_dir = _f2m_main.get('tool_dir')\nif isinstance(_f2m_tool_dir, str) and _f2m_old_dirs and os.path.normcase(os.path.abspath(_f2m_tool_dir)) in _f2m_old_dirs:\n    _f2m_main.pop('tool_dir', None)\nfor _f2m_name in ('_f2m_module_path', '_f2m_module_name', '_f2m_spec', '_f2m_module', '__f2m_run_ok', '_f2m_sc_path', '_f2m_sc_name', '_f2m_sc_spec', '_f2m_sc', '_f2m_sc_result', '__f2m_sc_ok', '__f2m_sc_text', '__f2m_sc_report'):\n    _f2m_main.pop(_f2m_name, None)\nfor _f2m_cleanup_name in ('_f2m_api', '_f2m_old_names', '_f2m_old_dirs', '_f2m_known_modules', '_f2m_main', '_f2m_b2m', '_f2m_tool_dir', '_f2m_name', '_f2m_path', '_f2m_cleanup_name'):\n    globals().pop(_f2m_cleanup_name, None)\n" throwOnError:true clearUndoBuffer:false
+            python.Execute "import __main__, builtins, os, sys\n_f2m_api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\nif _f2m_api:\n    _f2m_api.get('uninstall', lambda: 0)()\nif hasattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API'):\n    delattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API')\n_f2m_old_names = ('b2m_topology_transfer', 'b2m_skin_replace')\n_f2m_old_dirs = {os.path.normcase(os.path.abspath(os.path.dirname(getattr(sys.modules.get(_f2m_name), '__file__', '') or ''))) for _f2m_name in _f2m_old_names if getattr(sys.modules.get(_f2m_name), '__file__', None)}\n_f2m_known_modules = _f2m_old_names + ('f2m_i18n', 'f2m_report_i18n', '_fbx_to_3dsmax_i18n_runtime', '_f2m_report_i18n_runtime', 'f2m_topology_transfer', 'f2m_skin_replace', 'f2m_smoothing', 'f2m_fbx_metadata', 'f2m_selfcheck', 'f2m_test_fixtures', '_f2m_sc_fixture_integrity', '_f2m_sc_fixture_algorithm', '_f2m_sc_fixture_topology', '_fbx_to_3dsmax_toolbar_runtime', '_fbx_to_3dsmax_topology_runtime', '_fbx_to_3dsmax_skin_runtime', '_fbx_to_3dsmax_selfcheck_runtime', '_f2m_smoothing_runtime', '_f2m_fbx_metadata_runtime', '_f2m_sc_topology_integrity', '_f2m_sc_skin_integrity', '_f2m_sc_smoothing_integrity', '_f2m_sc_fbx_metadata_integrity', '_f2m_sc_smoothing_runtime', '_f2m_sc_fbx_metadata_runtime', '_f2m_sc_topology_procedural', '_f2m_sc_topology_fbx', '_f2m_sc_skin_fbx')\nfor _f2m_name in _f2m_known_modules:\n    sys.modules.pop(_f2m_name, None)\nif _f2m_old_dirs:\n    sys.path[:] = [_f2m_path for _f2m_path in sys.path if not _f2m_path or os.path.normcase(os.path.abspath(_f2m_path)) not in _f2m_old_dirs]\n_f2m_main = vars(__main__)\n_f2m_b2m = _f2m_main.get('b2m')\nif getattr(_f2m_b2m, '__name__', None) in _f2m_old_names:\n    _f2m_main.pop('b2m', None)\n_f2m_tool_dir = _f2m_main.get('tool_dir')\nif isinstance(_f2m_tool_dir, str) and _f2m_old_dirs and os.path.normcase(os.path.abspath(_f2m_tool_dir)) in _f2m_old_dirs:\n    _f2m_main.pop('tool_dir', None)\nfor _f2m_name in ('_f2m_module_path', '_f2m_module_name', '_f2m_spec', '_f2m_module', '__f2m_run_ok', '_f2m_sc_path', '_f2m_sc_name', '_f2m_sc_spec', '_f2m_sc', '_f2m_sc_result', '__f2m_sc_ok', '__f2m_sc_text', '__f2m_sc_report'):\n    _f2m_main.pop(_f2m_name, None)\nfor _f2m_cleanup_name in ('_f2m_api', '_f2m_old_names', '_f2m_old_dirs', '_f2m_known_modules', '_f2m_main', '_f2m_b2m', '_f2m_tool_dir', '_f2m_name', '_f2m_path', '_f2m_cleanup_name'):\n    globals().pop(_f2m_cleanup_name, None)\n" throwOnError:true clearUndoBuffer:false
             F2M_TopologyHelper = undefined
             F2M_SkinHelper = undefined
             F2M_Helper = undefined
@@ -659,7 +684,7 @@ F2M_Installer_FinalDialogText = ""
         local allOk = true
         try
         (
-            local oldBootstrap = joinPath packageRoot "Contents\\FBXTo3dsMax_Bootstrap.ms"
+            local oldBootstrap = joinPath packageRoot "contents\\FBXTo3dsMax_Bootstrap.ms"
             if not (fileClass.Exists oldBootstrap) do
                 throw ("已恢复插件包缺少启动引导：" + oldBootstrap)
             if (fileIn oldBootstrap quiet:true) != true do
@@ -697,14 +722,14 @@ F2M_Installer_FinalDialogText = ""
     if installerPath == undefined or installerPath == "" then
     (
         F2M_Installer_RunStatus = 0
-        F2M_Installer_FinalDialogTitle = "FBXTo3dsMax - 安装失败"
-        F2M_Installer_FinalDialogText = "请把 Install_FBXTo3dsMax.ms 文件直接拖入 3ds Max 视口。复制脚本文本后运行将无法定位安装文件。"
+        F2M_Installer_FinalDialogTitle = (localized "FBXTo3dsMax - 安装失败" "FBXTo3dsMax - Installation failed")
+        F2M_Installer_FinalDialogText = (localized "请把 Install_FBXTo3dsMax.ms 文件直接拖入 3ds Max 视口。复制脚本文本后运行将无法定位安装文件。" "Drag the complete Install_FBXTo3dsMax.ms file into a 3ds Max viewport. Pasting its text cannot locate the package.")
         messageBox F2M_Installer_FinalDialogText title:F2M_Installer_FinalDialogTitle
     )
     else
     (
         local sourceRoot = pathClass.GetFullPath (getFilenamePath installerPath)
-        local sourceManifest = joinPath sourceRoot "Contents\\FBXTo3dsMax.files"
+        local sourceManifest = joinPath sourceRoot "contents\\FBXTo3dsMax.files"
         local pluginBase = pathClass.GetFullPath (getDir #privateExchangeStoreInstallPath)
         local workRoot = joinPath pluginBase "..\\FBXTo3dsMaxInstaller"
         local token = uniqueToken()
@@ -750,21 +775,23 @@ F2M_Installer_FinalDialogText = ""
             if manifestEntries.count == 0 do throw "源文件清单中没有任何文件。"
             local requiredManifestDestinations = #(
                 "PackageContents.xml",
-                "Contents\\FBXTo3dsMax_Bootstrap.ms",
-                "Contents\\FBXTo3dsMax.files",
-                "Contents\\FBXTo3dsMax.version",
-                "Contents\\FBXTo3dsMax_UI.ms",
-                "Contents\\FBXTo3dsMax.mcr",
-                "Contents\\f2m_toolbar.py",
-                "Contents\\f2m_topology_transfer.py",
-                "Contents\\f2m_skin_replace.py",
-                "Contents\\f2m_smoothing.py",
-                "Contents\\f2m_fbx_metadata.py",
-                "Contents\\f2m_selfcheck.py",
-                "Contents\\f2m_test_fixtures.py",
-                "Contents\\LICENSE",
-                "Contents\\FBXTo3dsMax_详细说明书.md",
-                "Contents\\tests\\max_normals_safety.py"
+                "contents\\FBXTo3dsMax_Bootstrap.ms",
+                "contents\\FBXTo3dsMax.files",
+                "contents\\FBXTo3dsMax.version",
+                "contents\\FBXTo3dsMax_UI.ms",
+                "contents\\FBXTo3dsMax.mcr",
+                "contents\\f2m_toolbar.py",
+                "contents\\f2m_topology_transfer.py",
+                "contents\\f2m_skin_replace.py",
+                "contents\\f2m_smoothing.py",
+                "contents\\f2m_fbx_metadata.py",
+                "contents\\f2m_selfcheck.py",
+                "contents\\f2m_i18n.py",
+                "contents\\f2m_report_i18n.py",
+                "contents\\f2m_test_fixtures.py",
+                "contents\\LICENSE",
+                "contents\\FBXTo3dsMax_详细说明书.md",
+                "contents\\tests\\max_normals_safety.py"
             )
             for requiredDestination in requiredManifestDestinations do
             (
@@ -790,7 +817,7 @@ F2M_Installer_FinalDialogText = ""
                 writeInstallerLog ("已暂存：" + entry[2])
             )
 
-            local installedHashManifest = joinPath stagePackage "Contents\\FBXTo3dsMax.install-manifest.sha256"
+            local installedHashManifest = joinPath stagePackage "contents\\FBXTo3dsMax.install-manifest.sha256"
             local hashManifestText = ""
             for record in hashRecords do
                 hashManifestText += (record[1] + "|" + record[2] + "\r\n")
@@ -798,7 +825,7 @@ F2M_Installer_FinalDialogText = ""
             fileClass.WriteAllText installedHashManifest hashManifestText utf8NoBom
             if not fileClass.Exists installedHashManifest do throw "安装哈希清单读回失败。"
 
-            local stagedVersionPath = joinPath stagePackage "Contents\\FBXTo3dsMax.version"
+            local stagedVersionPath = joinPath stagePackage "contents\\FBXTo3dsMax.version"
             local stagedVersionText = fileClass.ReadAllText stagedVersionPath
             stagedVersionText = substituteString stagedVersionText "\r" ""
             stagedVersionText = substituteString stagedVersionText "\n" ""
@@ -826,7 +853,7 @@ F2M_Installer_FinalDialogText = ""
                     throw ("拒绝替换无法确认归属的插件目录：" + targetPackage)
                 )
 
-                local currentVersionPath = joinPath targetPackage "Contents\\FBXTo3dsMax.version"
+                local currentVersionPath = joinPath targetPackage "contents\\FBXTo3dsMax.version"
                 if not (fileClass.Exists currentVersionPath) do
                 (
                     throw ("拒绝替换缺少版本标记的插件包：" + currentVersionPath)
@@ -850,8 +877,8 @@ F2M_Installer_FinalDialogText = ""
             local deprecatedManagedMacro = joinPath (getDir #userMacros) "FBXTo3dsMax.mcr"
             local managedLightIcon = joinPath (getDir #userIcons) "Light\\FBXTo3dsMax\\FBXTo3dsMax.svg"
             local managedDarkIcon = joinPath (getDir #userIcons) "Dark\\FBXTo3dsMax\\FBXTo3dsMax.svg"
-            local macroTemplate = joinPath stagePackage "Contents\\FBXTo3dsMax.mcr"
-            local iconTemplate = joinPath stagePackage "Contents\\icons\\FBXTo3dsMax.svg"
+            local macroTemplate = joinPath stagePackage "contents\\FBXTo3dsMax.mcr"
+            local iconTemplate = joinPath stagePackage "contents\\icons\\FBXTo3dsMax.svg"
             snapshotManagedFile managedMacro (joinPath backupRoot "UserState\\UserMacros\\FBXTo3dsMax-FBXTo3dsMax_Open.mcr") macroTemplate #(
                 "macroScript FBXTo3dsMax_Open",
                 "category:\"FBXTo3dsMax\""
@@ -967,7 +994,7 @@ F2M_Installer_FinalDialogText = ""
                 legacyStream = undefined
             )
 
-            local bootstrapPath = joinPath targetPackage "Contents\\FBXTo3dsMax_Bootstrap.ms"
+            local bootstrapPath = joinPath targetPackage "contents\\FBXTo3dsMax_Bootstrap.ms"
             local bootstrapResult = fileIn bootstrapPath quiet:true
             if bootstrapResult != true do
             (
@@ -988,7 +1015,7 @@ F2M_Installer_FinalDialogText = ""
                 throw "顶部“FBX 转 MAX”按钮没有通过可见区域和点击命中验证。"
             )
 
-            local installedMacroTemplate = joinPath targetPackage "Contents\\FBXTo3dsMax.mcr"
+            local installedMacroTemplate = joinPath targetPackage "contents\\FBXTo3dsMax.mcr"
             local userMacro = joinPath (getDir #userMacros) "FBXTo3dsMax-FBXTo3dsMax_Open.mcr"
             if sha256File installedMacroTemplate != sha256File userMacro do
             (
@@ -1004,18 +1031,18 @@ F2M_Installer_FinalDialogText = ""
             F2M_Installer_LastLogPath = logPath
             F2M_Installer_RunStatus = 1
 
-            local backupMessage = if packageMovedToBackup then ("\n旧插件包备份：\n" + packageBackup + "\n") else ""
-            local legacyMessage = if legacyMoves.count > 0 then ("\n旧版自动加载文件归档：\n" + legacyRoot + "\n完成本次验证后请重启一次 3ds Max，以清除内存中的旧 MacroScript 条目。\n") else ""
-            local conflictMessage = if legacyConflicts.count > 0 then ("\n警告：" + (legacyConflicts.count as string) + " 个旧版同名文件与已知归属标记不匹配，因此保持不动。详情请查看安装日志。\n") else ""
+            local backupMessage = if packageMovedToBackup then ((localized "\n旧插件包备份：\n" "\nPrevious package backup:\n") + packageBackup + "\n") else ""
+            local legacyMessage = if legacyMoves.count > 0 then ((localized "\n旧版自动加载文件归档：\n" "\nLegacy startup archive:\n") + legacyRoot + (localized "\n完成本次验证后请重启一次 3ds Max，以清除内存中的旧 MacroScript 条目。\n" "\nAfter verification, restart 3ds Max to release cached legacy MacroScript actions.\n")) else ""
+            local conflictMessage = if legacyConflicts.count > 0 then ((localized "\n警告：" "\nWarning: ") + (legacyConflicts.count as string) + (localized " 个旧版同名文件与已知归属标记不匹配，因此保持不动。详情请查看安装日志。\n" " legacy files have unrecognized ownership and were preserved. See the installation log.\n")) else ""
 
             finalDialogTitle = "FBXTo3dsMax"
             finalDialogText = (
-            "FBXTo3dsMax v1.3.24 安装成功。\n\n" +
-                "3ds Max 顶部已经创建一个显眼的“FBX 转 MAX”按钮，并通过可见区域与点击命中验证。\n" +
-                "安装完成时不会自动打开主窗口；需要时请点击顶部按钮。\n\n" +
-                "安装目录：\n" + targetPackage + "\n" +
+            (localized "FBXTo3dsMax v1.4.24 安装成功。\n\n" "FBXTo3dsMax v1.4.24 installed successfully.\n\n") +
+                (localized "3ds Max 顶部已经创建一个显眼的“FBX 转 MAX”按钮，并通过可见区域与点击命中验证。\n" "The FBX to MAX toolbar button passed visibility and hit-area checks.\n") +
+                (localized "安装完成时不会自动打开主窗口；需要时请点击顶部按钮。\n\n" "Click the toolbar button when you want to open the plug-in.\n\n") +
+                (localized "安装目录：\n" "Installation directory:\n") + targetPackage + "\n" +
                 backupMessage + legacyMessage + conflictMessage +
-                "\n安装日志：\n" + logPath
+                (localized "\n安装日志：\n" "\nInstallation log:\n") + logPath
             )
         )
         catch
@@ -1181,16 +1208,16 @@ F2M_Installer_FinalDialogText = ""
 
             if rollbackComplete then
             (
-                finalDialogTitle = "FBXTo3dsMax - 安装失败"
+                finalDialogTitle = (localized "FBXTo3dsMax - 安装失败" "FBXTo3dsMax - Installation failed")
                 finalDialogText = (
-                    "FBXTo3dsMax 安装失败。" +
+                    (localized "FBXTo3dsMax 安装失败。" "FBXTo3dsMax installation failed.") +
                     (
                         if rollbackNeeded then
-                            "\n\n安装器已按存在性、SHA-256 和归属标记完整恢复安装前状态。"
+                            (localized "\n\n安装器已按存在性、SHA-256 和归属标记完整恢复安装前状态。" "\n\nThe previous installation was restored and verified by existence, SHA-256 and ownership.")
                         else
-                            "\n\n错误发生在修改插件状态之前，没有需要回滚的改动。"
+                            (localized "\n\n错误发生在修改插件状态之前，没有需要回滚的改动。" "\n\nThe error occurred before changing plug-in state; no rollback was needed.")
                     ) +
-                    "\n\n具体技术信息已写入安装日志。\n\n日志：\n" + logPath
+                    (localized "\n\n具体技术信息已写入安装日志。\n\n日志：\n" "\n\nFull technical diagnostics are retained in the installation log:\n") + logPath
                 )
             )
             else
@@ -1200,13 +1227,13 @@ F2M_Installer_FinalDialogText = ""
                 if previewCount > 5 do previewCount = 5
                 for i = 1 to previewCount do
                     rollbackPreview += ("\n- " + rollbackFailures[i])
-                finalDialogTitle = "FBXTo3dsMax - 安装失败（回滚不完整）"
+                finalDialogTitle = (localized "FBXTo3dsMax - 安装失败（回滚不完整）" "FBXTo3dsMax - Installation failed; rollback incomplete")
                 finalDialogText = (
-                    "FBXTo3dsMax 安装失败，而且回滚不完整。\n\n" +
-                    "当前插件磁盘文件或运行状态没有完全恢复。为避免继续产生旧包与新用户文件混合状态，请先保留诊断日志并重新启动 3ds Max。" +
-                    "\n\n未恢复项目：" + (rollbackFailures.count as string) + " 项" +
+                    (localized "FBXTo3dsMax 安装失败，而且回滚不完整。\n\n" "FBXTo3dsMax installation failed and rollback is incomplete.\n\n") +
+                    (localized "当前插件磁盘文件或运行状态没有完全恢复。为避免继续产生旧包与新用户文件混合状态，请先保留诊断日志并重新启动 3ds Max。" "Plug-in files or runtime state were not fully restored. Preserve the diagnostic log and restart 3ds Max before retrying.") +
+                    (localized "\n\n未恢复项目：" "\n\nItems not restored: ") + (rollbackFailures.count as string) + (localized " 项" " item(s)") +
                     rollbackPreview +
-                    "\n\n完整诊断日志：\n" + logPath
+                    (localized "\n\n完整诊断日志：\n" "\n\nFull diagnostic log:\n") + logPath
                 )
             )
         )

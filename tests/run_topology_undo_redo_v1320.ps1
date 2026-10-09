@@ -21,7 +21,7 @@ $resultPath = Join-Path $testsRoot ($artifactStem + '_result.json')
 $listenerPath = Join-Path $testsRoot ($artifactStem + '.listener.log')
 $pidLogPath = Join-Path $testsRoot ($artifactStem + '.Max.log')
 $metaPath = Join-Path $testsRoot ($artifactStem + '.meta.json')
-$modulePath = Join-Path $workspaceRoot 'f2m_topology_transfer.py'
+$modulePath = Join-Path $workspaceRoot 'contents\f2m_topology_transfer.py'
 $fixturePath = Join-Path $testsRoot 'fixtures\topology_source.fbx'
 $maxLogPath = Join-Path $env:LOCALAPPDATA (
     'Autodesk\3dsMax\2023 - 64bit\CHS\Network\Max.log'
@@ -318,7 +318,7 @@ else {
     -not [bool]$business.save_reload_requested
 }
 $identityPassed = (
-    [string]$business.version -eq '1.3.20' -and
+    [string]$business.version -eq '1.4.24' -and
     [string]$business.gate_mode -ceq $expectedGateMode -and
     [string]$business.run_token -ceq $runToken -and
     [string]$business.run_token -match '^[0-9a-fA-F]{32}$' -and

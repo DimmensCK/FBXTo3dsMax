@@ -11,6 +11,12 @@ import sys
 import unittest
 from pathlib import Path
 
+# Resolve runtime modules from the source distribution without a global PYTHONPATH.
+import sys as _f2m_test_sys
+from pathlib import Path as _F2MTestPath
+_f2m_test_root = _F2MTestPath(__file__).resolve().parents[1]
+_f2m_test_sys.path.insert(0, str(_f2m_test_root / "contents" if (_f2m_test_root / "contents").is_dir() else _f2m_test_root))
+
 from f2m_test_fixtures import CORNER_COUNT, FACE_COUNT, get_fixture_paths
 
 
@@ -18,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load(filename: str, module_name: str):
-    path = ROOT / filename
+    path = ROOT / "contents" / filename
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError(path)
@@ -41,8 +47,8 @@ metadata = _load(
 class IsolatedResolverBridgeV1320Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.fixture = Path(get_fixture_paths()["topology"])
-        self.metadata_path = ROOT / "f2m_fbx_metadata.py"
-        self.smoothing_path = ROOT / "f2m_smoothing.py"
+        self.metadata_path = ROOT / "contents" / "f2m_fbx_metadata.py"
+        self.smoothing_path = ROOT / "contents" / "f2m_smoothing.py"
 
     def test_combo_bridge_never_imports_heavy_parser_in_host_process(self):
         bridge = inspect.getsource(topology._inspect_smoothing_and_normal_data)

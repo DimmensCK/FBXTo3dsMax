@@ -2,6 +2,23 @@
 
 版本基线为原插件 `1.2.16`；BUG 修复增加 `0.0.1`，新增功能增加 `0.1.0`。发布时同步引擎、UI、版本文件、包元数据和安装器标记。
 
+## v1.4.24（2026-10-09）：双语与目录整理
+
+- 新增常驻 **语言 / Language** 下拉框，中文/English 原位切换，保留模式、FBX、选项和检查状态；偏好原子保存到本地，工具栏与用户摘要使用所选语言，原始技术诊断保留必要信息。
+- 整理工程根目录，运行 Python/MAXScript/资源统一放到小写 `contents/`，PowerShell 安装入口移至 `tools/`；中文与英文用户指南分别放在 `docs/zh/`、`docs/en/`，维护文档放在 `docs/development/`。
+- 增加完整英文安装与使用参考、原创流程图及经授权隐私审查的历史形状截图；不分发模型，不上传原企业 PDF 或内部链接。纠正同数量即同拓扑、非流形更稳定、安装失败可忽略等旧说明。
+- 修复混合技术诊断导致英文自检报告标题、检查行或最终失败提示跳过翻译的问题；按结构字段翻译一次，保留原始业务 JSON、未知诊断及中文行为。传递异常在最终显示边界翻译，避免提前翻译影响整份报告。
+- 修复顶部工具栏在实际字体与样式下压缩按钮、将文字显示为省略号的问题：按当前 Qt 样式的尺寸建议设置最小空间，语言切换后原位重算；保留同一个按钮、动作与定时器。尺寸修复须经过纯测试和真实 Max 回归；本版验收结果见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
+- Toolbar label fix (English): use the current polished Qt size hints to prevent the host toolbar from shrinking the icon/text button below its required size; recalculate in place after language changes without replacing the button, action or timers. This size correction requires pure tests and real-Max regression checks; see [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for this version's acceptance results.
+- 修复主工具栏首次验证通过、移除旧备用栏后再次验证失败时遗漏备用路径的分支：任一次主工具栏验证失败都尝试现有顶部备用栏；备用验证仍失败时清理自有动作并报错。此分支须经过纯测试与真实 Max 回归，本版结果见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
+- Toolbar fallback fix (English): try the existing top fallback if either Main Toolbar validation fails, including the second validation after removing an old fallback. If fallback validation also fails, remove owned actions and report failure. This branch requires pure tests and real-Max regression checks; see [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for this version's results.
+- 修复英文模式一的“Smoothing Groups”复选框末尾字母裁切：扩大该控件的可用宽度，保持位置、完整译文、勾选状态与传递逻辑；结果须以实际字体/DPI 的完整界面读回验收。
+- Smoothing checkbox fix (English): increase the available width for the full “Smoothing Groups” caption without changing its position, checked state or transfer behavior; verify the complete interface on the actual host font and DPI.
+- 修复英文自检把单独翻译的原生光滑组来源片段与完整技术报告比较而误报失败的问题：以本次实际生产摘要的完整来源消息验证保存报告的原文或完整译文；缺失、错误来源及无关节点/路径仍拒绝，业务成功与逐面掩码读回门保持。本版结果见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
+- Native smoothing self-check fix (English): verify the saved raw or fully translated production message from the current transfer summary instead of translating an isolated method fragment. Missing or incorrect source evidence and unrelated node/path text remain rejected; transfer success and per-face mask readback gates are unchanged. See [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for this version's results.
+- 固定安装清单从历史 27 项增至 **32 项**：两个语言模块与三个英文指南。安装副本的中英文指南平铺在 `contents/`，保留 MIT 文本。
+- 新功能按 `+0.1.0` 同步为 `1.4.24`，保留两模式业务合同。验收标准包含纯测试、真实 Max、自检与安装生命周期；当前结果见测试说明，旧版结果不代替后续版本证明。
+
 ## v1.3.24（2026-10-08）：公开源码与自检素材修复
 
 - 改为 MIT 许可证，作者署名保留 Dimmens；使用可读 Python/MAXScript 源文件安装。
@@ -11,7 +28,7 @@
 - 增加公开仓库静态检查和独立 Max Batch 自检入口，验证输出使用用户本地数据目录。
 - 自检依赖修复按 BUG 规则增加 `0.0.1`；同步为 `1.3.24`，安装清单从 28 项改为 27 项（移除三个私有样本，增加生成器与安装副本的 LICENSE）。保留既有两模式业务行为。
 - 同步安装器原生“必要目标”检查，要求生成器和 LICENSE，移除已退役 FBX 要求；新增实际 MAXScript 目标数组与 27 项固定清单的回归检查，仓库静态检查也验证这道门。此前仅校验清单和原生解析会漏掉这个确定性的安装失败。
-- 当前整理的测试方法与证据边界见 [docs/TESTING.md](docs/TESTING.md)；原创小样本不继承旧私有大资产的压力覆盖，旧加密安装验收不作为当前源码安装证明。
+- 测试方法与证据边界见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)；原创小样本不继承旧私有大资产的压力覆盖，旧加密安装验收不作为源码安装证明。
 
 ## v1.3.23（2026-08-01）
 

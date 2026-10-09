@@ -10,7 +10,7 @@ import unittest
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "f2m_topology_transfer.py"
+MODULE_PATH = ROOT / "contents" / "f2m_topology_transfer.py"
 
 
 def load_module(name: str):

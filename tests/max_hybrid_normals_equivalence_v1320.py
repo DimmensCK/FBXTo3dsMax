@@ -24,13 +24,14 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 SCRIPT_PATH = os.path.normcase(os.path.abspath(__file__))
 RESULT_PATH = os.path.join(
     ROOT,
     "tests",
     "_max_hybrid_normals_equivalence_v1320_result.json",
 )
-EXPECTED_VERSION = "1.3.20"
+EXPECTED_VERSION = "1.4.24"
 TOKEN_ENV = "F2M_HYBRID_NORMALS_TOKEN"
 SCRIPT_ENV = "F2M_HYBRID_NORMALS_EXPECTED_SCRIPT"
 RESULT_ENV = "F2M_HYBRID_NORMALS_RESULT"
@@ -120,7 +121,7 @@ def atomic_json_write(path: str, payload: dict[str, Any], token: str) -> None:
 
 
 def load_topology_module(token: str):
-    path = os.path.join(ROOT, "f2m_topology_transfer.py")
+    path = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")
     module_name = f"_f2m_hybrid_normals_{token}"
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:

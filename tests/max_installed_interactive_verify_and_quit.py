@@ -85,7 +85,7 @@ def _write_status(payload: dict) -> None:
 
 run_token = str(os.environ.get(TOKEN_ENV, ""))
 command_line_args = _process_command_line_args()
-if not re.fullmatch(r"v1\.3\.24-[0-9a-fA-F]{32}", run_token):
+if not re.fullmatch(r"v1\.4\.24-[0-9a-fA-F]{32}", run_token):
     raise RuntimeError("拒绝运行安装后验收：缺少专用子进程令牌。")
 if not _has_exact_python_host_identity(command_line_args):
     raise RuntimeError("拒绝运行安装后验收：当前进程不是指定的验收子进程。")

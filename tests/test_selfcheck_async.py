@@ -18,8 +18,8 @@ from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "f2m_selfcheck.py"
-UI_PATH = ROOT / "FBXTo3dsMax_UI.ms"
+MODULE_PATH = ROOT / "contents" / "f2m_selfcheck.py"
+UI_PATH = ROOT / "contents" / "FBXTo3dsMax_UI.ms"
 
 
 def load_selfcheck():
@@ -137,18 +137,18 @@ class FakeApplication:
 
 
 class AsyncSelfCheckTests(unittest.TestCase):
-    def test_installed_manifest_requires_exact_27_target_set(self) -> None:
+    def test_installed_manifest_requires_exact_32_target_set(self) -> None:
         selfcheck = load_selfcheck()
         with tempfile.TemporaryDirectory() as folder:
             package_root = pathlib.Path(folder) / "FBXTo3dsMax"
-            contents = package_root / "Contents"
+            contents = package_root / "contents"
             contents.mkdir(parents=True)
             targets = [
                 "PackageContents.xml",
-                "Contents\\FBXTo3dsMax.files",
+                "contents\\FBXTo3dsMax.files",
             ] + [
-                f"Contents\\fixture_{index:02d}.bin"
-                for index in range(2, 27)
+                f"contents\\fixture_{index:02d}.bin"
+                for index in range(2, 32)
             ]
             mapping_path = contents / "FBXTo3dsMax.files"
             mapping_path.write_text(
@@ -183,7 +183,7 @@ class AsyncSelfCheckTests(unittest.TestCase):
             )
             with mock.patch.object(selfcheck, "ROOT", str(contents)):
                 result = selfcheck._verify_installed_manifest()
-                self.assertIn("27 项全部匹配", result)
+                self.assertIn("32 项全部匹配", result)
 
                 manifest_path.write_text(lines[0] + "\n", encoding="utf-8")
                 with self.assertRaisesRegex(

@@ -1,44 +1,41 @@
 # 下载源码与维护 GitHub 仓库
 
-源码与后续更新使用同一仓库：[DimmensCK/FBXTo3dsMax](https://github.com/DimmensCK/FBXTo3dsMax)。主分支为 `main`。安装前先阅读[安装说明](../INSTALL_中文.md)与[测试范围](TESTING.md)。
+项目使用现有仓库 [DimmensCK/FBXTo3dsMax](https://github.com/DimmensCK/FBXTo3dsMax)，主分支 `main`。
 
-在仓库页面选择 **Code → Download ZIP**，解压后找到包含 `Install_FBXTo3dsMax.ms` 和 `Contents/` 的工程根目录，保持相对结构，再按安装说明拖入标准 `.ms` 入口。[GitHub 官方源码下载说明](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)。
+[中文安装](zh/INSTALL_中文.md) · [English installation](en/INSTALL.md) · [测试范围](TESTING.md)
 
-根目录 `LICENSE` 为 MIT，作者 Dimmens。上传内容是可读源码、资源、测试代码和文档，不包含 FBX/MAX/BLEND 模型、旧发行、工具链、私有备份、本机日志或验证工具。
+## 下载给自己用
 
-下面是作者或贡献者维护本地 Git 仓库的方法。沿用现有仓库，无需重复创建同名仓库或选择 Publish repository。本地 Commit 只保存本机历史；Push origin 才把提交推送到远端。
+在仓库页面选择 **Code → Download ZIP**，解压后找到同时包含 `Install_FBXTo3dsMax.ms` 和小写 `contents/` 的工程根目录。按安装说明拖入标准 `.ms` 入口，保持相对结构，不在 ZIP 中运行。[GitHub 官方下载说明](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)
 
-## 1. 把本地工程加入 GitHub Desktop
+如果需要固定版本，在 **Releases** 选择对应版本的完整源代码包；分支 `main` 可能继续变化。记录插件版本，不要将历史验证误当作新版本验证。
 
-安装 [GitHub Desktop](https://desktop.github.com/)，登录现有的 `DimmensCK` 账号。
+Root `LICENSE` 是 MIT，作者 Dimmens。公开内容是可读源码、资源、测试代码、双语文档及经授权审查的教程媒体，不携带 FBX/MAX/BLEND 模型、私有备份、本机日志或构建工具链。
 
-1. 选择 **File → Add local repository**。
-2. 点击 **Choose**，选择整理后的工程目录本身。
-3. 点击 **Add repository**。
-4. 确认当前仓库为 `FBXTo3dsMax`、分支为 `main`，远端为上面的现有 GitHub 仓库。
+## 用 GitHub Desktop 管理更新
 
-本地已是 Git 仓库；选择工程目录即可，不要另建嵌套目录。[GitHub 官方本地仓库说明](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-a-repository-from-your-local-computer-to-github-desktop)。
+安装 [GitHub Desktop](https://desktop.github.com/)，用自己的账号登录。作者沿用现有仓库，无需重复创建同名仓库；贡献者先 Fork，再克隆自己的副本。
 
-## 2. 查看并提交本地修改
+1. 选择 **File → Clone repository**，选择 `DimmensCK/FBXTo3dsMax`；也可在 **URL** 页填该仓库链接。
+2. 用 **Choose** 选择一个新的空开发目录，再点击 **Clone**。以线上公开历史为基线，不直接推送本机验收工程的候选历史。[官方克隆说明](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop)
+3. 检查远端是目标仓库、当前分支与 **History** 正确。将审核后的源码文件改动复制进这个克隆目录，保持安装入口与 `contents/`、`docs/`、`tests/`、`tools/` 的相对结构；不复制 `.git/`、私有资产、备份或日志。
+4. 在 **Changes** 逐项阅读变更，完成相关验证、更新版本和验证范围。使用开发分支保存修改，填写具体 **Summary** 并提交；需要合并时通过 Pull Request 审查。
+5. 只对当前审核过的开发分支使用 **Push origin**。远端有新修改时先查看并合并；出现冲突先核对双方内容，不强制覆盖。[官方提交与推送说明](https://docs.github.com/en/desktop/making-changes-in-a-branch/committing-and-reviewing-changes-to-your-project-in-github-desktop)
 
-在 **Changes** 中逐项阅读本次文件列表，保持 `Contents/`、`tests/`、`tools/`、`docs/` 及根目录源码的相对结构。
+已有目录仅在核对其远端、当前分支及提交历史与公开仓库一致后，才用 **File → Add local repository**。[官方添加本地仓库说明](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-a-repository-from-your-local-computer-to-github-desktop) 本机验证分支和备份引用不属于发布内容；不要使用 `push --all`，不要用强制推送解决历史不一致。
 
-有未提交修改时，在 **Summary** 填写简明说明，例如 `Prepare source v1.3.24`，再点击 **Commit to main**。如果修改已经由本轮本地提交保存，直接在 **History** 核对提交即可，无需重复提交。
+`.gitignore` 用于忽略后续未跟踪文件，不会清除已经提交的文件或历史。发现不该公开的内容时先停止推送、查清范围，再单独处理；不能靠新增忽略规则证明历史已清理。[GitHub 官方忽略文件说明](https://docs.github.com/en/get-started/git-basics/ignoring-files)
 
-**Commit** 把当前改动保存到本机 Git 历史；它还没有把源码上传给别人。
+**Commit** 保存本机历史；**Push** 才把提交发给远端。GitHub 登录使用正常 Desktop 流程，不把密码或令牌写入工程。
 
-## 3. 推送本次更新
+## 核对远端与发布版本
 
-先按 [测试说明](TESTING.md) 完成与本次改动相关的验证，更新版本和证明范围，再提交修改。
+打开仓库确认 README、MIT、源码、双语教程和 **32 项**安装资源完整。重新下载或克隆到新目录，运行仓库检查和纯测试；相关源码/安装改动还需从远端副本做真实 Max 和隔离安装验收。单凭网页可见或 Push 成功不证明插件功能正常。
 
-确认即将上传的内容后，点击 **Push origin**，把本地提交推送到已有仓库。遇到登录提示，使用 Desktop 的正常登录流程；如果提示远端有新修改，先查看并合并，不使用强制推送覆盖远端。[GitHub 官方提交与推送说明](https://docs.github.com/en/desktop/making-changes-in-a-branch/committing-and-reviewing-changes-to-your-project-in-github-desktop)。
+需要版本入口时，用 **Releases → Draft a new release**，目标选择已验收的提交；标签对应源码版本，例如 `v1.4.24`。写清安装方法、实测 Max 版本、变化与剩余限制，确认后发布。[官方 Release 指南](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
-在浏览器打开 [现有仓库](https://github.com/DimmensCK/FBXTo3dsMax)，核对：README 已更新、LICENSE 显示 MIT、源码可浏览、27 项安装资源与生成器完整。这一步完成后才能称完整源码已上传。
+后续沿用：从公开历史克隆 → 复制审核后的源码改动 → 验证 → 查看 Changes → Commit → Push 当前分支 → 审查合并。不要把尚未验收的改动写成全平台稳定版本。
 
-## 4. 从远端新副本再验证
+## English quick reference
 
-上传完成后，重新下载或克隆到新目录，对这份副本运行仓库检查和纯测试。在测试配置/场景副本中从该副本安装，核对冷启动按钮与安装副本自检，发现漏传文件或目录嵌套时先修正。
-
-如需单独的版本入口，可以在 **Releases → Draft a new release** 准备 `v1.3.24`，目标选择已完成验收的提交，写明源码安装方法、实测 Max 版本和剩余限制。只有准备完成后再发布 Release。[GitHub 官方 Release 指南](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)。
-
-后续更新沿用同一流程：修改 → 查看 Changes → Commit → Push origin。版本和验证结果随改动同步，不上传用户场景或本机验证日志。
+Download the complete repository via **Code → Download ZIP** and extract it before installation. For maintenance, use **GitHub Desktop → File → Clone repository**, choose `DimmensCK/FBXTo3dsMax` and a new empty development directory. Contributors fork and clone their own copy. Start from the published history, copy only reviewed source changes, verify them, then commit and push the reviewed branch. Before adding an existing local repository, check its remote, branch and history. Do not publish local validation branches or backup refs, use `push --all`, or force-push to resolve a history mismatch. `.gitignore` does not remove committed content or history. Commit is local; push updates the remote. Release only the exact qualified commit, state tested Max versions and limits, and verify a fresh remote download.

@@ -15,7 +15,7 @@ import tempfile
 from typing import Dict, Optional
 
 
-TOOL_VERSION = "1.3.24"
+TOOL_VERSION = "1.4.24"
 MESH_NAME = "F2M_ProceduralMesh"
 FACES = ((0, 1, 2), (0, 2, 3))
 FACE_COUNT = 2

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bounded performance regressions for FBXTo3dsMax v1.3.20.
+"""Bounded performance regressions for FBXTo3dsMax v1.4.24.
 
 The first two cases exercise pure Python code and therefore run both under
 ordinary CPython and 3ds Max's embedded Python.  When pymxs is available, a
@@ -28,6 +28,7 @@ except Exception:
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 TESTS_DIR = os.path.join(ROOT, "tests")
 INSIDE_3DS_MAX = rt is not None
 DEFAULT_RESULT_NAME = (
@@ -67,7 +68,7 @@ def _sha256(path: str) -> str:
 
 
 def _load_module(filename: str, module_name: str) -> Any:
-    path = os.path.abspath(os.path.join(ROOT, filename))
+    path = os.path.abspath(os.path.join(RUNTIME_ROOT, filename))
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"无法为性能测试加载模块：{path}")
@@ -363,8 +364,8 @@ def _run_max_batch_smoothing_case(topology: Any) -> Dict[str, Any]:
 
 
 def _base_result() -> Dict[str, Any]:
-    smoothing_path = os.path.join(ROOT, "f2m_smoothing.py")
-    topology_path = os.path.join(ROOT, "f2m_topology_transfer.py")
+    smoothing_path = os.path.join(RUNTIME_ROOT, "f2m_smoothing.py")
+    topology_path = os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py")
     environment: Dict[str, Any] = {
         "inside_3ds_max": INSIDE_3DS_MAX,
         "process_id": os.getpid(),
@@ -437,8 +438,8 @@ def main() -> None:
             "topology": str(topology.TOOL_VERSION),
         }
         if result["tool_version"] != {
-            "smoothing": "1.3.20",
-            "topology": "1.3.20",
+            "smoothing": "1.4.24",
+            "topology": "1.4.24",
         }:
             raise AssertionError(f"性能回归加载到错误版本：{result['tool_version']}")
 

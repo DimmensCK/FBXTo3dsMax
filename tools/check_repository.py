@@ -21,13 +21,15 @@ from typing import Dict, List, Set
 ENGINES = (
     "f2m_topology_transfer.py", "f2m_skin_replace.py", "f2m_smoothing.py",
     "f2m_fbx_metadata.py", "f2m_selfcheck.py",
-    "f2m_test_fixtures.py",
+    "f2m_test_fixtures.py", "f2m_i18n.py", "f2m_report_i18n.py",
 )
+ENGINES = tuple("contents/" + name for name in ENGINES)
+EXPECTED_INSTALL_COUNT = 32
 SCRIPT_SUFFIXES = {".py", ".ms", ".mcr", ".ps1"}
 TEXT_SUFFIXES = SCRIPT_SUFFIXES | {
     ".md", ".xml", ".txt", ".files", ".version", ".svg", ".yml", ".yaml",
 }
-PUBLIC_TREES = {"Contents", "tests", "tools", "docs", ".github"}
+PUBLIC_TREES = {"contents", "tests", "tools", "docs", ".github"}
 PERSONAL_PATH = re.compile(
     r"(?i)\b[a-z]:[\\/]+(?:ai[\\/]+codex|users[\\/]+user(?:[\\/]|$))"
 )
@@ -168,18 +170,18 @@ def inspect(root: Path) -> Dict:
         errors.append("Private/build roots remain beside public source: " + ", ".join(sorted(private_roots)))
     files = inventory(root)
     named = {path.relative_to(root).as_posix(): path for path in files}
-    versions = {"VERSION.txt": read(root / "VERSION.txt").strip()}
-    version = versions["VERSION.txt"]
+    versions = {"contents/VERSION.txt": read(root / "contents/VERSION.txt").strip()}
+    version = versions["contents/VERSION.txt"]
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         errors.append("VERSION.txt must contain a numeric three-part version")
     for name in ENGINES:
         versions[name] = literal_assignment(root / name, "TOOL_VERSION")
-    versions["Contents/FBXTo3dsMax.version"] = read(
-        root / "Contents/FBXTo3dsMax.version"
+    versions["contents/FBXTo3dsMax.version"] = read(
+        root / "contents/FBXTo3dsMax.version"
     ).strip()
     for name, pattern in (
-        ("FBXTo3dsMax_UI.ms", r'local\s+toolVersion\s*=\s*"([0-9.]+)"'),
-        ("Contents/FBXTo3dsMax_Bootstrap.ms", r'\bversion\s*=\s*"([0-9.]+)"'),
+        ("contents/FBXTo3dsMax_UI.ms", r'local\s+toolVersion\s*=\s*"([0-9.]+)"'),
+        ("contents/FBXTo3dsMax_Bootstrap.ms", r'\bversion\s*=\s*"([0-9.]+)"'),
         ("Install_FBXTo3dsMax.ms", r'local\s+installerVersion\s*=\s*"([0-9.]+)"'),
     ):
         found = re.findall(pattern, read(root / name))
@@ -187,7 +189,7 @@ def inspect(root: Path) -> Dict:
             errors.append(name + ": expected one declared version")
         else:
             versions[name] = found[0]
-    ui = read(root / "FBXTo3dsMax_UI.ms")
+    ui = read(root / "contents/FBXTo3dsMax_UI.ms")
     if re.findall(r"版本：([0-9.]+)", ui) != [version]:
         errors.append("UI displayed version differs from VERSION.txt")
     xml = ET.parse(str(root / "PackageContents.xml")).getroot()
@@ -195,21 +197,21 @@ def inspect(root: Path) -> Dict:
     host = xml.find("./Components/RuntimeRequirements")
     if host is None:
         errors.append("PackageContents.xml has no host requirements")
-    toolbar_path = root / "Contents/f2m_toolbar.py"
+    toolbar_path = root / "contents/f2m_toolbar.py"
     toolbar = read(toolbar_path)
     if re.search(r"(?m)^TOOL_VERSION\s*=", toolbar):
-        versions["Contents/f2m_toolbar.py"] = literal_assignment(toolbar_path, "TOOL_VERSION")
+        versions["contents/f2m_toolbar.py"] = literal_assignment(toolbar_path, "TOOL_VERSION")
     else:
         notes.append("Toolbar has no independent version constant; Bootstrap supplies package version.")
     if not re.search(r"(?m)^def install_and_schedule\(", toolbar):
         errors.append("Toolbar install entry is missing")
-    if not (root / "Contents/icons/FBXTo3dsMax.svg").is_file():
+    if not (root / "contents/icons/FBXTo3dsMax.svg").is_file():
         errors.append("Toolbar icon is missing")
     for name, found in versions.items():
         if found != version:
             errors.append(name + ": version differs from VERSION.txt")
 
-    manifest = read(root / "Contents/FBXTo3dsMax.files")
+    manifest = read(root / "contents/FBXTo3dsMax.files")
     if re.findall(r"(?m)^#\s*FBXTo3dsMax v([0-9.]+)", manifest) != [version]:
         errors.append("Installation manifest version comment differs from VERSION.txt")
     sources, targets, records = set(), set(), []
@@ -239,8 +241,8 @@ def inspect(root: Path) -> Dict:
                             "bytes": source_path.stat().st_size, "sha256": digest(source_path)})
         except (ValueError, OSError) as exc:
             errors.append("Manifest line {}: {}".format(number, exc))
-    if len(records) != 27:
-        errors.append("Expected 27 valid installation entries; found " + str(len(records)))
+    if len(records) != EXPECTED_INSTALL_COUNT:
+        errors.append("Expected 32 valid installation entries; found " + str(len(records)))
 
     installer_source = read(root / "Install_FBXTo3dsMax.ms")
     required_blocks = re.findall(
@@ -269,15 +271,48 @@ def inspect(root: Path) -> Dict:
             except ValueError as exc:
                 errors.append("Unsafe installer required destination: " + str(exc))
         required_lower = {item.casefold() for item in required_targets}
-        for mandatory in ("contents/f2m_test_fixtures.py", "contents/license"):
+        for mandatory in ("contents/f2m_test_fixtures.py", "contents/license",
+                          "contents/f2m_i18n.py", "contents/f2m_report_i18n.py"):
             if mandatory not in required_lower:
                 errors.append("Installer required destinations omit " + mandatory)
 
+    # The PowerShell preflight is an independent installer gate. Its literal
+    # list must remain closed over the same public manifest as the native gate.
+    ps_source = read(root / "tools/Install_FBXTo3dsMax.ps1")
+    ps_blocks = re.findall(
+        r"foreach\s*\(\s*\$requiredDestination\s+in\s+@\((.*?)\)\s*\)",
+        ps_source, flags=re.DOTALL,
+    )
+    ps_required_targets = []
+    if len(ps_blocks) != 1:
+        errors.append("PowerShell installer must declare one required-target list")
+    else:
+        ps_literal = r'"([^"\r\n]*)"'
+        remainder = re.sub(ps_literal, "", ps_blocks[0])
+        if re.search(r"[^,\s]", remainder):
+            errors.append("PowerShell installer requirements must be literal strings")
+        for raw_target in re.findall(ps_literal, ps_blocks[0]):
+            try:
+                target = "/".join(safe_parts(raw_target))
+                if target.casefold() in {item.casefold() for item in ps_required_targets}:
+                    raise ValueError("duplicate required target")
+                ps_required_targets.append(target)
+                if target.casefold() not in targets:
+                    errors.append("PowerShell installer requires a target absent from the manifest: " + target)
+                if Path(target).suffix.lower() in {".fbx", ".max", ".blend", ".blend1"}:
+                    errors.append("PowerShell installer requires a bundled DCC asset: " + target)
+            except ValueError as exc:
+                errors.append("Unsafe PowerShell required destination: " + str(exc))
+        for mandatory in ("contents/f2m_test_fixtures.py", "contents/license",
+                          "contents/f2m_i18n.py", "contents/f2m_report_i18n.py"):
+            if mandatory not in {item.casefold() for item in ps_required_targets}:
+                errors.append("PowerShell installer requirements omit " + mandatory)
+
     runtime = set(ENGINES) | {
-        "FBXTo3dsMax_UI.ms", "Install_FBXTo3dsMax.ms",
-        "Install_FBXTo3dsMax.ps1", "Uninstall_FBXTo3dsMax.ms",
+        "contents/FBXTo3dsMax_UI.ms", "Install_FBXTo3dsMax.ms",
+        "tools/Install_FBXTo3dsMax.ps1", "Uninstall_FBXTo3dsMax.ms",
     }
-    runtime.update(name for name in named if name.startswith("Contents/")
+    runtime.update(name for name in named if name.startswith("contents/")
                    and Path(name).suffix in SCRIPT_SUFFIXES)
     for name in sorted(runtime):
         raw = read(root / name)
@@ -313,7 +348,7 @@ def inspect(root: Path) -> Dict:
                 line = raw.count("\n", 0, match.start()) + 1
                 personal.append({"file": name, "line": line})
                 if name in runtime or (name.endswith(".md") and name not in {
-                    "AGENTS.md", "PROJECT_MEMORY.md",
+                    "AGENTS.md", "docs/development/PROJECT_MEMORY.md",
                 }):
                     errors.append("{}: personal machine path at line {}".format(name, line))
         elif name.startswith("tests/fixtures/"):
@@ -340,9 +375,10 @@ def inspect(root: Path) -> Dict:
         "private_roots": private_roots,
         "errors": errors, "notes": notes, "versions": versions,
         "declared_host_range": dict(host.attrib) if host is not None else {},
-        "installation": {"count": len(records), "expected_count": 27,
+        "installation": {"count": len(records), "expected_count": EXPECTED_INSTALL_COUNT,
                          "bytes": sum(item["bytes"] for item in records), "files": records,
-                         "required_destinations": required_targets},
+                         "required_destinations": required_targets,
+                         "powershell_required_destinations": ps_required_targets},
         "privacy": {"secret_findings": secrets, "personal_path_locations": personal,
                     "fixture_path_findings": fixture_paths,
                     "limit": "Pattern checks cannot establish complete privacy or asset ownership."},
@@ -368,7 +404,7 @@ def main() -> int:
         print("Repository static check: " + ("PASS" if result["ok"] else "FAIL"))
         if "installation" in result:
             package = result["installation"]
-            print("Installation sources: {}/27; {} bytes".format(
+            print("Installation sources: {}/32; {} bytes".format(
                 package["count"], package["bytes"]))
             closure = result["test_dependency_closure"]
             print("Retained scripts: {}; optional migration candidates: {}".format(

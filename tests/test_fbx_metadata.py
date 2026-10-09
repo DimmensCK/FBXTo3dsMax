@@ -15,6 +15,12 @@ import zlib
 from pathlib import Path
 from typing import Iterable, Optional, Sequence, Tuple
 
+# Resolve runtime modules from the source distribution without a global PYTHONPATH.
+import sys as _f2m_test_sys
+from pathlib import Path as _F2MTestPath
+_f2m_test_root = _F2MTestPath(__file__).resolve().parents[1]
+_f2m_test_sys.path.insert(0, str(_f2m_test_root / "contents" if (_f2m_test_root / "contents").is_dir() else _f2m_test_root))
+
 from f2m_test_fixtures import (
     CORNER_COUNT, FACE_COUNT, FACES, MESH_NAME, NATIVE_MASKS, get_fixture_paths,
 )
@@ -524,7 +530,7 @@ class FbxMetadataTests(unittest.TestCase):
             return reader(path)
 
     def test_version_matches_release(self) -> None:
-        self.assertEqual(TOOL_VERSION, "1.3.24")
+        self.assertEqual(TOOL_VERSION, "1.4.24")
 
     def test_existing_topology_fixture_has_no_native_smoothing(self) -> None:
         self.assertEqual(
@@ -833,11 +839,12 @@ class FbxMetadataTests(unittest.TestCase):
             )
 
     def test_resolver_cli_success_and_nonzero_failure(self) -> None:
-        script = ROOT / "f2m_fbx_metadata.py"
+        script = ROOT / "contents" / "f2m_fbx_metadata.py"
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "cli.json"
             environment = dict(os.environ)
             environment["PYTHONDONTWRITEBYTECODE"] = "1"
+            environment["PYTHONIOENCODING"] = "utf-8"
             success = subprocess.run(
                 (
                     sys.executable,
@@ -852,6 +859,7 @@ class FbxMetadataTests(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
                 check=False,
             )
             self.assertEqual(success.returncode, 0, success.stderr)
@@ -876,6 +884,7 @@ class FbxMetadataTests(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
                 check=False,
             )
             self.assertNotEqual(failure.returncode, 0)

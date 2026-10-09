@@ -6,8 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE = ROOT / "f2m_topology_transfer.py"
-SKIN_ENGINE = ROOT / "f2m_skin_replace.py"
+ENGINE = ROOT / "contents" / "f2m_topology_transfer.py"
+SKIN_ENGINE = ROOT / "contents" / "f2m_skin_replace.py"
 RUNNER = ROOT / "tests" / "max_user_reported_regressions_v1321.py"
 RUNNER_1322 = ROOT / "tests" / "max_user_reported_regressions_v1322.py"
 TRS_RUNNER = ROOT / "tests" / "max_mode1_matching_trs_v1322.py"
@@ -40,7 +40,7 @@ class UserReportedWorldSpaceGateSourceTests(unittest.TestCase):
         )
         for source in (self.runner, self.runner_1322, self.trs_runner):
             with self.subTest(source=source[:40]):
-                self.assertIn('EXPECTED_VERSION = "1.3.24"', source)
+                self.assertIn('EXPECTED_VERSION = "1.4.24"', source)
                 self.assertIn('"gate": {', source)
                 self.assertIn('"sha256": sha256_file(GATE_PATH)', source)
                 self.assertIn('"run_id":', source)

@@ -23,6 +23,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 GATE_PATH = os.path.abspath(__file__)
 
 
@@ -44,10 +45,10 @@ MAX_PATH = _required_private_path("F2M_PRIVATE_MAX_FIXTURE")
 FBX_PATH = _required_private_path("F2M_PRIVATE_FBX_VARIANT1")
 EVIDENCE_PATHS = {
     "gate": GATE_PATH,
-    "topology_engine": os.path.join(ROOT, "f2m_topology_transfer.py"),
-    "skin_engine": os.path.join(ROOT, "f2m_skin_replace.py"),
-    "metadata_engine": os.path.join(ROOT, "f2m_fbx_metadata.py"),
-    "smoothing_engine": os.path.join(ROOT, "f2m_smoothing.py"),
+    "topology_engine": os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py"),
+    "skin_engine": os.path.join(RUNTIME_ROOT, "f2m_skin_replace.py"),
+    "metadata_engine": os.path.join(RUNTIME_ROOT, "f2m_fbx_metadata.py"),
+    "smoothing_engine": os.path.join(RUNTIME_ROOT, "f2m_smoothing.py"),
 }
 MODE1_NAMES = (
     os.environ.get("F2M_PRIVATE_NODE_A", "ExampleMeshA"),
@@ -58,7 +59,7 @@ POSITION_TOLERANCE = 0.001
 NORMAL_ANGLE_TOLERANCE_DEGREES = 0.1
 SMOOTHING_NORMAL_ANGLE_TOLERANCE_DEGREES = 0.01
 BOOLEAN_IMPORTER_PARAMS = {"Animation", "Skin", "SmoothingGroups"}
-EXPECTED_VERSION = "1.3.24"
+EXPECTED_VERSION = "1.4.24"
 RESULT_PATH = os.path.join(
     os.environ["LOCALAPPDATA"],
     "FBXTo3dsMax", "Validation",
@@ -82,7 +83,7 @@ def sha256_file(path: str) -> str:
 
 
 def load_module(filename: str, module_name: str) -> Any:
-    path = os.path.join(ROOT, filename)
+    path = os.path.join(RUNTIME_ROOT, filename)
     sys.modules.pop(module_name, None)
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:

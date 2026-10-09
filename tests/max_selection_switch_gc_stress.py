@@ -33,6 +33,7 @@ import pymxs
 
 rt = pymxs.runtime
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 SCRIPT_PATH = os.path.abspath(__file__)
 DEFAULT_RESULT = os.path.join(
     os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(),
@@ -379,7 +380,7 @@ def _log_marker(kind: str, ok: Any = None) -> None:
 
 
 def _load_topology() -> Any:
-    path = os.path.abspath(os.path.join(ROOT, "f2m_topology_transfer.py"))
+    path = os.path.abspath(os.path.join(RUNTIME_ROOT, "f2m_topology_transfer.py"))
     name = TRACKED_MODULE_NAMES[0]
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)

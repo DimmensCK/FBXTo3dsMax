@@ -9,6 +9,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+# Resolve runtime modules from the source distribution without a global PYTHONPATH.
+import sys as _f2m_test_sys
+from pathlib import Path as _F2MTestPath
+_f2m_test_root = _F2MTestPath(__file__).resolve().parents[1]
+_f2m_test_sys.path.insert(0, str(_f2m_test_root / "contents" if (_f2m_test_root / "contents").is_dir() else _f2m_test_root))
+
 from f2m_fbx_metadata import read_mesh_smoothing_and_normals
 from f2m_test_fixtures import FACES, MESH_NAME, NATIVE_MASKS, fixture_bytes, get_fixture_paths
 
@@ -18,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class FixturePrivacyTests(unittest.TestCase):
     def test_repository_has_no_bundled_private_fbx_assets(self) -> None:
         self.assertEqual(list((ROOT / "tests").rglob("*.fbx")), [])
-        self.assertNotIn("tests\\fixtures\\", (ROOT / "Contents/FBXTo3dsMax.files").read_text("utf-8-sig"))
+        self.assertNotIn("tests\\fixtures\\", (ROOT / "contents/FBXTo3dsMax.files").read_text("utf-8-sig"))
 
     def test_generated_bytes_are_original_numeric_data_without_external_paths(self) -> None:
         for native in (False, True):

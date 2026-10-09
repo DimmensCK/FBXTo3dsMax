@@ -1,4 +1,4 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 [CmdletBinding()]
 param(
     [string]$MaxBatchExecutable = 'D:\Autodesk\3dsmax2023\3ds Max 2023\3dsmaxbatch.exe',
@@ -335,8 +335,8 @@ if ($null -ne $result) {
     if (-not $ownedPids.Contains($resultPid)) {
         $errors.Add("业务 JSON PID $resultPid 不属于本次 MaxBatch 启动树。")
     }
-    if ($result.version -ne '1.3.20') {
-        $errors.Add("业务 JSON 版本错误：$($result.version)/1.3.20")
+    if ($result.version -ne '1.4.24') {
+        $errors.Add("业务 JSON 版本错误：$($result.version)/1.4.24")
     }
     if ($result.state -ne 'finished' -or $result.ok -ne $true) {
         $errors.Add(

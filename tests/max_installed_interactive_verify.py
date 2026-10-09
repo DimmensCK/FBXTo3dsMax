@@ -30,7 +30,7 @@ LEGACY_TOOLBAR_OBJECT_NAME = "FBXTo3dsMax.Toolbar"
 FALLBACK_TOOLBAR_OBJECT_NAME = "FBXTo3dsMax.FallbackToolbar"
 ACTION_OBJECT_NAME = "FBXTo3dsMax.OpenWidgetAction"
 BUTTON_OBJECT_NAME = "FBXTo3dsMax.TopButton"
-EXPECTED_VERSION = "1.3.24"
+EXPECTED_VERSION = "1.4.24"
 
 
 def _read_installed_version() -> str:
@@ -42,7 +42,7 @@ def _read_installed_version() -> str:
         "Autodesk",
         "ApplicationPlugins",
         "FBXTo3dsMax",
-        "Contents",
+        "contents",
         "FBXTo3dsMax.version",
     )
     if not os.path.isfile(version_path):

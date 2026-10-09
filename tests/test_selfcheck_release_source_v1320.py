@@ -13,9 +13,9 @@ from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SELFCHECK_PATH = ROOT / "f2m_selfcheck.py"
-TOPOLOGY_PATH = ROOT / "f2m_topology_transfer.py"
-SKIN_PATH = ROOT / "f2m_skin_replace.py"
+SELFCHECK_PATH = ROOT / "contents" / "f2m_selfcheck.py"
+TOPOLOGY_PATH = ROOT / "contents" / "f2m_topology_transfer.py"
+SKIN_PATH = ROOT / "contents" / "f2m_skin_replace.py"
 
 
 def load_selfcheck():

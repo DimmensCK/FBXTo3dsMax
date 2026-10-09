@@ -16,6 +16,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 RESULT = os.path.join(
     ROOT,
     "tests",
@@ -24,7 +25,7 @@ RESULT = os.path.join(
 
 
 def load_selfcheck() -> Any:
-    path = os.path.join(ROOT, "f2m_selfcheck.py")
+    path = os.path.join(RUNTIME_ROOT, "f2m_selfcheck.py")
     name = "_f2m_topology_fbx_gc_gate_v1320"
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
@@ -38,7 +39,7 @@ def load_selfcheck() -> Any:
 
 payload = {
     "ok": False,
-    "version": "1.3.20",
+    "version": "1.4.24",
     "engine_pid": os.getpid(),
     "started_at_utc_epoch": time.time(),
     "finished_at_utc_epoch": 0.0,

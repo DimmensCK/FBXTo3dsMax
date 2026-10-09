@@ -13,6 +13,7 @@ from pymxs import runtime as rt
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 FIXTURE = ""
 NATIVE_FIXTURE = ""
 os.makedirs(os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "FBXTo3dsMax", "Validation"), exist_ok=True)
@@ -20,7 +21,7 @@ RESULT = os.path.join(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir(), "
 
 
 def load_module(filename: str, module_name: str):
-    path = os.path.join(ROOT, filename)
+    path = os.path.join(RUNTIME_ROOT, filename)
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError(path)
