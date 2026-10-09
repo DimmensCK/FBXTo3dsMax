@@ -13,7 +13,7 @@ global F2M_UI_EnglishTexts
 rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:466
 (
     local toolAuthor = "Dimmens"
-    local toolVersion = "1.4.25"
+    local toolVersion = "1.4.26"
     local scriptDir = getFilenamePath (getSourceFileName())
     local pyTopologyFile = scriptDir + "f2m_topology_transfer.py"
     local pyReplaceFile = scriptDir + "f2m_skin_replace.py"
@@ -68,7 +68,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:466
 
     label lbl_warn "传递数据前优先检查 FBX，报告无异常后再执行；正式执行前建议保存 Max 文件。" pos:[24,364] width:410 height:44
     button btn_run "开始执行" pos:[155,396] width:150 height:26
-    label lbl_meta "作者：Dimmens    版本：1.4.25" pos:[24,430] width:410 height:14
+    label lbl_meta "作者：Dimmens    版本：1.4.26" pos:[24,430] width:410 height:14
 
     fn pyString s =
     (
@@ -86,12 +86,12 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:466
     (
         local code = "import os, sys, importlib.util, builtins\nfrom pymxs import runtime as rt\n"
         code += "p = os.path.abspath(" + pyString pyLanguageFile + ")\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n"
-        code += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n"
+        code += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.26' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True:\n"
         code += "    sys.modules.pop(name, None)\n    spec = importlib.util.spec_from_file_location(name, p)\n"
         code += "    if spec is None or spec.loader is None: raise RuntimeError('Language module loader missing')\n"
         code += "    m = importlib.util.module_from_spec(spec)\n    sys.modules[name] = m\n"
         code += "    try: spec.loader.exec_module(m)\n    except BaseException:\n        if sys.modules.get(name) is m: sys.modules.pop(name, None)\n        raise\n"
-        code += "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language module identity/version mismatch')\n"
+        code += "if os.path.normcase(os.path.abspath(m.__file__)) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.26' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language module identity/version mismatch')\n"
         code += "for api in ('translate', 'get_language', 'set_language', 'ui_catalog_sources', 'ui_catalog_english'):\n    if not callable(getattr(m, api, None)): raise RuntimeError('Language API missing: ' + api)\n"
         if requestedLocale != undefined do
             code += "m.set_language(" + pyString requestedLocale + ", persist=False)\n"
@@ -108,7 +108,7 @@ rollout F2M_Transfer_Rollout "FBX 到 3ds Max 数据传递" width:460 height:466
             -- Commit only after catalog, toolbar and native language readback succeed.
             local commitCode = "import os, sys\n"
             commitCode += "p = os.path.abspath(" + pyString pyLanguageFile + ")\nname = '_fbx_to_3dsmax_i18n_runtime'\nm = sys.modules.get(name)\n"
-            commitCode += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.25' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language commit module identity/version mismatch')\n"
+            commitCode += "if m is None or os.path.normcase(os.path.abspath(getattr(m, '__file__', '') or '')) != os.path.normcase(p) or getattr(m, 'TOOL_VERSION', '') != '1.4.26' or getattr(m, '_F2M_IMPORT_COMPLETE', False) is not True: raise RuntimeError('Language commit module identity/version mismatch')\n"
             commitCode += "for api in ('get_language', 'set_language'):\n    if not callable(getattr(m, api, None)): raise RuntimeError('Language commit API missing: ' + api)\n"
             commitCode += "chosen = " + pyString currentLanguage + "\nif chosen not in ('zh-CN', 'en') or m.get_language() != chosen: raise RuntimeError('Language commit preview mismatch')\n"
             commitCode += "m.set_language(chosen, persist=True)\n"

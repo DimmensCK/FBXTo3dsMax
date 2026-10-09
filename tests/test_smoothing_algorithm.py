@@ -106,7 +106,7 @@ def _wheel(pair_count: int) -> Tuple[List[Face], List[List[int]]]:
 
 class SmoothingAlgorithmTests(unittest.TestCase):
     def test_version_is_v1320(self) -> None:
-        self.assertEqual(TOOL_VERSION, "1.4.25")
+        self.assertEqual(TOOL_VERSION, "1.4.26")
 
     def test_two_triangles_all_soft_from_corner_normals(self) -> None:
         faces = [(0, 1, 2), (0, 2, 3)]

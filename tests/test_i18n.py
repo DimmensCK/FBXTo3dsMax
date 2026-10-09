@@ -112,8 +112,8 @@ class LanguageTests(unittest.TestCase):
                 self.assertIn(source, self.module.CATALOG)
 
     def test_display_formatting_preserves_names_paths_and_version(self):
-        self.assertEqual(self.module.text("ui.meta", locale="en", author="Dimmens", version="1.4.25"),
-                         "Author: Dimmens    Version: 1.4.25")
+        self.assertEqual(self.module.text("ui.meta", locale="en", author="Dimmens", version="1.4.26"),
+                         "Author: Dimmens    Version: 1.4.26")
         path = r"C:\User Models\中文网格\mesh.fbx"
         original = self.module.text("macro.missing", locale="zh-CN", path=path)
         rendered = self.module.translate(original, locale="en")
@@ -137,7 +137,7 @@ class LanguageTests(unittest.TestCase):
         self.assertNotEqual(rendered, "FOREIGN")
         loaded = sys.modules[name]
         self.assertEqual(Path(loaded.__file__).resolve(), CONTENTS / "f2m_report_i18n.py")
-        self.assertEqual(loaded.TOOL_VERSION, "1.4.25")
+        self.assertEqual(loaded.TOOL_VERSION, "1.4.26")
         self.assertIs(loaded._F2M_IMPORT_COMPLETE, True)
 
     def test_language_handler_changes_only_display_and_preference(self):
@@ -395,7 +395,7 @@ class LanguageTests(unittest.TestCase):
         self.assertIsInstance(final, ast.Expr)
         self.assertEqual(ast.get_source_segment(code, final), "m.set_language(chosen, persist=True)")
         foreign = types.SimpleNamespace(__file__=str(Path(self.directory.name) / "foreign.py"),
-                                        TOOL_VERSION="1.4.25", _F2M_IMPORT_COMPLETE=True,
+                                        TOOL_VERSION="1.4.26", _F2M_IMPORT_COMPLETE=True,
                                         get_language=lambda: "en", set_language=mock.Mock())
         with mock.patch.dict(sys.modules, {self.module.MODULE_NAME: foreign}):
             with self.assertRaisesRegex(RuntimeError, "identity/version mismatch"):

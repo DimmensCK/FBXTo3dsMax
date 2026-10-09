@@ -60,7 +60,7 @@ def _load_topology() -> Any:
     actual = os.path.normcase(os.path.abspath(str(module.__file__)))
     if actual != os.path.normcase(path):
         raise RuntimeError(f"核心模块来源不一致：{actual} != {path}")
-    if str(module.TOOL_VERSION) != "1.4.25":
+    if str(module.TOOL_VERSION) != "1.4.26":
         raise RuntimeError(f"加载到错误插件版本：{module.TOOL_VERSION}")
     module.ensure_runtime()
     return module
@@ -665,7 +665,7 @@ def main() -> None:
     payload: Dict[str, Any] = {
         "schema_version": 1,
         "test": "FBXTo3dsMax smoothing write safety",
-        "tool_version": "1.4.25",
+        "tool_version": "1.4.26",
         "started_at_utc": started_at,
         "finished_at_utc": None,
         "overall_status": "running",

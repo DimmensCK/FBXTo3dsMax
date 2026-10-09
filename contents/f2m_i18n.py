@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-TOOL_VERSION = "1.4.25"
+TOOL_VERSION = "1.4.26"
 SUPPORTED_LOCALES = ("zh-CN", "en")
 MODULE_NAME = "_fbx_to_3dsmax_i18n_runtime"
 REPORT_MODULE_NAME = "_f2m_report_i18n_runtime"

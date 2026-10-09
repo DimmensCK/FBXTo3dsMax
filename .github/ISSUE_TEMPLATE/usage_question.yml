@@ -1,0 +1,29 @@
+name: Usage question / 使用问题
+description: Ask about a task or workflow / 询问任务或操作方法
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with the [中文教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) or [English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md).
+        Share sanitized text or screenshots only; no production models, personal paths, account details, tokens or raw local logs.
+        仅提供脱敏文字或截图；不要上传正式模型、个人路径、账号、令牌或原始本机日志。
+  - type: input
+    id: versions
+    attributes:
+      label: Versions / 版本
+      description: Plug-in and full Max version, if installed / 如已安装，填写插件与 Max 完整版本
+  - type: textarea
+    id: task
+    attributes:
+      label: Your task / 想完成的任务
+      description: Describe the result you need and the mode or channels involved / 说明目标及涉及的模式或通道
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried / 已尝试的方法
+      description: Steps, guide section and the point where you got stuck / 操作步骤、参考章节及卡住的位置
+    validations:
+      required: true

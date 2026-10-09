@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 中文使用教程
+    url: https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md
+    about: 按任务查看安装后操作、两种模式与限制。
+  - name: English user guide
+    url: https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md
+    about: Task-based workflows, the two modes and their limits.

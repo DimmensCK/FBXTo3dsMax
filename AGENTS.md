@@ -11,7 +11,7 @@ Before editing, read:
 
 - The sibling `Blender To 3dsMax` directory is read-only historical source. Never edit, install from, rename or clean it.
 - Keep the mature two-mode workflow unless a verified defect requires change.
-- Original version baseline is `1.2.16`: bug fixes add `0.0.1`, new features add `0.1.0`. Current target `1.4.25` requires fresh qualification; historical `1.3.24` or `1.4.24` results do not qualify it.
+- Original version baseline is `1.2.16`: bug fixes add `0.0.1`, new features add `0.1.0`. Current target `1.4.26` requires fresh qualification; historical `1.3.24` or `1.4.24` results do not qualify it.
 - Runtime source/resources live under lowercase `contents/`. Keep root user entry points concise; PowerShell installation is `tools/Install_FBXTo3dsMax.ps1`.
 - Synchronize versions in both Python engines, UI, language modules, `contents/VERSION.txt`, `contents/FBXTo3dsMax.version`, package metadata, installer manifest and changelog.
 - Load runtime modules by absolute path and verify `module.__file__`, version, completion state and entry point.

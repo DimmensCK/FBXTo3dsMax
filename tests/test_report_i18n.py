@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import contextlib
 import os
 from pathlib import Path
 import re
@@ -238,8 +239,8 @@ class SelfcheckReportFormatterTests(unittest.TestCase):
         checks = [self.check(name, index != 0, FORMATTER_UNKNOWN if index == 0 else "光滑组算法测试通过。", index + 23) for index, name in enumerate(FORMATTER_CASES)]
         expected_details = [self.module._localize_visible_text(item.detail) for item in checks]
         result, visible = self.write(checks)
-        self.assertEqual(result["summary"], "FBXTo3dsMax v1.4.25 自检失败：5/6 项通过。")
-        self.assertEqual(visible.splitlines()[0], "FBXTo3dsMax v1.4.25 self-check Failed: 5/6 checks passed.")
+        self.assertEqual(result["summary"], "FBXTo3dsMax v1.4.26 自检失败：5/6 项通过。")
+        self.assertEqual(visible.splitlines()[0], "FBXTo3dsMax v1.4.26 self-check Failed: 5/6 checks passed.")
         self.assertIn(self.report.CATALOG[FORMATTER_NOTICE], visible)
         for index, item in enumerate(checks):
             row = "[" + ("Passed" if item.ok else "Failed") + "] " + self.report.CATALOG[item.name] + " (" + str(item.elapsed_ms) + " ms)"
@@ -569,7 +570,7 @@ class TypedSelfcheckGateDisplayTests(unittest.TestCase):
             visible = self.finish(result)
             self.assertTrue(visible.startswith("Self-check failed: "))
             self.assertNotIn("Original business-check summary", visible)
-        result = self.process({"ok": True, "summary": "FBXTo3dsMax v1.4.25 自检通过：6/6 项通过。", "report_path": ""}, code=0)
+        result = self.process({"ok": True, "summary": "FBXTo3dsMax v1.4.26 自检通过：6/6 项通过。", "report_path": ""}, code=0)
         self.assertTrue(result["ok"])
         self.assertIn("self-check Passed: 6/6 checks passed.", self.finish(result))
 
@@ -607,10 +608,10 @@ class BackendExceptionTerminalDisplayTests(unittest.TestCase):
         for engine in self.engines:
             with self.subTest(engine=engine.__name__):
                 raw = engine.visible_exception_text(RuntimeError(CONSUMER_UNKNOWN))
-                body = "FBX 到 3ds Max 数据传递报告 v1.4.25\n[失败：已回滚] [显式法线]\n传递失败：" + raw
+                body = "FBX 到 3ds Max 数据传递报告 v1.4.26\n[失败：已回滚] [显式法线]\n传递失败：" + raw
                 path = engine.write_log_file(body, "terminal_" + engine.__name__)
                 visible = Path(path).read_text(encoding="utf-8")
-                self.assertTrue(visible.startswith("FBX to 3ds Max transfer report v1.4.25\n"))
+                self.assertTrue(visible.startswith("FBX to 3ds Max transfer report v1.4.26\n"))
                 self.assertIn("[Failed: rolled back] [显式法线]", visible)
                 self.assertIn("Transfer failed: ", visible)
                 for line in CONSUMER_UNKNOWN.split("\n"):
@@ -636,11 +637,13 @@ class BackendExceptionTerminalDisplayTests(unittest.TestCase):
             with self.subTest(engine=engine.__name__):
                 popup = mock.Mock()
                 listener = mock.Mock()
-                fake_rt = types.SimpleNamespace(selection=[], messageBox=popup, format=listener)
+                fake_rt = types.SimpleNamespace(selection=[], objects=[], isValidNode=lambda node: True,
+                    getHandleByAnim=lambda node: node.handle, clearSelection=mock.Mock(), messageBox=popup, format=listener)
                 raw_log = engine.TransferLog()
-                context = types.SimpleNamespace(log=raw_log, diagnostics=[], run_id="exception_branch", committed_replacements=[])
                 mode = "topology_only" if "topology" in engine.__name__ else "replace"
                 options = engine.TransferOptions(fbx_path="", mode=mode, show_ui=True)
+                context = engine.TransferContext(options, raw_log)
+                context.run_id = "exception_branch"
                 patches = [mock.patch.object(engine, "rt", fake_rt), mock.patch.object(engine, "ensure_runtime"),
                     mock.patch.object(engine, "ensure_maxscript_heap_reserve", side_effect=RuntimeError(CONSUMER_UNKNOWN)),
                     mock.patch.object(engine, "TransferContext", return_value=context),
@@ -650,6 +653,8 @@ class BackendExceptionTerminalDisplayTests(unittest.TestCase):
                     mock.patch.object(engine, "_exception_text_and_release", return_value=CONSUMER_UNKNOWN),
                     mock.patch.object(engine, "write_diagnostic_file", return_value="C:\\光滑组\\diagnostic.txt")]
                 if mode == "replace":
+                    patches.append(mock.patch.object(engine, "pymxs",
+                        types.SimpleNamespace(redraw=lambda enabled: contextlib.nullcontext())))
                     patches.append(mock.patch.object(engine, "rollback_committed_replacements", return_value=[]))
                 else:
                     patches.append(mock.patch.object(engine, "restore_selection_by_handle"))

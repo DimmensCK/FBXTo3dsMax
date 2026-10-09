@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.4.25 启动引导。
+FBXTo3dsMax v1.4.26 启动引导。
 
 这里只注册稳定的 MacroScript 和顶部按钮；主窗口只会在用户点击按钮后打开。
 */
@@ -8,7 +8,7 @@ global FBXTo3dsMax_Bootstrap
 
 struct FBXTo3dsMax_BootstrapStruct
 (
-    version = "1.4.25",
+    version = "1.4.26",
     contentDir = getFilenamePath (getSourceFileName()),
     callbackId = #FBXTo3dsMax_Toolbar,
     lastError = "",
@@ -159,7 +159,7 @@ struct FBXTo3dsMax_BootstrapStruct
                 "_f2m_toolbar_name = '_fbx_to_3dsmax_toolbar_runtime'\n" +
                 "_f2m_toolbar_module = sys.modules.get(_f2m_toolbar_name)\n" +
                 "_f2m_toolbar_origin = os.path.abspath(getattr(_f2m_toolbar_module, '__file__', '') or '') if _f2m_toolbar_module else ''\n" +
-                "if _f2m_toolbar_module is None or os.path.normcase(_f2m_toolbar_origin) != os.path.normcase(_f2m_toolbar_path) or str(getattr(_f2m_toolbar_module, 'TOOL_VERSION', '')) != '1.4.25' or getattr(_f2m_toolbar_module, '_F2M_IMPORT_COMPLETE', False) is not True or not callable(getattr(_f2m_toolbar_module, 'install_and_schedule', None)):\n" +
+                "if _f2m_toolbar_module is None or os.path.normcase(_f2m_toolbar_origin) != os.path.normcase(_f2m_toolbar_path) or str(getattr(_f2m_toolbar_module, 'TOOL_VERSION', '')) != '1.4.26' or getattr(_f2m_toolbar_module, '_F2M_IMPORT_COMPLETE', False) is not True or not callable(getattr(_f2m_toolbar_module, 'install_and_schedule', None)):\n" +
                 "    _f2m_old_api = getattr(builtins, '_FBXTO3DSMAX_TOOLBAR_API', None)\n" +
                 "    if _f2m_old_api:\n" +
                 "        _f2m_old_api.get('uninstall', lambda: 0)()\n" +
@@ -178,7 +178,7 @@ struct FBXTo3dsMax_BootstrapStruct
                 "    setattr(_f2m_toolbar_module, '_F2M_IMPORT_COMPLETE', True)\n" +
                 "if os.path.normcase(os.path.abspath(_f2m_toolbar_module.__file__)) != os.path.normcase(_f2m_toolbar_path):\n" +
                 "    raise RuntimeError('工具栏模块来源校验失败。')\n" +
-                "if str(getattr(_f2m_toolbar_module, 'TOOL_VERSION', '')) != '1.4.25':\n" +
+                "if str(getattr(_f2m_toolbar_module, 'TOOL_VERSION', '')) != '1.4.26':\n" +
                 "    raise RuntimeError('Toolbar module version mismatch.')\n" +
                 "_f2m_toolbar_status = _f2m_toolbar_module.install_and_schedule()\n" +
                 "if not _f2m_toolbar_status.get('ok', False):\n" +

@@ -1,90 +1,87 @@
-# Installing FBXTo3dsMax 1.4.25
+# Installing FBXTo3dsMax 1.4.26
 
-[中文安装说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [Overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md) · [User guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
+[中文安装说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [English overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md) · [Complete user guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
 
-This is the installation and removal guide for the **1.4.25 readable source edition**. Consult [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for version-specific acceptance. Historical 1.4.24 and 1.3.24 results do not qualify 1.4.25.
+## Start in three steps
 
-## Choose the right entry
+1. **Download a complete release and extract it.** Use the [v1.4.26 source ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip), or choose **Source code (zip)** under Assets on the [Release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26). Do not save the installer alone or run inside the ZIP.
+2. **Save your scene and drag in the installer.** Drag root **`Install_FBXTo3dsMax.ms`** into the Max viewport. Wait and confirm success; retain the log and resolve a failure before use.
+3. **Open, self-check and try a copy.** Click **FBX 转 MAX / FBX to MAX** on the top toolbar. Click **EN** beside **Language**, then **Run Self-check**. Start on a scene copy with one receiving mesh and the default **Shape** option.
+
+Installation does not open the plug-in window automatically. Interactive installation normally shows a result dialog; silent startup may record it in the log. After success, restart Max and confirm the toolbar entry remains. The main toolbar is preferred, with a docked fallback when necessary. [See the English UI reference](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md#language-ui)
+
+## Before installing
+
+The installer, `PackageContents.xml`, `LICENSE` and lowercase `contents/`, `docs/`, `tests/`, `tools/` must come from the same complete version. The plug-in uses Max's bundled Python; normal installation needs no separate interpreter, compiler or administrator access.
+
+Consult [TESTING](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for version-specific results and limits. Package metadata declares Max 2023–2026; **2024–2026 remain untested**. Self-check data is generated in the local user-data directory. The source package contains no FBX/MAX/BLEND model files.
 
 | Goal | Entry |
 |---|---|
 | Install or reinstall the same version | Root `Install_FBXTo3dsMax.ms` |
-| Remove the package while retaining recovery archives | Root `Uninstall_FBXTo3dsMax.ms` |
+| Remove the package and retain recovery archives | Root `Uninstall_FBXTo3dsMax.ms` |
 | Work after installation | Max top-toolbar **FBX 转 MAX / FBX to MAX** |
 
-**Complete ZIP → extract → run installer → confirm success → self-check → first transfer on a scene copy.** The installer and `contents/` must come from the same complete version. Opening the UI script alone does not install the package.
+Opening `contents/FBXTo3dsMax_UI.ms` directly is a temporary UI entry, not proof of installation. The repository's [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) is a development snapshot; prefer the fixed release above for your first installation.
 
-## Download and environment
+## Installation and language locations
 
-Download the complete [repository](https://github.com/DimmensCK/FBXTo3dsMax) using **Code → Download ZIP**, then extract it. Keep root `Install_FBXTo3dsMax.ms`, `PackageContents.xml`, `LICENSE`, and the lowercase `contents/`, `docs/`, `tests/`, `tools/` directories together. Do not execute inside the ZIP or download the installer alone.
-
-Historical acceptance used Windows 11 x64, Max 2023.3.10 and Python 3.9.7. Package routing declares Max 2023–2026; 2024–2026 have not been validated. The plug-in uses the Python shipped with Max; normal installation needs no separate interpreter or compiler.
-
-The source distribution contains no FBX/MAX/BLEND model files. Self-check data is generated procedurally in the local user-data directory.
-
-## Recommended installation
-
-1. Save your current Max scene.
-2. Drag root **`Install_FBXTo3dsMax.ms`** into the Max viewport.
-3. Wait for completion and confirm success. Interactive installation normally shows a result dialog; silent startup may record the result in the log instead. On failure, retain the log and resolve it before use.
-4. After success, click **FBX 转 MAX / FBX to MAX** on the top toolbar. The main toolbar is preferred; a docked fallback toolbar is used when necessary.
-5. Click **EN** beside **Language** for English (or **中文** for Chinese), then **Run Self-check** and read its report.
-6. Close and reopen Max, confirm the button remains available, and try your first transfer on a scene copy.
-
-Installation does not automatically open the plug-in window. It is per-user and normally needs no administrator access. The installed package is normally:
+The normal per-user package location is:
 
 ```text
 %APPDATA%\Autodesk\ApplicationPlugins\FBXTo3dsMax
 ```
 
-After installation, Max runs the complete installed copy. The UI language updates without reopening the window and is saved in `%LOCALAPPDATA%\FBXTo3dsMax\language.txt`. See the root [language UI reference](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md#language-ui); installed text is local, while web images and videos require internet access.
+Max runs the complete installed copy after installation. The mutually exclusive **中文 / EN** buttons switch the UI in place without reopening it. The preference file is `%LOCALAPPDATA%\FBXTo3dsMax\language.txt`. Installed guide text works offline; web images and videos require internet access.
 
-## Reinstall, upgrade and archives
-
-Drag the same installer again for a same-version reinstall. Downgrades are rejected by default. Install/uninstall share an exclusive package lock. The installer stages the fixed resources, verifies SHA-256, archives the previous package, switches the complete package, then reads back files, version and toolbar state. On failure it attempts to restore the previous package and managed files.
-
-The current source manifest has **32 safe, unique targets**. Installed hashes are recorded in `FBXTo3dsMax.install-manifest.sha256`; its target set must equal the fixed source manifest. Do not use a historical encrypted-edition manifest or the former 27-target source manifest.
-
-Logs, staging, archives and the lock live under:
+Installer logs, staging, archives and the lock live under:
 
 ```text
 %APPDATA%\Autodesk\FBXTo3dsMaxInstaller
 ```
 
-The result dialog gives the exact paths for that transaction. Unrecognized same-name package, Macro or icon files cause an ownership failure rather than an overwrite. Recognized legacy AutoLoader scripts are archived with their locations recorded. Historical source projects are outside the cleanup scope.
+The result dialog gives the paths for that transaction. Keep failure logs and archive information.
 
-The historical 27-target to current 32-target upgrade has not been separately exercised; the new target count does not qualify that upgrade.
+## Reinstall, upgrade and archives
 
-An archived installation is recoverable data, not an automatic restore button. Preserve its manifest and logs; inspect it before manual recovery. Historical uninstall acceptance verified archived bytes but did not exercise restoring from that archive. It does not establish installation, removal or recovery in your normal daily profile.
+Drag the same installer again for a same-version reinstall. Downgrades are rejected by default. Install/uninstall share an exclusive lock. The installer stages the fixed resources, verifies SHA-256, archives the previous package and managed files, switches the complete package, then reads back files, version and toolbar state. On failure it attempts restoration.
 
-## Missing button or window
+The fixed source manifest has **32 safe, unique targets**. `FBXTo3dsMax.install-manifest.sha256` records installed hashes; its target set must equal the fixed source manifest. This is an installation-resource count, not a test count. Do not mix a historical encrypted-edition manifest or the former 27-target source manifest with this version.
 
-Check that the download was complete and extracted, read the actual installation result/log, then rerun the standard installer and restart Max. Do not manually delete same-name packages, Macros, icons or old AutoLoader scripts whose ownership is unknown just to remove a warning. If the problem remains, report the full Max version, plug-in version and reproduction steps with sanitized logs.
+Unrecognized same-name package, Macro or icon files cause an ownership failure rather than an overwrite. Recognized legacy AutoLoader scripts are archived with their original locations recorded. Historical source projects are outside the cleanup scope.
 
-Running `contents/FBXTo3dsMax_UI.ms` directly only opens a temporary UI; it does not establish that the package is installed correctly. Developers must retain `post-start-up scripts parts` in `PackageContents.xml`: it is the AutoLoader routing identifier.
+The historical 27-target to current 32-target upgrade has not been separately exercised. An archive is data for inspected recovery, not an automatic restore button; keep its manifest and logs. Complete archived bytes do not prove that reinstalling from the archive was exercised or that installation/removal/recovery was qualified in your daily profile.
+
+## Missing button, or installation failed
+
+Check that the download was complete and extracted, read the actual installation result/log, then rerun the standard installer and restart Max. Do not manually delete same-name packages, Macros, icons or old AutoLoader scripts of unknown ownership to remove a warning.
+
+If the problem remains, report the full Max version, plug-in version, reproduction steps and sanitized logs in [Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues). Do not attach private models, full local paths or project information. Developers must retain `post-start-up scripts parts` in `PackageContents.xml`: it is the AutoLoader routing identifier.
 
 ## Self-check and first transfer
 
-The built-in self-check starts a dedicated `3dsmaxbatch.exe` and uses original generated scenes. It does not reset the current interactive scene. It runs asynchronously and may be cancelled. Success requires all six categories and natural process exit **0**. Timeout, forced cleanup, cancellation or a nonzero exit are failure even if a JSON result looks successful.
+The built-in self-check starts a dedicated `3dsmaxbatch.exe` with original generated scenes. It does not reset your current interactive scene. It runs asynchronously and may be cancelled. Success requires all six categories and natural process exit **0**. Timeout, forced cleanup, cancellation or a nonzero exit are failure even if a JSON result is green.
 
-Reports are saved in `%LOCALAPPDATA%\FBXTo3dsMax\SelfCheck`. Resolve self-check failures before processing formal assets. After success, use a scene copy and start with a single receiving mesh and the default position/shape channel. Check appearance, animation and save/reload.
+Reports are saved in `%LOCALAPPDATA%\FBXTo3dsMax\SelfCheck`. Resolve failures before processing formal assets. Then start with a scene copy and one receiving mesh. Inspect the selected channels, appearance, animation and save/reload; Mode 1 updates positions by default, with other channels selected as needed.
 
-The actual transfer is synchronous on Max's main thread; it currently has no safe mid-transfer cancellation.
+Actual transfer is synchronous on Max's main thread and currently has no safe mid-transfer cancellation. Follow the [complete task guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) for operation.
 
 ## Uninstall
 
-Drag root `Uninstall_FBXTo3dsMax.ms` into Max, or run the installed `contents/Uninstall_FBXTo3dsMax.ms`. The uninstaller checks ownership, cleans the owned UI/toolbars/callbacks, archives the package and managed Macro/icons, and records their SHA-256. On failure it attempts restoration.
+Drag root `Uninstall_FBXTo3dsMax.ms` into Max, or run the installed `contents/Uninstall_FBXTo3dsMax.ms`. The uninstaller checks ownership, cleans the owned UI/toolbars/callbacks, archives the package and managed Macro/icons, and records SHA-256. On failure it attempts restoration.
 
-Keep the archive path shown by the result dialog. Restart Max after uninstall to clear cached action items. User scenes and retained recovery archives are not permanently deleted.
+Keep the archive location shown by the result. Restart Max after uninstall to clear cached action items. User scenes and retained recovery archives are not permanently deleted. Inspect the complete manifest, version and logs before attempting manual recovery; having an archive is not evidence of a completed restore.
 
 ## Optional PowerShell entry
 
-Use drag-and-drop when interactive Max is already open. With all Max/Batch processes closed, run PowerShell 7 from the repository root:
+Prefer drag-and-drop when interactive Max is open. With all Max/Batch processes closed, run PowerShell 7 from the repository root:
 
 ```powershell
 pwsh -NoLogo -NoProfile -File .\tools\Install_FBXTo3dsMax.ps1 -MaxRoot '<absolute Max installation directory>'
 ```
 
-Replace the placeholder with your installation directory or absolute `3dsmax.exe` path. This launcher first checks files, versions and the chosen Max path, then starts Max with the same standard `.ms` transaction. It refuses existing Max/Batch processes and does not terminate them.
+Replace the placeholder with your installation directory or absolute `3dsmax.exe` path. This launcher checks files, versions and the Max path, then starts Max with the same standard `.ms` transaction. It refuses existing Max/Batch processes and does not terminate them. Read [TESTING](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for actual coverage and acceptance-tool exceptions; a narrowly accepted observation is not a waiver for every installation failure.
 
-Task-based operation is covered in the [complete user guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md). Development checks are described in [TESTING](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md). The installed offline guide is named `INSTALL_EN.md`; `README_EN.md` and `USER_GUIDE_EN.md` are beside it.
+## Offline guides
+
+Installed `contents/` keeps guide text flat as `README_中文.md`, `INSTALL_中文.md`, `FBXTo3dsMax_详细说明书.md`, `README_EN.md`, `INSTALL_EN.md`, `USER_GUIDE_EN.md`, alongside the changelog. Web links lead to the complete tutorials and media; open the corresponding neighboring text files when offline.

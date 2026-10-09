@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""模式二 v1.4.25 发布安全修复的纯 Python 专项回归。"""
+"""模式二 v1.4.26 发布安全修复的纯 Python 专项回归。"""
 
 from __future__ import annotations
 
@@ -191,10 +191,12 @@ class SkinReleaseSafetyV1320Tests(unittest.TestCase):
 
     def test_tracking_failure_cannot_skip_importer_restore(self):
         module = load_module("_f2m_test_skin_release_nested_restore")
-        module.rt = types.SimpleNamespace(execute=lambda _code: True)
+        module.rt = types.SimpleNamespace(objects=[], isValidNode=lambda node: True,
+            getHandleByAnim=lambda node: node.handle, execute=lambda _code: True)
         ctx = types.SimpleNamespace(
             options=types.SimpleNamespace(fbx_path="fixture.fbx"),
             imported_nodes=[],
+            pre_handles=None,
             log=_Log(),
         )
         snapshot = {"Mode": "merge"}

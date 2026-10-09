@@ -1,10 +1,10 @@
-# FBXTo3dsMax 1.4.25 · user guide
+# FBXTo3dsMax 1.4.26 · user guide
 
 **Choose the task, then the data.** Follow practical workflows first; consult the reference below for matching, Skin authority and failure boundaries.
 
 By Dimmens · [中文教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) · [Installation and removal](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [Feature overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md)
 
-This guide describes 1.4.25 operations and design. Version-specific acceptance is recorded in [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md). Historical 1.4.24 and 1.3.24 results are separate and do not qualify later versions.
+This guide describes 1.4.26 operations and design. Version-specific acceptance is recorded in [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md). Historical 1.4.24 and 1.3.24 results are separate and do not qualify later versions.
 
 ## Pick a task
 
@@ -45,7 +45,7 @@ One Max mesh and one FBX mesh can pair directly. Other object-count combinations
 |---|---|
 | ![Before historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![After historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
 
-These author-authorized historical images are not 1.4.25 captures. Their left/right positions do not define source authority. The [historical v1.3.23 inspection clip, about 10 seconds](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4), shows deformation/binding inspection, not the complete procedure.
+These author-authorized historical images are not 1.4.26 captures. Their left/right positions do not define source authority. The [historical v1.3.23 inspection clip, about 10 seconds](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4), shows deformation/binding inspection, not the complete procedure.
 
 ## Task 2 — update UVs, materials and face IDs
 

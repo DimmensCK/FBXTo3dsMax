@@ -40,7 +40,7 @@ class UserReportedWorldSpaceGateSourceTests(unittest.TestCase):
         )
         for source in (self.runner, self.runner_1322, self.trs_runner):
             with self.subTest(source=source[:40]):
-                self.assertIn('EXPECTED_VERSION = "1.4.25"', source)
+                self.assertIn('EXPECTED_VERSION = "1.4.26"', source)
                 self.assertIn('"gate": {', source)
                 self.assertIn('"sha256": sha256_file(GATE_PATH)', source)
                 self.assertIn('"run_id":', source)
@@ -48,7 +48,7 @@ class UserReportedWorldSpaceGateSourceTests(unittest.TestCase):
 
     def test_success_path_uses_node_coordinate_domain(self) -> None:
         self.assertIn(
-            "local expectedNode = ((meshop.getVert srcMesh i) * srcTM) * dstInvTM",
+            "local expectedNode = meshop.getVert srcMesh i",
             self.shape_helper,
         )
         for marker in (
@@ -60,12 +60,27 @@ class UserReportedWorldSpaceGateSourceTests(unittest.TestCase):
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, self.shape_helper)
+        self.assertNotIn("local srcTM", self.shape_helper)
+        self.assertNotIn("(meshop.getVert srcMesh i) *", self.shape_helper)
         self.assertNotIn("polyop.setVert baseObj i expectedNode", self.shape_helper)
         self.assertNotIn("meshop.setVert workingMesh i expectedNode", self.shape_helper)
         self.assertNotIn("baseObj.mesh = workingMesh", self.shape_helper)
         self.assertNotIn("compensateExistingSkin", self.shape_helper)
         self.assertNotIn("setPolyVertLocal", self.shape_helper)
         self.assertNotIn("setMeshVertLocal", self.shape_helper)
+
+    def test_world_oracle_and_different_transform_cases_are_independent(self) -> None:
+        tree = ast.parse(self.trs_runner, filename=str(TRS_RUNNER), feature_version=(3, 9))
+        oracle = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
+                      and node.name == "evaluated_world_positions")
+        oracle_source = ast.get_source_segment(self.trs_runner, oracle)
+        self.assertIn("in coordsys world", oracle_source)
+        self.assertIn("getAnimByHandle", oracle_source)
+        self.assertNotIn("snapshotAsMesh", oracle_source)
+        self.assertNotIn("objectTransform", oracle_source)
+        for marker in ("unit_scale_to_identity", "different_trs_negative_receiver",
+                       "destination_transform_expression", "expect_matching", "TRANSFORM_PAIRS"):
+            self.assertIn(marker, self.trs_runner)
 
     def test_final_transactional_rollback_is_retained(self) -> None:
         required = (

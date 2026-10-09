@@ -147,7 +147,7 @@ class _PackageCycleMock:
             backup = (
                 self.work_root
                 / "Backups"
-                / ("1.4.25-" + token)
+                / ("1.4.26-" + token)
                 / "FBXTo3dsMax"
             )
             backup.parent.mkdir(parents=True)
@@ -903,7 +903,7 @@ class InstallationLayerTests(unittest.TestCase):
             harness,
         )
         self.assertIn("F2M_Installer_FinalDialogText", harness)
-        self.assertIn("FBXTo3dsMax v1.4.25 安装成功。", harness)
+        self.assertIn("FBXTo3dsMax v1.4.26 安装成功。", harness)
         self.assertIn("中文结果载荷=通过", harness)
         self.assertIn("F2M_STALE_TOPOLOGY_SENTINEL", harness)
         self.assertIn("F2M_STALE_SKIN_SENTINEL", harness)
@@ -931,10 +931,10 @@ class InstallationLayerTests(unittest.TestCase):
         verifier = (
             ROOT / "tests" / "max_installed_interactive_verify.py"
         ).read_text(encoding="utf-8-sig")
-        self.assertIn('EXPECTED_VERSION = "1.4.25"', verifier)
+        self.assertIn('EXPECTED_VERSION = "1.4.26"', verifier)
         self.assertIn("FBXTo3dsMax.version", verifier)
         self.assertIn("installed_version = _read_installed_version()", verifier)
-        self.assertNotIn('"version": "1.4.25"', verifier)
+        self.assertNotIn('"version": "1.4.26"', verifier)
 
         for runner_name, token_name in (
             ("run_install_v1319_harness.ps1", "F2M_INSTALL_HARNESS_TOKEN"),
@@ -954,7 +954,7 @@ class InstallationLayerTests(unittest.TestCase):
             )
             if runner_name == "run_installed_verify_v1319.ps1":
                 self.assertIn(
-                    "$result.version -ne '1.4.25'",
+                    "$result.version -ne '1.4.26'",
                     runner,
                     runner_name,
                 )

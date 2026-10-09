@@ -37,7 +37,7 @@ except Exception:  # 允许在普通 Python 中做语法检查
 
 
 TOOL_AUTHOR = "Dimmens"
-TOOL_VERSION = "1.4.25"
+TOOL_VERSION = "1.4.26"
 LAST_RUN_OK = False
 LAST_RUN_REPORT_PATH = ""
 LAST_RUN_SUMMARY = ""
@@ -95,7 +95,7 @@ struct F2M_TopologyHelperStruct
 (
     lastMessage = "",
     apiKind = "topology",
-    apiVersion = "1.4.25",
+    apiVersion = "1.4.26",
 
     fn setLastMessage msg =
     (
@@ -3533,16 +3533,15 @@ struct F2M_TopologyHelperStruct
         local ok = false
         try
         (
-            -- The mature Mode-1 path transfers the FBX node's evaluated shape.
-            -- The legacy helper wrote the destination-node-domain value through
-            -- the node while Max was normally in #hybrid.  Explicit world node
-            -- I/O is the verified deterministic equivalent for both skinned and
-            -- unskinned receivers; it also removes dependence on the user's
-            -- World/Local/View toolbar state.
+            -- snapshotAsMesh supplies the evaluated source points. On the
+            -- observed Max 2023 host these mesh points already include object TM.
+            -- The node writer below explicitly consumes world coordinates:
+            -- do not apply source TM or destination inverse before that write.
+            -- Destination inverse belongs only to the base-local readback.
+            -- Keep node I/O independent of the user's toolbar coordinate state.
             srcMesh = snapshotAsMesh src
             baseObj = dst.baseObject
             baseName = (classof baseObj) as string
-            local srcTM = src.objectTransform
             local dstInvTM = inverse dst.objectTransform
             sourceCount = getNumVerts srcMesh
             if sourceCount < 1 do throw "无法读取 FBX 目标模型求值点位。"
@@ -3554,13 +3553,13 @@ struct F2M_TopologyHelperStruct
                 writeStarted = true
                 for i = 1 to sourceCount do
                 (
-                    local expectedNode = ((meshop.getVert srcMesh i) * srcTM) * dstInvTM
+                    local expectedNode = meshop.getVert srcMesh i
                     setPolyVertWorld dst i expectedNode
                 )
                 update dst
                 for i = 1 to sourceCount do
                 (
-                    local expectedNode = ((meshop.getVert srcMesh i) * srcTM) * dstInvTM
+                    local expectedNode = meshop.getVert srcMesh i
                     local actualNode = getPolyVertWorld dst i
                     local nodeDelta = distance actualNode expectedNode
                     local nodeTolerance = pointReadbackTolerance actualNode expectedNode
@@ -3592,7 +3591,7 @@ struct F2M_TopologyHelperStruct
                 writeStarted = true
                 for i = 1 to sourceCount do
                 (
-                    local expectedNode = ((meshop.getVert srcMesh i) * srcTM) * dstInvTM
+                    local expectedNode = meshop.getVert srcMesh i
                     setMeshVertWorld dst i expectedNode
                 )
                 update dst
@@ -3600,7 +3599,7 @@ struct F2M_TopologyHelperStruct
                 readbackMesh = copy baseObj.mesh
                 for i = 1 to sourceCount do
                 (
-                    local expectedNode = ((meshop.getVert srcMesh i) * srcTM) * dstInvTM
+                    local expectedNode = meshop.getVert srcMesh i
                     local actualNode = getMeshVertWorld dst i
                     local nodeDelta = distance actualNode expectedNode
                     local nodeTolerance = pointReadbackTolerance actualNode expectedNode
@@ -4706,7 +4705,7 @@ class TransferContext:
         self.import_prefix = f"__F2M_SRC_{self.run_id}_"
         self.scene_records: List[SceneRecord] = []
         self.scene_by_original: Dict[str, List[SceneRecord]] = {}
-        self.pre_handles: Set[int] = set()
+        self.pre_handles: Optional[Set[int]] = None
         self.imported_nodes: List[Any] = []
         self.keep_imported_nodes: Set[int] = set()
         self.replacement_nodes: Set[int] = set()
@@ -4903,9 +4902,29 @@ def register_record(ctx: TransferContext, record: SceneRecord) -> None:
     ctx.scene_by_original.setdefault(record.original_name, []).append(record)
 
 
+def _strict_node_handles(nodes: Sequence[Any], label: str) -> List[int]:
+    """Acquire a complete native identity snapshot; never filter failed reads."""
+    predicate = getattr(rt, "isValidNode", None)
+    if not callable(predicate):
+        raise RuntimeError(label + "缺少原生节点有效性检查。")
+    handles: List[int] = []
+    seen: Set[int] = set()
+    for index, node in enumerate(nodes, start=1):
+        if predicate(node) is not True:
+            raise RuntimeError(f"{label}第 {index} 个节点的原生有效性检查未通过。")
+        handle = rt.getHandleByAnim(node)
+        if type(handle) is not int or handle <= 0 or handle in seen:
+            raise RuntimeError(f"{label}第 {index} 个节点没有正整数唯一句柄。")
+        seen.add(handle)
+        handles.append(handle)
+    return handles
+
+
 def prepare_scene_names(ctx: TransferContext) -> None:
-    scene_nodes = [node for node in all_scene_nodes() if is_valid_node(node)]
-    ctx.pre_handles = {node_handle(node) for node in scene_nodes}
+    # None is not an empty scene: only a complete scan grants cleanup ownership.
+    ctx.pre_handles = None
+    scene_nodes = list(rt.objects)
+    ctx.pre_handles = set(_strict_node_handles(scene_nodes, "导入前场景快照"))
     scene_nodes.clear()
     selected_nodes: List[Any] = []
     seen_handles: Set[int] = set()
@@ -5212,7 +5231,9 @@ def _import_fbx_once(ctx: TransferContext, smoothing_groups: bool) -> List[Any]:
         f"此前面板模式={previous_panel_mode or '未知'}。"
     )
 
-    before = {node_handle(node) for node in all_scene_nodes() if is_valid_node(node)}
+    before = set(_strict_node_handles(list(rt.objects), "原生导入前场景快照"))
+    if ctx.pre_handles is None:
+        ctx.pre_handles = set(before)
     escaped = path.replace("\\", "\\\\").replace('"', '\\"')
     snapshot = configure_fbx_import(ctx, smoothing_groups)
     import_error = ""
@@ -8424,6 +8445,11 @@ def process_pair_transactional(src: Any, target_record: SceneRecord, ctx: Transf
 
 
 def cleanup_imported_nodes(ctx: TransferContext) -> None:
+    if ctx.pre_handles is None:
+        if ctx.imported_nodes:
+            raise RuntimeError("未取得完整导入前场景快照，已拒绝推断并删除临时节点。")
+        ctx.log.add("尚未取得完整导入前场景快照；未执行全景临时节点清理。")
+        return
     keep = set(ctx.keep_imported_nodes)
     tracked_by_handle = {
         node_handle(node): node
@@ -8709,15 +8735,19 @@ def reports_succeeded(ctx: TransferContext) -> bool:
 
 def restore_selection_by_handle(handles: Sequence[int]) -> None:
     wanted = {int(handle) for handle in handles}
-    live = [
-        node
-        for node in all_scene_nodes()
-        if is_valid_node(node) and node_handle(node) in wanted
-    ]
+    scene_nodes = list(rt.objects)
+    scene_handles = _strict_node_handles(scene_nodes, "选择恢复场景快照")
+    live = [node for handle, node in zip(scene_handles, scene_nodes) if handle in wanted]
+    resolved = {node_handle(node) for node in live}
+    if resolved != wanted:
+        raise RuntimeError("无法恢复完整选择，缺失原节点句柄：" + str(sorted(wanted - resolved)))
     if live:
         rt.select(live)
     else:
         rt.clearSelection()
+    actual = set(_strict_node_handles(list(rt.selection), "选择恢复读回"))
+    if actual != wanted:
+        raise RuntimeError("选择恢复读回不一致：期望 " + str(sorted(wanted)) + "，实际 " + str(sorted(actual)))
 
 
 def _release_completed_pair_boundary(
@@ -8907,11 +8937,7 @@ def run_transfer(options: TransferOptions) -> str:
     ensure_runtime()
     if options.mode != "topology_only":
         raise ValueError("f2m_topology_transfer 只接受 mode='topology_only'；整模替换必须调用 f2m_skin_replace。")
-    original_selection_handles = [
-        node_handle(node)
-        for node in list(rt.selection)
-        if is_valid_node(node)
-    ]
+    original_selection_handles = _strict_node_handles(list(rt.selection), "初始选择快照")
     log = TransferLog()
     ctx = TransferContext(options, log)
     try:
@@ -8949,6 +8975,7 @@ def run_transfer(options: TransferOptions) -> str:
             if not restore_scene_names(ctx):
                 raise RuntimeError("场景节点名称没有完整恢复，详见报告。")
 
+        restore_selection_by_handle(original_selection_handles)
         _release_context_node_references(ctx)
         summary = summarize_reports(ctx)
         log.add("")
@@ -8958,7 +8985,7 @@ def run_transfer(options: TransferOptions) -> str:
             log.add("内部诊断文件：" + diagnostic_path)
         log_path = write_log_file(log.text(), ctx.run_id)
         log.add(f"报告文件：{log_path}")
-        LAST_RUN_OK = reports_succeeded(ctx)
+        run_ok = reports_succeeded(ctx)
         LAST_RUN_REPORT_PATH = log_path
         LAST_RUN_SUMMARY = summary
         if options.dry_run and options.show_ui:
@@ -8966,8 +8993,10 @@ def run_transfer(options: TransferOptions) -> str:
         elif (not options.dry_run) and options.show_ui:
             show_normal_residual_notice(ctx, log_path)
             show_missing_transfer_attributes(ctx, log_path)
+        LAST_RUN_OK = run_ok
         return summary
     except Exception as exc:
+        LAST_RUN_OK = False
         ctx.diagnostics.append("[运行或收尾阶段]\n" + traceback.format_exc())
         failure_visible = visible_exception_text(exc)
         _exception_text_and_release(exc)
@@ -8991,6 +9020,13 @@ def run_transfer(options: TransferOptions) -> str:
             recovery_errors.append(
                 "名称恢复失败：" + restore_visible
             )
+        try:
+            restore_selection_by_handle(original_selection_handles)
+        except Exception as selection_exc:
+            ctx.diagnostics.append("[选择恢复失败]\n" + traceback.format_exc())
+            selection_visible = visible_exception_text(selection_exc)
+            _exception_text_and_release(selection_exc)
+            recovery_errors.append("选择恢复失败：" + selection_visible)
         _release_context_node_references(ctx)
         error_text = f"传递失败：{failure_visible}"
         if recovery_errors:
@@ -9013,11 +9049,6 @@ def run_transfer(options: TransferOptions) -> str:
             except Exception:
                 pass
         return error_text
-    finally:
-        try:
-            restore_selection_by_handle(original_selection_handles)
-        except Exception:
-            pass
 
 
 def parse_uv_channels(text: str) -> List[int]:

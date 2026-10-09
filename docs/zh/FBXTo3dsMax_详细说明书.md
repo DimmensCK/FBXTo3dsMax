@@ -1,10 +1,10 @@
-# FBXTo3dsMax 1.4.25 · 使用教程
+# FBXTo3dsMax 1.4.26 · 使用教程
 
 **先选任务，再选数据。** 本教程既提供可以照做的步骤，也解释传递依据、蒙皮来源和失败边界。
 
 作者：Dimmens · [English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) · [安装与卸载](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [功能主页](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md)
 
-本页描述 1.4.25 的操作与设计，具体版本验收见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。1.4.24 与 1.3.24 的历史结果分别保留，不自动证明后续版本。
+本页描述 1.4.26 的操作与设计，具体版本验收见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。1.4.24 与 1.3.24 的历史结果分别保留，不自动证明后续版本。
 
 ## 从这里选任务
 
@@ -45,7 +45,7 @@
 |---|---|
 | ![历史形状传递前](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![历史形状传递后](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
 
-这是作者授权的历史功能示意，不是 1.4.25 截图；左右位置不定义固定的数据提供方。[v1.3.23 历史结果检查片段，约 10 秒](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)展示变形/绑定查看，没有展示完整操作。
+这是作者授权的历史功能示意，不是 1.4.26 截图；左右位置不定义固定的数据提供方。[v1.3.23 历史结果检查片段，约 10 秒](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)展示变形/绑定查看，没有展示完整操作。
 
 ## 任务二：更新 UV、材质与面 ID
 

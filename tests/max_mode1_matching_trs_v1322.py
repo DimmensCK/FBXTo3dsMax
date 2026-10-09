@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Real-Max core gate for Mode-1 matching TRS point transfer.
+"""Real-Max core gate for Mode-1 world-space point transfer.
 
 This test deliberately bypasses FBX import, Skin, topology remapping, normals,
 and every other transfer channel.  It calls the production
@@ -13,11 +13,13 @@ Coverage matrix:
   source and destination;
 * identical non-zero translation/rotation/single-negative-axis non-uniform
   scale on the source and destination;
-* World and Local toolbar reference-coordinate states.
+* World and Local toolbar reference-coordinate states;
+* source unit scale versus identity receiver and different source/negative receiver TRS;
+* independent direct node-world oracle, without snapshot-times-transform reuse.
 
 No user asset is opened or saved.  The generated scene exists only in the
-isolated 3ds Max Batch process.  The sole durable output is a JSON result next
-to this script.
+isolated 3ds Max Batch process.  The sole durable output is a JSON result
+under local user data; importing this module does not run the cases.
 """
 
 from __future__ import annotations
@@ -39,15 +41,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUNTIME_ROOT = os.path.join(ROOT, "contents") if os.path.isdir(os.path.join(ROOT, "contents")) else ROOT
 GATE_PATH = os.path.abspath(__file__)
 RESULT_PATH = os.path.join(
-    ROOT,
-    "tests",
-    "_max_mode1_matching_trs_v1322_result.json",
+    os.environ["LOCALAPPDATA"], "FBXTo3dsMax", "Reports",
+    "mode1_world_regression_" + os.urandom(16).hex() + ".json",
 )
 
 WORLD_TOLERANCE = 0.001
 MATRIX_TOLERANCE = 1.0e-6
 INITIAL_DIFFERENCE_MINIMUM = 0.25
-EXPECTED_VERSION = "1.4.25"
+EXPECTED_VERSION = "1.4.26"
 
 TRANSFORMS = (
     (
@@ -66,6 +67,16 @@ TRANSFORMS = (
         "(transMatrix [-31.0,18.0,9.0])",
         -1,
     ),
+)
+
+# Keep the original eight matching-TRS cases and add non-cancelling pairs.
+TRANSFORM_PAIRS = tuple(
+    (name, expression, expression, sign, sign, True, False)
+    for name, expression, sign in TRANSFORMS
+) + (
+    ("unit_scale_to_identity", "(scaleMatrix [0.3937007784843445,0.3937007784843445,0.3937007784843445])",
+     "(matrix3 1)", 1, 1, False, True),
+    ("different_trs_negative_receiver", TRANSFORMS[0][1], TRANSFORMS[1][1], 1, -1, False, False),
 )
 
 BASE_KINDS = ("poly", "mesh")
@@ -346,22 +357,27 @@ def authored_point(value: Any, vertex_index: int, role: str) -> Any:
     )
 
 
-def author_base_positions(node: Any, role: str) -> None:
+def author_base_positions(node: Any, role: str) -> tuple[tuple[float, float, float], ...]:
     base_object = node.baseObject
     base_class = class_name(base_object)
+    authored = []
+    current = wanted = None
     if base_class == "Editable_Poly":
         for vertex_index in range(
             1,
             int(rt.polyop.getNumVerts(base_object)) + 1,
         ):
             current = rt.polyop.getVert(base_object, vertex_index)
+            wanted = authored_point(current, vertex_index, role)
+            authored.append(point_tuple(wanted))
             rt.polyop.setVert(
                 base_object,
                 vertex_index,
-                authored_point(current, vertex_index, role),
+                wanted,
             )
+            current = wanted = None
         rt.update(node)
-        return
+        return tuple(authored)
 
     if base_class in {"Editable_mesh", "Editable Mesh"}:
         working_mesh = rt.copy(base_object.mesh)
@@ -371,19 +387,23 @@ def author_base_positions(node: Any, role: str) -> None:
                 int(rt.getNumVerts(working_mesh)) + 1,
             ):
                 current = rt.getVert(working_mesh, vertex_index)
+                wanted = authored_point(current, vertex_index, role)
+                authored.append(point_tuple(wanted))
                 rt.setVert(
                     working_mesh,
                     vertex_index,
-                    authored_point(current, vertex_index, role),
+                    wanted,
                 )
+                current = wanted = None
             base_object.mesh = working_mesh
             rt.update(node)
         finally:
+            current = wanted = None
             try:
                 rt.free(working_mesh)
             except Exception:
                 pass
-        return
+        return tuple(authored)
 
     raise AssertionError(f"不支持的基础类型：{base_class}")
 
@@ -391,25 +411,87 @@ def author_base_positions(node: Any, role: str) -> None:
 def evaluated_world_positions(
     node: Any,
 ) -> tuple[tuple[float, float, float], ...]:
-    """Independent oracle: evaluated object mesh multiplied into world space."""
-
-    mesh_value = None
+    """Independent node-world oracle; no production helper or snapshot formula."""
+    base_class = class_name(node.baseObject)
+    getter = "polyop.getVert" if base_class == "Editable_Poly" else "getVert"
+    if base_class not in {"Editable_Poly", "Editable_mesh", "Editable Mesh"}:
+        raise AssertionError(f"Unsupported world oracle base: {base_class}")
+    handle = int(rt.getHandleByAnim(node))
+    count = base_vertex_count(node)
+    raw = value = None
     try:
-        mesh_value = rt.snapshotAsMesh(node)
-        transform = node.objectTransform
-        return tuple(
-            point_tuple(rt.getVert(mesh_value, vertex_index) * transform)
-            for vertex_index in range(
-                1,
-                int(rt.getNumVerts(mesh_value)) + 1,
-            )
-        )
+        raw = rt.execute(
+            "(local observedNode = getAnimByHandle " + str(handle) +
+            "; if observedNode == undefined then throw \"World oracle node vanished\"; " +
+            "for observedIndex = 1 to " + str(count) +
+            " collect (in coordsys world (" + getter + " observedNode observedIndex)))")
+        positions = []
+        for value in raw:
+            positions.append(point_tuple(value))
+            value = None
+        if len(positions) != count:
+            raise AssertionError("World oracle vertex count differs")
+        return tuple(positions)
     finally:
-        if mesh_value is not None and str(mesh_value) != "undefined":
-            try:
-                rt.free(mesh_value)
-            except Exception:
-                pass
+        value = raw = None
+
+
+def base_local_positions(node: Any) -> tuple[tuple[float, float, float], ...]:
+    base = node.baseObject
+    kind = class_name(base)
+    mesh = value = None
+    try:
+        if kind == "Editable_Poly":
+            count = int(rt.polyop.getNumVerts(base))
+            getter = lambda index: rt.polyop.getVert(base, index)
+        else:
+            mesh = rt.copy(base.mesh)
+            count = int(rt.getNumVerts(mesh))
+            getter = lambda index: rt.meshop.getVert(mesh, index)
+        positions = []
+        for index in range(1, count + 1):
+            value = getter(index)
+            positions.append(point_tuple(value))
+            value = None
+        return tuple(positions)
+    finally:
+        value = None
+        if mesh is not None:
+            rt.free(mesh)
+        mesh = base = None
+
+
+def uv1_snapshot(node: Any) -> dict[str, Any]:
+    mesh = value = None
+    try:
+        mesh = rt.snapshotAsMesh(node)
+        count = int(rt.getNumTVerts(mesh))
+        vertices, faces = [], []
+        for index in range(1, count + 1):
+            value = rt.getTVert(mesh, index)
+            vertices.append(point_tuple(value))
+            value = None
+        if count:
+            for index in range(1, int(rt.getNumFaces(mesh)) + 1):
+                value = rt.getTVFace(mesh, index)
+                faces.append((int(value.x), int(value.y), int(value.z)))
+                value = None
+        return {"vertices": vertices, "faces": faces}
+    finally:
+        value = None
+        if mesh is not None:
+            rt.free(mesh)
+        mesh = None
+
+
+def world_from_primitives(points: Sequence[Sequence[float]], tm: Sequence[float]) -> tuple[tuple[float, float, float], ...]:
+    return tuple(tuple(sum(point[axis] * tm[axis * 3 + component] for axis in range(3))
+                       + tm[9 + component] for component in range(3)) for point in points)
+
+
+def native_point_budgets(first: Sequence[Sequence[float]], second: Sequence[Sequence[float]]) -> list[float]:
+    return [0.000002 + 0.000002 * max(1.0, *(abs(value) for value in tuple(left) + tuple(right)))
+            for left, right in zip(first, second)]
 
 
 def point_distance(
@@ -476,6 +558,11 @@ def run_case(
     determinant_sign: int,
     reference_coordinate_system: str,
     base_kind: str,
+    destination_transform_expression: str = "",
+    destination_determinant_sign: int = 0,
+    expect_matching: bool = True,
+    unit_scale: bool = False,
+    evidence_callback: Any = None,
 ) -> dict[str, Any]:
     reset_max_file_safely()
     case_id = (
@@ -505,8 +592,16 @@ def run_case(
     if source_vertex_count != base_vertex_count(destination):
         raise AssertionError("source/destination 基础点数不一致。")
 
-    author_base_positions(source, "source")
-    author_base_positions(destination, "destination")
+    source_authored = author_base_positions(source, "source")
+    destination_authored = author_base_positions(destination, "destination")
+    source_base_before = base_local_positions(source)
+    destination_base_before = base_local_positions(destination)
+    assert_world_points(source_authored, source_base_before, "Authored source base-local readback")
+    assert_world_points(destination_authored, destination_base_before, "Authored destination base-local readback")
+    source_uv_before = uv1_snapshot(source)
+    destination_uv_before = uv1_snapshot(destination)
+    node_handles_before = sorted(int(rt.getHandleByAnim(item)) for item in list(rt.objects))
+    source_handle, destination_handle = int(rt.getHandleByAnim(source)), int(rt.getHandleByAnim(destination))
     if base_face_signature(source) != source_topology:
         raise AssertionError("建立 source 点位时改变了基础拓扑。")
     if base_face_signature(destination) != destination_topology_before:
@@ -516,7 +611,11 @@ def run_case(
     if transform_value is None or str(transform_value) == "undefined":
         raise AssertionError(f"无法建立测试矩阵：{transform_expression}")
     source.transform = transform_value
-    destination.transform = transform_value
+    destination_transform = rt.execute(f"({destination_transform_expression})") if destination_transform_expression else transform_value
+    if destination_transform is None or str(destination_transform) == "undefined":
+        raise AssertionError("Cannot establish destination transform")
+    destination.transform = destination_transform
+    transform_value = destination_transform = None
     rt.update(source)
     rt.update(destination)
 
@@ -526,21 +625,31 @@ def run_case(
         source_transform_before,
         destination_transform_before,
     )
-    if matching_transform_delta > MATRIX_TOLERANCE:
+    if expect_matching and matching_transform_delta > MATRIX_TOLERANCE:
         raise AssertionError(
             "source/destination objectTransform 不一致："
             f"{matching_transform_delta}"
         )
-    transform_contract = assert_transform_contract(
-        source.objectTransform,
-        determinant_sign,
-    )
+    if not expect_matching and matching_transform_delta <= 0.1:
+        raise AssertionError("Different-transform fixture did not establish distinct matrices")
+    if unit_scale:
+        factor = 0.3937007784843445
+        expected_source_tm = (factor, 0, 0, 0, factor, 0, 0, 0, factor, 0, 0, 0)
+        identity_tm = (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+        if matrix_max_delta(source_transform_before, expected_source_tm) > MATRIX_TOLERANCE or matrix_max_delta(destination_transform_before, identity_tm) > MATRIX_TOLERANCE:
+            raise AssertionError("Unit-scale to identity fixture differs")
+        transform_contract = {"unit_scale_to_identity": True, "unit_factor": factor}
+    else:
+        transform_contract = assert_transform_contract(source.objectTransform, determinant_sign)
+        assert_transform_contract(destination.objectTransform, destination_determinant_sign or determinant_sign)
 
     rt.select(sentinel)
     selection_before = selection_handles()
     set_reference_coordinate_system(reference_coordinate_system)
 
     expected_world = evaluated_world_positions(source)
+    authored_source_world = world_from_primitives(source_base_before, source_transform_before)
+    assert_world_points(authored_source_world, expected_world, f"{case_id}/authored-source versus direct-node oracle")
     destination_initial_world = evaluated_world_positions(destination)
     initial_delta, initial_worst_vertex = maximum_point_delta(
         expected_world,
@@ -561,6 +670,42 @@ def run_case(
 
     actual_world = evaluated_world_positions(destination)
     source_world_after = evaluated_world_positions(source)
+    source_base_after = base_local_positions(source)
+    destination_base_after = base_local_positions(destination)
+    source_uv_after = uv1_snapshot(source)
+    destination_uv_after = uv1_snapshot(destination)
+    source_transform_after = matrix_tuple(source.objectTransform)
+    destination_transform_after = matrix_tuple(destination.objectTransform)
+    raw_evidence = {
+        "case_id": case_id, "base_kind": base_kind, "ref_coord_sys": reference_coordinate_system,
+        "source_handle": source_handle, "destination_handle": destination_handle,
+        "source_base_handle": source_base_handle, "destination_base_handle": destination_base_handle,
+        "source_tm": list(source_transform_before), "destination_tm": list(destination_transform_before),
+        "source_tm_after": list(source_transform_after), "destination_tm_after": list(destination_transform_after),
+        "source_handle_after": int(rt.getHandleByAnim(source)), "destination_handle_after": int(rt.getHandleByAnim(destination)),
+        "source_base_handle_after": int(rt.getHandleByAnim(source.baseObject)),
+        "destination_base_handle_after": int(rt.getHandleByAnim(destination.baseObject)),
+        "source_authored_base": source_authored, "destination_authored_base": destination_authored,
+        "source_base_before": source_base_before, "destination_base_before": destination_base_before,
+        "source_base_after": source_base_after, "destination_base_after": destination_base_after,
+        "source_world_before": expected_world, "destination_world_before": destination_initial_world,
+        "source_world_after": source_world_after, "destination_world_after": actual_world,
+        "authored_source_world": authored_source_world,
+        "source_topology_before": source_topology, "source_topology_after": base_face_signature(source),
+        "destination_topology_before": destination_topology_before, "destination_topology_after": base_face_signature(destination),
+        "source_uv_before": source_uv_before, "source_uv_after": source_uv_after,
+        "destination_uv_before": destination_uv_before, "destination_uv_after": destination_uv_after,
+        "scene_handles_before": node_handles_before,
+        "scene_handles_after": sorted(int(rt.getHandleByAnim(item)) for item in list(rt.objects)),
+        "selection_before": selection_before, "selection_after": selection_handles(),
+        "reference_coordinate_system_after": normalized_name(rt.getRefCoordSys()),
+        "source_modifier_count_after": len(list(source.modifiers)),
+        "destination_modifier_count_after": len(list(destination.modifiers)),
+        "world_tolerance": WORLD_TOLERANCE, "matrix_tolerance": MATRIX_TOLERANCE,
+        "point_budgets": native_point_budgets(expected_world, actual_world),
+    }
+    if evidence_callback is not None:
+        evidence_callback(raw_evidence)
     world_comparison = assert_world_points(
         expected_world,
         actual_world,
@@ -571,6 +716,21 @@ def run_case(
         source_world_after,
         f"{case_id}/source",
     )
+    for index, (wanted, actual, budget) in enumerate(zip(expected_world, actual_world, raw_evidence["point_budgets"]), 1):
+        if point_distance(wanted, actual) > budget:
+            raise AssertionError(f"{case_id}/vertex {index} exceeds existing native precision budget {budget}")
+    assert_world_points(world_from_primitives(destination_base_after, destination_transform_before), actual_world,
+                        f"{case_id}/destination base times TM versus direct world")
+    if source_base_after != source_base_before:
+        raise AssertionError("Source authored base points changed")
+    if source_uv_after != source_uv_before or destination_uv_after != destination_uv_before:
+        raise AssertionError("Shape transfer changed existing UV1 data")
+    if raw_evidence["scene_handles_after"] != node_handles_before:
+        raise AssertionError("Shape transfer changed the complete owned scene inventory")
+    if int(rt.getHandleByAnim(source)) != source_handle or int(rt.getHandleByAnim(destination)) != destination_handle:
+        raise AssertionError("Source/destination node identities changed")
+    if int(rt.getHandleByAnim(source.baseObject)) != source_base_handle or int(rt.getHandleByAnim(destination.baseObject)) != destination_base_handle:
+        raise AssertionError("Source/destination base object identities changed")
 
     if selection_handles() != selection_before:
         raise AssertionError(
@@ -583,11 +743,11 @@ def run_case(
 
     source_transform_delta = matrix_max_delta(
         source_transform_before,
-        matrix_tuple(source.objectTransform),
+        source_transform_after,
     )
     destination_transform_delta = matrix_max_delta(
         destination_transform_before,
-        matrix_tuple(destination.objectTransform),
+        destination_transform_after,
     )
     if source_transform_delta > MATRIX_TOLERANCE:
         raise AssertionError(
@@ -612,6 +772,11 @@ def run_case(
         "source_tm_delta_after": source_transform_delta,
         "destination_tm_delta_after": destination_transform_delta,
         "object_transform": list(source_transform_before),
+        "destination_object_transform": list(destination_transform_before),
+        "expect_matching_transforms": expect_matching,
+        "expected_world": list(expected_world),
+        "actual_world": list(actual_world),
+        "source_world_after": list(source_world_after),
         **transform_contract,
         "initial_max_world_delta": initial_delta,
         "initial_worst_vertex": initial_worst_vertex,
@@ -621,6 +786,7 @@ def run_case(
         "selection_preserved": True,
         "modifier_count": 0,
         "helper_message": str(module.helper_message()),
+        "raw_evidence": raw_evidence,
     }
 
 
@@ -632,7 +798,7 @@ payload: dict[str, Any] = {
         "run_id": os.urandom(16).hex(),
         "expected_version": EXPECTED_VERSION,
     },
-            "test": "Mode-1 matching TRS core point transfer v1.4.25 gate",
+            "test": "Mode-1 matching TRS core point transfer v1.4.26 gate",
     "scope": (
         "generated Editable Poly/Mesh only; direct production helper; "
         "no FBX, Skin, normals, mapping channels, or user assets"
@@ -641,7 +807,7 @@ payload: dict[str, Any] = {
     "world_tolerance": WORLD_TOLERANCE,
     "matrix_tolerance": MATRIX_TOLERANCE,
     "expected_case_count": (
-        len(TRANSFORMS)
+        len(TRANSFORM_PAIRS)
         * len(REFERENCE_COORDINATE_SYSTEMS)
         * len(BASE_KINDS)
     ),
@@ -667,7 +833,7 @@ def main() -> None:
     original_ref_coord = rt.getRefCoordSys()
     failures: list[str] = []
     try:
-        for transform_name, expression, determinant_sign in TRANSFORMS:
+        for transform_name, expression, destination_expression, determinant_sign, destination_sign, matching, unit_scale in TRANSFORM_PAIRS:
             for reference_coordinate_system in REFERENCE_COORDINATE_SYSTEMS:
                 for base_kind in BASE_KINDS:
                     case_id = (
@@ -684,6 +850,10 @@ def main() -> None:
                                 reference_coordinate_system
                             ),
                             base_kind=base_kind,
+                            destination_transform_expression=destination_expression,
+                            destination_determinant_sign=destination_sign,
+                            expect_matching=matching,
+                            unit_scale=unit_scale,
                         )
                     except BaseException:
                         failure = traceback.format_exc()
@@ -721,21 +891,23 @@ def main() -> None:
     payload["ok"] = True
 
 
-try:
-    main()
-except BaseException:
-    payload["ok"] = False
-    payload["error"] = traceback.format_exc()
-finally:
+if __name__ == "__main__":
     try:
-        reset_max_file_safely()
+        main()
     except BaseException:
-        payload["cleanup_error"] = traceback.format_exc()
         payload["ok"] = False
-    with open(RESULT_PATH, "w", encoding="utf-8", newline="\n") as handle:
-        json.dump(payload, handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+        payload["error"] = traceback.format_exc()
+    finally:
+        try:
+            reset_max_file_safely()
+        except BaseException:
+            payload["cleanup_error"] = traceback.format_exc()
+            payload["ok"] = False
+        os.makedirs(os.path.dirname(RESULT_PATH), exist_ok=True)
+        with open(RESULT_PATH, "x", encoding="utf-8", newline="\n") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
 
-if not payload["ok"]:
-    raise RuntimeError("模式一匹配 TRS 核心门失败，请查看结果 JSON。")
+    if not payload["ok"]:
+        raise RuntimeError("模式一匹配 TRS 核心门失败，请查看结果 JSON。")

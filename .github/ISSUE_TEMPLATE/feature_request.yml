@@ -1,0 +1,29 @@
+name: Improvement / 改进建议
+description: Explain a practical need / 说明实际需求与改进动机
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Focus on a concrete workflow. A proposal does not promise implementation or support for untested Max versions.
+        请围绕具体工作流；提交建议不代表承诺实现或支持未测 Max 版本。不要附正式模型、个人路径、账号、令牌或原始本机日志。
+        Do not attach production models, personal paths, account details, tokens or raw local logs.
+  - type: textarea
+    id: need
+    attributes:
+      label: Current difficulty / 当前困难
+      description: What task is difficult, and what do you do today? / 哪项任务有困难，目前如何处理？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested change / 建议的改动
+      description: Describe the behavior or documentation you would improve / 描述想改进的行为或文档
+    validations:
+      required: true
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Benefit and alternatives / 收益与替代方案
+      description: Who benefits, and is there a current workaround? / 谁会受益，是否有现成替代方法？

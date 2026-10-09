@@ -30,7 +30,7 @@ LEGACY_TOOLBAR_OBJECT_NAME = "FBXTo3dsMax.Toolbar"
 FALLBACK_TOOLBAR_OBJECT_NAME = "FBXTo3dsMax.FallbackToolbar"
 ACTION_OBJECT_NAME = "FBXTo3dsMax.OpenWidgetAction"
 BUTTON_OBJECT_NAME = "FBXTo3dsMax.TopButton"
-EXPECTED_VERSION = "1.4.25"
+EXPECTED_VERSION = "1.4.26"
 
 
 def _read_installed_version() -> str:

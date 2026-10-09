@@ -1,5 +1,5 @@
 /*
-FBXTo3dsMax v1.4.25 可恢复卸载器。
+FBXTo3dsMax v1.4.26 可恢复卸载器。
 
 插件文件不会被永久删除；已验证的插件包、MacroScript 与图标会移动到
 ApplicationPlugins 扫描路径之外的时间戳归档。

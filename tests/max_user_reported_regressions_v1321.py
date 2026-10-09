@@ -51,7 +51,7 @@ TEMP_DIR = os.path.join(os.environ["LOCALAPPDATA"], "FBXTo3dsMax", "Tests")
 TEMP_MAX = os.path.join(TEMP_DIR, f"mode2_003_{uuid.uuid4().hex}.max")
 POSITION_TOLERANCE = 0.001
 BOOLEAN_IMPORTER_PARAMS = {"Animation", "Skin", "SmoothingGroups"}
-EXPECTED_VERSION = "1.4.25"
+EXPECTED_VERSION = "1.4.26"
 
 
 def sha256_file(path: str) -> str:

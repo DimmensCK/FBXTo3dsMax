@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import BinaryIO, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 
-TOOL_VERSION = "1.4.25"
+TOOL_VERSION = "1.4.26"
 RESOLVER_SCHEMA = "FBXTo3dsMax.strict_resolver"
 RESOLVER_SCHEMA_VERSION = 1
 RESOLVER_NORMAL_TOLERANCE_DEGREES = 0.01

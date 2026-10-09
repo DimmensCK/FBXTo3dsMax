@@ -1,0 +1,48 @@
+name: Source checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: utf-8
+  F2M_LANGUAGE: zh-CN
+
+jobs:
+  source-checks:
+    name: Windows static and pure tests
+    runs-on: windows-2022
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.9
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.9'
+      - name: Check repository sources
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B .\tools\check_repository.py
+          if ($LASTEXITCODE -ne 0) { throw "Repository static check failed (exit $LASTEXITCODE)." }
+      - name: Run pure Python regressions
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B -m unittest discover -s tests -p 'test_*.py' -v
+          if ($LASTEXITCODE -ne 0) { throw "Pure regression tests failed (exit $LASTEXITCODE)." }

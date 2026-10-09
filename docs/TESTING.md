@@ -1,6 +1,106 @@
 # 回归测试与验证边界
 
-## 1.4.25 当前结果 / Current results
+## 1.4.26 当前修订 / Current revision
+
+本次目标宿主为 **Windows 11 x64、3ds Max 2023.3.10、内置 Python 3.9.7**。最终验收日期：2026-10-10。新核心修订来源：`a9071872a1cfe3034af3c6b20c4e13ca7283fee3`；32 项安装资源指纹：`F2D7A897A4B9CC835BE14044810C6CCDCCA7400479654C52E2B20F5BEB6FD1D0`。
+
+The target host is **Windows 11 x64, 3ds Max 2023.3.10 and bundled Python 3.9.7**. Qualification dates: 2026-10-10. The final source and 32-resource fingerprint are recorded above. This local qualification revision is not a public download commit; publication identities belong in the [Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26).
+
+本表按当前源码的同一条新隔离链记录：全新/重复安装 → 冷启动 → 安装副本自检与扩展回归 → 真实安装失败回滚及正常重试 → 可恢复卸载。五步均已完成实际验收与独立复核；每一步只消费前一步的新成功收据，并核对自然退出、源码/安装来源、隔离、进程身份与完整原生日志。仅成功 JSON 不足以作为验收。
+
+The five stages used one new isolated chain: fresh/repeat installation, cold start, installed checks and regressions, real installer-failure rollback with normal retry, and recoverable uninstall. All completed actual acceptance and independent review. Each stage consumed the preceding fresh success receipt and checked natural exit, verified origins, isolation, process identity and complete native logs. A successful JSON alone is insufficient.
+
+| 检查 / Check | 当前修订结果 / Current result | 范围 / Scope |
+|---|---|---|
+| 纯 Python / Pure Python | **337/337，通过 / Passed**（9.190 s；源码回归 / source regressions） | 最终源码的算法、事务与契约回归；测试语言显式为 zh-CN / Final-source algorithm, transaction and contract regressions with explicit zh-CN locale |
+| 静态清单 / Static manifest | **32/32，通过 / Passed**（1,315,661 B） | 最终源码的固定 32 个安装目标、版本和公开内容检查 / The fixed 32 installation targets, versions and public-content checks |
+| 全新与重复安装 / Fresh and repeat install | **实际通过，自然退出 0 / Actual pass, natural exit 0** | 标准安装器、同版本重复安装及全部 32 项来源读回 / Standard installer, same-version repeat and all 32 origin checks |
+| 隔离冷启动 / Isolated cold start | **实际通过，自然退出 0 / Actual pass, natural exit 0** | 自动加载、工具栏与界面 / Autoload, toolbar and UI |
+| 中文安装副本六类自检 / Six Chinese installed checks | **6/6，通过，自然退出 0 / Passed, natural exit 0** | 实际新安装副本的原创小样本 / Original small fixtures through the actual new installed copy |
+| 九个原生故障场景 / Nine native fault cases | **9/9，通过 / Passed** | 生产调用、场景读回、真实恢复与提交边界 / Production calls, scene readback, real recovery and commit boundaries |
+| 独立世界坐标回归 / Independent world-coordinate cases | **16/16，通过 / Passed** | 16 例：Mesh/Poly × World/Local × 四组源/目标矩阵 / Sixteen cases across both base types, reference systems and four matrix pairs |
+| 旧核心预期负例 / Expected old-core negative | **按预期拒绝 / Rejected as expected**（原生旧 MXS 点位 helper；世界点误差 2.554746 > 0.001） | 实际旧 MXS 生产点位 helper 被独立世界点读回拒绝；不是旧完整 Python/FBX 路径 / Actual legacy MXS point helper rejected by independent node-world reads; not the old complete Python/FBX path |
+| 生成器故障清理 / Generator fault cleanup | **通过 / Passed** | 准备提交处故障、原异常保留、自有节点删除及无成功收据 / Prepared-commit failure, original error, owned-node cleanup and no success receipt |
+| 原创雨棚 / Original canopy | **通过 / Passed**（91 顶点、144 三角形 / vertices and triangles） | 实际预检、形状/UV1 传递、节点/材质保留、原生前后渲染 / Actual preflight, shape/UV1 transfer, retained node/material and native before/after renders |
+| 新来源双语范围 / Bilingual checks on the changed source | **本轮未重跑完整双语链 / Full bilingual chain not rerun** | 本轮仅 Fresh/Cold 程序界面检查；较早72图单独记录 / Fresh/Cold programmatic UI here; earlier 72 images separate |
+| 新来源英文安装自检 / English installed checks on the changed source | **本轮未重跑附加英文自检 / Additional English suite not rerun** | 本轮六类安装自检为中文；较早英文6/6不迁移 / Current installed suite is Chinese; earlier English 6/6 not transferred |
+| 新来源 PowerShell 入口 / PowerShell entry on the changed source | **本轮未重跑 PS 三阶段 / Three PowerShell phases not rerun** | 较早静默入口与 INI 结果仍为历史来源 / Earlier silent-entry and INI results retain historical scope |
+| 安装失败回滚 / Installer rollback | **通过，自然退出 0 / Passed, natural exit 0** | 一个实际激活后故障点及完整旧状态读回 / One actual postactivation fault and previous-state readback |
+| 可恢复卸载 / Recoverable uninstall | **通过，自然退出 0 / Passed, natural exit 0** | 归档数量与原始字节核对；33 个包文件及 3 个受管文件归档完整，未演练复装 / Archive count and original bytes; 33 package and 3 managed files archived exactly; restoration not exercised |
+| 最终文档/图片覆盖检查 / Final documentation/media overlay | 与发行运输检查单独记录 / Recorded separately from host acceptance | 四文档、四 PNG 的内容与最终源码检查 / Content and source checks for four documents and four PNGs |
+| GitHub 发布读回 / GitHub readback | 发布后单独记录 / Recorded after publication | 公开 commit/tree/tag、ZIP、全新 clone 与具体 CI 运行；不预写通过 / Public commit/tree/tag, ZIP, fresh clone and specific CI run, without preclaimed success |
+
+### 当前来源记录 / Current source provenance
+
+本地源码树为 `7e22a69821a1dbd0cf4ccee1f9dfd82ed5cbe3f8`，共 127 文件、3,609,063 B；宿主流程使用其中 121 文件的隔离副本，安装资源为 32 项、1,315,661 B。原始源码冻结 SHA-256 为 `2B85BCBA28665BBDF6CFAB48F98CF0D2710BB32FEC1CF9EF1F506ABD314AC719`。这些是本地来源记录，不是可访问的 GitHub 下载提交。
+
+The local source tree contains 127 files (3,609,063 B); the isolated host copy contains 121 files and installs 32 resources (1,315,661 B). The source-freeze hash above binds these local records. It is separate from the future clean public commit and publication readback.
+
+本页的当前 32 项指纹引用冻结的 `runtime32.canonical.json` 原始字节：UTF-8 无 BOM/末尾换行、紧凑 JSON 数组、冻结行序与 `source,target,sha256,length` 字段序，原始 Unicode、大写 SHA-256、整数长度。旧指纹仅作历史引用，不承诺采用同一序列化。该指纹与静态/纯回归都不代替原生功能验收。
+
+The current fingerprint refers to the exact frozen canonical bytes with the declared field and row order; older fingerprints are historical references with no implied matching serialization. A fingerprint, static checks and pure regressions do not qualify native behavior.
+
+### 本次修复与回归 / Repair and regression scope
+
+当前源码去除模式一对求值快照点的重复变换，直接交给明确的世界坐标节点写入；目标逆矩阵仅用于基础对象局部读回，原点位预算和回滚保留。16 例保留原来的 8 例匹配矩阵检查，并增加单位缩放源/恒等目标与不同正负 TRS。预期点来自独立的节点世界坐标读取，不复用生产快照变换公式；保存源/目标局部点、矩阵、世界点和既定预算，便于独立重算。新安装副本已实际完成 16 例独立世界点回归，并由真实旧 MXS 点位 helper 负例检出已知重复变换错误。原生用例与整个安装副本运行的自然退出、日志和来源门已完成，并经独立复核采纳。
+
+The source revision sends evaluated snapshot points directly to the explicit world-space node writer and keeps the receiver inverse only for base-local verification. Precision budgets and rollback stay intact. Sixteen cases retain the original eight matching-transform checks and add unit-scale/identity and distinct positive/negative TRS pairs. Expected points come from independent direct node-world reads. Raw base-local points, matrices, world points and budgets permit separate recomputation. The new installed copy completed all 16 independent world-coordinate cases and rejected the actual legacy MXS point helper for the known repeated-transform error. The parent installed run completed its natural-exit, log and origin checks and was independently reviewed and accepted.
+
+这些坐标样本不带 Skin，不覆盖全部 FBX 通道；完整六类自检、九个故障场景和雨棚传递另行验收。旧核心负例验证预期能发现已知错误，不意味着修复后没有未知缺陷。生成器故障检查仅在自有空场景执行，真实触发准备收据提交失败并检查清理，不模拟核心、单位或原生 getter。
+
+These coordinate fixtures are unskinned and do not cover every FBX channel. The six-category suite, nine fault cases and canopy transfer remain separate. Detecting the known old-core error does not establish absence of unknown bugs. The generator fault uses an owned empty scene and a real prepared-receipt collision without replacing the runtime, core, units or native getters.
+
+原创练习修正逐行 FBX ASCII 区块、节点上的 UV 构建与最终面角读回，以及按 AnimHandle 查找自有节点的失败清理。独立 SDK 曾读回规范化 FBX 的完整数据；SDK 或纯测试均不代替 Max 导入、传递、渲染与生命周期验收。
+
+The original exercise repairs multiline FBX ASCII blocks, node-level UV construction/final corner readback and AnimHandle-based owned cleanup. Standalone SDK readback of the normalized FBX is preparation evidence, not Max import, transfer, rendering or lifecycle qualification.
+
+九个故障场景覆盖不同恢复与提交边界，不能统称“九次完整回滚”。T3 在点位/通道已提交后触发选择读回不一致，保留已提交数据并报告失败；S2 关闭备份后旧节点已删除，保留已验证的新节点并明确报告不可逆边界。它们验证正确的失败状态与保护行为，不要求伪造未发生的回滚。
+
+The nine faults exercise different recovery and commit boundaries, not nine complete rollbacks. T3 fails selection readback after data commit and retains the committed data. In S2, deleting the old node with backup disabled is irreversible; the validated replacement remains protected and failure is reported explicitly.
+
+安装生命周期另有一个实际激活后故障：Bootstrap 返回失败，旧包、受管与遗留状态按原始哈希恢复，32 项失败新资源保留，独占锁可重开并完成标准源码重试。随后卸载将 33 个包内文件和 3 个受管文件完整归档，活动安装已移除；本次没有执行归档复装。
+
+A separate installer postactivation failure returned Bootstrap false, restored the previous package/managed/legacy state by exact hashes, preserved the 32 failed new resources, reopened the exclusive lock and completed normal source retry. Uninstall then archived 33 package and 3 managed files exactly and removed the live installation. Archive restoration was not exercised.
+
+### 本轮语言与入口范围 / Language and entry-point scope
+
+本次源码未改界面、语言模块或 PowerShell 安装入口，相关文件与较早来源已逐字节核对。本轮没有扩大重跑完整双语链、附加英文六类或 PS 三阶段。当前实证为新 Main 的 Fresh/Cold 程序界面检查，以及中文安装副本的六类、九故障和16组坐标回归；较早 f94 的72图、英文6/6和PS结果仍仅对应其历史来源。文件不变不等于整个旧32项资格迁移，也不证明物理鼠标、真人可用性或另一个 Max 进程的语言偏好冷恢复。
+
+This source revision leaves the UI, language modules and PowerShell installer unchanged; the relevant files were compared byte for byte with the earlier source. The full bilingual chain, additional English six-category suite and three PowerShell phases were not rerun. Current evidence is the new Main Fresh/Cold programmatic UI checks and Chinese installed six-category, nine-fault and sixteen-coordinate runs. Earlier f94 images/English/PowerShell results retain their historical source scope. Unchanged files do not transfer qualification of the old complete 32-resource package or prove physical mouse use, human usability or preference cold restoration in another Max process.
+
+### 较早 1.4.26 来源 / Earlier 1.4.26 source
+
+下列结果使用本地较早来源 `f94fdb51a3f570bcba7dcf930a6b833c2958e84a`，绑定其当时的 32 项安装字节，**不作为修改后的核心/整个包验收**。它们不是新 Main 中回滚或卸载的前序。新核心改变了安装资源；不得再写新旧 32 项整体逐字节相同。
+
+The following results belong to the earlier local source and its then-current 32 installation resources. **They do not qualify the changed core or complete new package** and are not predecessors for its Main rollback/uninstall chain.
+
+| 历史检查 / Earlier check | 已完成结果 / Completed result | 证明范围 / Limit |
+|---|---|---|
+| 纯回归 / Pure regressions | 329/329 | 较早源码 / Earlier source |
+| 中文源码自检 / Chinese source self-check | 6/6，自然退出 0 / Natural exit 0 | 较早源码的绝对入口与独立安装/冷启动 / Earlier absolute source entry and separate install/cold start |
+| 双语界面 / Bilingual UI | 两个 AI 各逐张查看 72 原图 / Each AI viewed all 72 originals | 6 次切换、2 次同进程重开与当时字体/DPI；非物理鼠标或真人可用性 / Six switches, two same-process reopens and observed font/DPI, not physical mouse or human usability |
+| 附加英文安装自检 / Additional English installed check | 6/6，自然退出 0 / Natural exit 0 | 独立附加链；已知英文标签，原 JSON/诊断保留 / Separate chain, known English labels with original JSON/diagnostics |
+| 公开 PowerShell 入口 / Public PowerShell entry | 三阶段自然退出 0 / Three phases, natural exit 0 | 静默结果、32 项来源和最终 INI 逐字节一致；未看可见弹窗 / Silent result, 32 origins and exact final INI; no visible-dialog observation |
+
+语言重开在同一 Max 进程中，不证明另一个进程的偏好冷启动。较早原图可作界面布局参考；新核心的业务、英文自检或安装范围必须据本表当前修订栏另记。原始失败记录保留，后续通过不改写它们，也不自动解释旧失败原因。
+
+Same-process reopens do not prove preference restoration in another Max process. Earlier originals remain layout references; current-core business, English and installer scope must be stated separately. A later success neither rewrites earlier failures nor establishes their causes.
+
+### 来源、覆盖与限制 / Origins, overlay and limits
+
+本地验收修订号不随公开版本上传其本地历史，也不是可下载的 GitHub commit 链接。公开源码提交、标签、ZIP、全新克隆和 CI 的具体结果写入可编辑的 [Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)，避免让 Git 文档引用尚不存在的自身提交。静态/纯 CI 不替代 Max 主机验证。
+
+Local qualification history is not published as the public Git history. Public revision/tag/archive/clone and exact CI results belong in the editable [Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26). Static/pure CI does not qualify the Max host.
+
+最终公开覆盖仅包含 `README.md`、`docs/TESTING.md`、`docs/assets/MEDIA.md`、`docs/development/PROJECT_MEMORY.md` 与四张原始 PNG，均在 32 项安装资源之外。更新日志已作为新源码中的安装资源单独验收，不能借最终覆盖更改。覆盖后重做源码/内容检查，不声称对文档覆盖后的整个仓库又执行了全部主机步骤。
+
+The final overlay contains only four documents and four original PNGs outside the installation resources. The changelog is qualified separately with the changed source, not edited through this overlay. Repeat source/content checks without implying every host step was repeated on the final documentation overlay.
+
+验收使用自有进程和隔离配置，继承许可环境；未对正常用户配置做全树字节比对。首次用户传递使用副本。包描述声明 Max 2023–2026，**2024–2026 尚未实测**；复杂资产、大模型性能、全部故障点与历史 27→32 项升级不在此覆盖中。归档哈希完整不等于实际复装。
+
+Checks use owned processes and isolated profiles with inherited licensing, without a whole normal-user-profile byte comparison. Use a copy first. **Max 2024–2026 remain untested**. Complex assets, performance, every fault point and the historical 27→32 upgrade are outside coverage. Archive integrity is not exercised restoration.
+
+## 1.4.25 历史结果 / Historical results
 
 **实测环境：Windows 11 x64、3ds Max 2023.3.10、内置 Python 3.9.7。** 下表记录本版已完成的实跑结果及明确例外；独立复核与发布读回分开记录。历史1.4.24和1.3.24结果保持独立，不代替本版验收。
 
@@ -17,8 +117,8 @@
 | 双语界面 / Bilingual UI | **72图已双审 / 72 images reviewed twice** | 6次切换、模式一已有检查缓存/原生语言值变化、模式二正常空缓存、2次同进程重开；两个AI分别逐张查看72原图 / Six switches, a populated Mode 1 check cache and native locale changes, normally empty Mode 2 cache, two same-process reopens; each AI actor viewed all 72 originals |
 | 英文安装副本自检 / English installed self-check | **6/6，自然退出0 / 6/6, natural exit 0** | 实际安装副本；英文已知标题与六类显示名称，原技术诊断及JSON协议保留 / Actual installed copy; English known headings and six display names, with original diagnostics and stable JSON retained |
 | PowerShell安装入口 / PowerShell installer | **功能有限接受 / Functional scope accepted** | 原样公开入口；启动保护与非安装配置阶段自然退出0，实际静默安装及32项读回完成；最终INI变化另行有限复核，原失败收据保留 / Unmodified public entry; startup guard and non-installing profile phase exited naturally 0, actual silent installation and 32-target readback completed; final INI changes received a bounded separate review, with the original failed receipt retained |
-| 激活后失败回滚 / Postactivation rollback | **通过 / Passed** | 单处真实激活后故障；旧包、受管及遗留状态完整恢复，失败新包32项资源保留，锁可重新独占并标准重装 / One actual postactivation fault; old package, managed and legacy state restored, all32 failed-package resources retained, exclusive lock reopened and normal retry completed |
-| 可恢复卸载 / Recoverable uninstall | **通过 / Passed** | 33个包内文件与3个受管文件归档逐字节哈希完整，运行状态清理；未从归档复装 / Matching byte hashes for33 package and3 managed files, with runtime cleanup; archive restoration not exercised |
+| 激活后失败回滚 / Postactivation rollback | **通过 / Passed** | 单处真实激活后故障；旧包、受管及遗留状态完整恢复，失败新包32项资源保留，锁可重新独占并标准重装 / One actual postactivation fault; old package, managed and legacy state restored, all 32 failed-package resources retained, exclusive lock reopened and normal retry completed |
+| 可恢复卸载 / Recoverable uninstall | **通过 / Passed** | 33个包内文件与3个受管文件归档逐字节哈希完整，运行状态清理；未从归档复装 / Matching byte hashes for 33 package and 3 managed files, with runtime cleanup; archive restoration not exercised |
 
 **PowerShell的限制：** 本次静默安装完成，原生静默消息、安装结果、32项来源与工具栏检查用于功能判断；没有看到或按过可见结果弹窗。安装退出后的INI与先前合格退出快照不完全相等：`Maximized`由1变0，并出现`Size=800 600`窗口布局变化。完整差异经本次有限复核接受；原最终收据仍为失败、要求独立INI复核，**不是三个原始收据全部通过，也不是配置全程字节不变**。这不允许忽略其他安装失败或任意配置变更。
 
@@ -126,9 +226,9 @@ The six categories cover loading/version, smoothing algorithms, procedural meshe
 
 Use a scene copy first and inspect appearance, animation and save/reload. Mode 1 commits per object; Mode 2 batch rollback requires retaining the old meshes. Installation/layout/language changes require fresh acceptance, with archive restoration stated separately.
 
-文本采用 LF，`.gitattributes` 保留自动二进制检测，便于 Windows clone 与已测源码保持相同字节。安装资源指纹按 target 排序，取 `bytes`、小写 `sha256`、`source`、`target`，序列化为键排序、紧凑 UTF-8 JSON（保留 Unicode，`ensure_ascii=False`；无 BOM/尾换行）再 SHA-256。发布时应独立读回远端树、ZIP 与新 clone；这里给出方法，**不把将来的发布检查预写为通过**。
+文本采用 LF，`.gitattributes` 保留自动二进制检测。发布读回以明确绑定原始 SHA-256 的最终文件清单为准，逐项比较安全相对路径、长度、SHA-256 与 Git blob 身份；32 项安装来源另外按 source/target/length/SHA-256 核对。历史指纹不能假定采用同一序列化。远端树、ZIP 和全新 clone 分别检查，**不把将来的结果预写为通过**。
 
-Text uses LF with automatic binary detection. For the installation fingerprint, sort rows by target; use `bytes`, lowercase `sha256`, `source`, `target`; hash compact UTF-8 JSON with sorted keys, Unicode retained (`ensure_ascii=False`) and no BOM/trailing newline. Independently read back the remote tree, ZIP and a fresh clone during publication; these are release-check methods, not preclaimed results.
+Text uses LF with automatic binary detection. Bind the final file manifest by its raw SHA-256, then compare safe relative paths, lengths, SHA-256 and Git blob identities exactly. Check all 32 source/target/length/hash rows separately; do not assume historical fingerprints share a serialization. Remote tree, ZIP and fresh-clone checks remain separate and are not preclaimed success.
 
 ## 1.3.24 历史结果（2026-10-09）
 

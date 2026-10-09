@@ -318,7 +318,7 @@ else {
     -not [bool]$business.save_reload_requested
 }
 $identityPassed = (
-    [string]$business.version -eq '1.4.25' -and
+    [string]$business.version -eq '1.4.26' -and
     [string]$business.gate_mode -ceq $expectedGateMode -and
     [string]$business.run_token -ceq $runToken -and
     [string]$business.run_token -match '^[0-9a-fA-F]{32}$' -and

@@ -2,6 +2,18 @@
 
 版本基线为原插件 `1.2.16`；BUG 修复增加 `0.0.1`，新增功能增加 `0.1.0`。发布时同步引擎、UI、版本文件、包元数据和安装器标记。
 
+## v1.4.26（2026-10-10）：严格场景保护与坐标回传
+
+- 修复两种模式在选择恢复失败或读回不一致时仍可能报告成功的问题。完整捕获原选择，恢复后按节点句柄集合核对；原始故障与恢复故障分别记录。报告、通知和运行边界尚未完成时不提交成功状态。
+- 修复模式二在报告、通知或视口重绘收尾前过早清空恢复记录的问题。原生节点包装引用与纯句柄恢复账本分开释放；保留备份时可在这些收尾失败后使用真实回滚。单对象关闭备份后，已验证的新结果继续受清理保护，并明确报告不可完整回滚的删除边界。
+- 修复尚未取得完整导入前快照时可能错误清理原场景的问题。未知快照与合法空场景分开表示；权威快照和选择捕获严格验证原生有效性、正整数唯一句柄，异常或不完整读取停止执行，不能通过吞错来授予删除所有权。
+- 修复模式一把已含世界变换的求值网格快照再次应用节点变换，导致不同源/目标变换下形状缩放或偏移错误的问题。世界空间节点写入直接使用求值快照点；仅基础对象局部读回转换到目标局部空间，保留原点位预算与失败回滚。
+- 形状原生回归保留原8例并扩为16例，增加源节点带单位换算缩放、目标恒等变换，以及不同正负 TRS 变换的 Mesh/Poly 与 World/Local 组合；世界点预期改用独立节点读取，避免与生产代码共享快照变换假设。实际执行范围仍以测试说明为准。
+- 修正原创雨棚练习的 FBX ASCII 分块格式与原生 UV 构建读回；失败清理按创建节点的 AnimHandle 查找，仅处理本次自有节点，保留主异常与清理诊断。
+- 首页与双语起始页前移完整固定发行版下载、三步开始与真实界面参考；保留完整任务教程。增加原创雨棚生成练习，用户无需下载或分发任何模型即可练习形状与 UV1 回传。源码、输出数据和实际传递结果保持明确区分。
+- 增加 Windows / CPython 3.9 的只读源码 CI，以及使用问题和改进建议入口。CI 仅验证静态与纯回归，不能替代真实 Max 验收；实际执行与发布状态见[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。固定安装目标仍为32项，保留两模式与数据来源合同。
+- English: fail closed on incomplete scene/selection snapshots, verify restored selection by native handles, and publish success only after report/UI/redraw finalization. Retain pure recovery state until late Skin failures can roll back; protect verified no-backup results and state the irreversible boundary. Improve bilingual onboarding, add an original procedural canopy exercise, and introduce Windows source CI and focused feedback templates. Transfer evaluated world-space snapshot points without applying node transforms twice; expand independent world-coordinate regressions to differing transforms, and repair authored demo FBX/UV construction and owned-node cleanup. See [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for executed scope and limits.
+
 ## v1.4.25（2026-10-09）：紧凑语言按钮与图文教程
 
 - 将占用独立顶部行的语言下拉框改为模式标题空白角落中的 **Language · 中文 / EN** 两个直接选择按钮，回收顶部空间。切换保留模式、FBX、选项与检查状态；点击当前语言保持单选，保存失败沿用回退流程，执行中禁用两钮。

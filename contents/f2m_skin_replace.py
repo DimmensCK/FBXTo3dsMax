@@ -34,7 +34,7 @@ except Exception:  # 允许在普通 Python 中做语法检查
 
 
 TOOL_AUTHOR = "Dimmens"
-TOOL_VERSION = "1.4.25"
+TOOL_VERSION = "1.4.26"
 LAST_RUN_OK = False
 LAST_RUN_REPORT_PATH = ""
 LAST_RUN_SUMMARY = ""
@@ -93,7 +93,7 @@ struct F2M_SkinHelperStruct
 (
     lastMessage = "",
     apiKind = "skin",
-    apiVersion = "1.4.25",
+    apiVersion = "1.4.26",
 
     fn setLastMessage msg =
     (
@@ -1678,7 +1678,7 @@ class TransferContext:
         self.import_prefix = f"__F2M_SRC_{self.run_id}_"
         self.scene_records: List[SceneRecord] = []
         self.scene_by_original: Dict[str, List[SceneRecord]] = {}
-        self.pre_handles: Set[int] = set()
+        self.pre_handles: Optional[Set[int]] = None
         self.imported_nodes: List[Any] = []
         self.keep_imported_nodes: Set[int] = set()
         self.replacement_nodes: Set[int] = set()
@@ -1951,10 +1951,30 @@ def register_record(ctx: TransferContext, record: SceneRecord) -> None:
     ctx.scene_by_original.setdefault(record.original_name, []).append(record)
 
 
+def _strict_node_handles(nodes: Sequence[Any], label: str) -> List[int]:
+    """Acquire a complete native identity snapshot; never filter failed reads."""
+    predicate = getattr(rt, "isValidNode", None)
+    if not callable(predicate):
+        raise RuntimeError(label + "缺少原生节点有效性检查。")
+    handles: List[int] = []
+    seen: Set[int] = set()
+    for index, node in enumerate(nodes, start=1):
+        if predicate(node) is not True:
+            raise RuntimeError(f"{label}第 {index} 个节点的原生有效性检查未通过。")
+        handle = rt.getHandleByAnim(node)
+        if type(handle) is not int or handle <= 0 or handle in seen:
+            raise RuntimeError(f"{label}第 {index} 个节点没有正整数唯一句柄。")
+        seen.add(handle)
+        handles.append(handle)
+    return handles
+
+
 def prepare_scene_names(ctx: TransferContext) -> None:
-    nodes = [node for node in all_scene_nodes() if is_valid_node(node)]
+    # None is not an empty scene: only a complete scan grants cleanup ownership.
+    ctx.pre_handles = None
+    nodes = list(rt.objects)
     # 必须先记住完整的原场景句柄；即使改名中途失败，清理也不能误删原节点。
-    ctx.pre_handles = {node_handle(node) for node in nodes}
+    ctx.pre_handles = set(_strict_node_handles(nodes, "导入前场景快照"))
     for index, node in enumerate(nodes, start=1):
         handle = node_handle(node)
         original = str(node.name)
@@ -1979,6 +1999,8 @@ def restore_scene_names(ctx: TransferContext) -> bool:
             continue
         if not record.renamed:
             continue
+        if record.node is None:
+            record.node = node_by_handle(record.handle)
         if not is_valid_node(record.node):
             failures.append(f"{record.temp_name} -> {record.original_name}（节点已不存在）")
             continue
@@ -2134,7 +2156,9 @@ def import_fbx(ctx: TransferContext) -> None:
         f"此前面板模式={previous_panel_mode or '未知'}。"
     )
 
-    before = {node_handle(node) for node in all_scene_nodes() if is_valid_node(node)}
+    before = set(_strict_node_handles(list(rt.objects), "原生导入前场景快照"))
+    if ctx.pre_handles is None:
+        ctx.pre_handles = set(before)
     escaped = path.replace("\\", "\\\\").replace('"', '\\"')
     snapshot = configure_fbx_import(ctx)
     import_error = ""
@@ -5267,6 +5291,11 @@ def process_pair(src: Any, target_record: SceneRecord, ctx: TransferContext) -> 
 
 
 def cleanup_imported_nodes(ctx: TransferContext) -> None:
+    if ctx.pre_handles is None:
+        if ctx.imported_nodes:
+            raise RuntimeError("未取得完整导入前场景快照，已拒绝推断并删除临时节点。")
+        ctx.log.add("尚未取得完整导入前场景快照；未执行全景临时节点清理。")
+        return
     keep = set(ctx.keep_imported_nodes)
     tracked_by_handle: Dict[int, Any] = {}
     for node in ctx.imported_nodes:
@@ -5593,18 +5622,21 @@ def reports_succeeded(ctx: TransferContext) -> bool:
     return all(report.status.startswith(expected_prefix) for report in ctx.reports)
 
 
-def _release_context_node_references(ctx: TransferContext) -> None:
-    """在报告/对话框/返回前主动释放上下文中的 pymxs 节点 wrapper。"""
+def _release_context_node_references(
+    ctx: TransferContext, *, preserve_recovery: bool = False,
+) -> None:
+    """释放 wrapper；可失败收尾完成前保留纯句柄事务与名称恢复记录。"""
 
     ctx.imported_nodes.clear()
-    ctx.committed_replacements.clear()
     for record in ctx.scene_records:
         record.node = None
-    ctx.scene_by_original.clear()
-    ctx.scene_records.clear()
-    ctx.keep_imported_nodes.clear()
-    ctx.replacement_nodes.clear()
     ctx.imported_bone_names.clear()
+    if not preserve_recovery:
+        ctx.committed_replacements.clear()
+        ctx.scene_by_original.clear()
+        ctx.scene_records.clear()
+        ctx.keep_imported_nodes.clear()
+        ctx.replacement_nodes.clear()
 
 
 def _run_transfer_impl(options: TransferOptions) -> str:
@@ -5621,6 +5653,13 @@ def _run_transfer_impl(options: TransferOptions) -> str:
     if options.mode != "replace":
         LAST_RUN_SUMMARY = "f2m_skin_replace 只接受 mode='replace'；同拓扑传递必须调用 f2m_topology_transfer。"
         raise ValueError(LAST_RUN_SUMMARY)
+    selection_nodes = list(rt.selection)
+    selection_handles = _strict_node_handles(selection_nodes, "初始选择快照")
+    original_selection = [
+        (handle, str(node.name))
+        for handle, node in zip(selection_handles, selection_nodes)
+    ]
+    selection_nodes.clear()
     log = TransferLog()
     ctx = TransferContext(options, log)
     selected_geometry: List[Any] = []
@@ -5630,127 +5669,131 @@ def _run_transfer_impl(options: TransferOptions) -> str:
     src: Any = None
     target_record: Optional[SceneRecord] = None
     try:
-        heap_before, heap_after = ensure_maxscript_heap_reserve()
-        log.add(
-            "MaxScript 内存堆安全下限已确认："
-            f"{heap_before} -> {heap_after} 字节；"
-            "仅扩充不足的会话，不主动垃圾回收。"
-        )
-        log.add(f"FBX 到 3ds Max 替换网格并保留蒙皮开始 v{TOOL_VERSION} / 作者：{TOOL_AUTHOR}")
-        log.add(
-            "数据方向：Max 源模型 <- FBX 目标模型；运行方式："
-            + ("仅检查" if options.dry_run else "正式替换")
-        )
-        selected_geometry = [
-            node
-            for node in list(rt.selection)
-            if is_valid_node(node) and is_geometry_node(node)
-        ]
-        if not selected_geometry:
-            raise RuntimeError("请在 Max 场景里选中至少 1 个 Max 源网格。")
-        if (
-            not options.dry_run
-            and len(selected_geometry) > 1
-            and not options.backup_old_mesh
-        ):
-            raise RuntimeError(
-                "多个 Max 源模型同时替换时必须启用“备份旧网格”，否则删除后的源节点无法保证批次级无损回滚。"
+        with pymxs.redraw(False):
+            heap_before, heap_after = ensure_maxscript_heap_reserve()
+            log.add(
+                "MaxScript 内存堆安全下限已确认："
+                f"{heap_before} -> {heap_after} 字节；"
+                "仅扩充不足的会话，不主动垃圾回收。"
             )
-        prepare_scene_names(ctx)
-        target_records = selected_target_records(ctx)
-        selected_geometry.clear()
-        log.add(f"选中 Max 源网格数量：{len(target_records)}")
-        import_fbx(ctx)
-
-        sources = imported_geometry_nodes(ctx)
-        log.add(f"FBX 目标网格数量：{len(sources)}")
-        pairs, unmatched_reports = match_selected_targets_to_sources(target_records, sources)
-        ctx.reports.extend(unmatched_reports)
-
-        for src, target_record in pairs:
-            log.add(f"匹配：Max 源模型 {target_record.original_name} <- FBX 目标模型 {src.name}")
-            report = ObjectReport(name=target_record.original_name, status="处理中")
-            src_counts = mesh_counts(src)
-            dst_counts = mesh_counts(target_record.node)
-            report.add(f"FBX 目标模型统计：点 {src_counts[0]}，边 {src_counts[1]}，面 {src_counts[2]}")
-            report.add(f"Max 源模型统计：点 {dst_counts[0]}，边 {dst_counts[1]}，面 {dst_counts[2]}")
-            for warning in transform_pair_warnings(src, target_record.node):
-                report.add(f"成对变换警告：{warning}")
-            warnings = [
-                f"FBX 目标网格：{warning}"
-                for warning in node_state_warnings(src)
+            log.add(f"FBX 到 3ds Max 替换网格并保留蒙皮开始 v{TOOL_VERSION} / 作者：{TOOL_AUTHOR}")
+            log.add(
+                "数据方向：Max 源模型 <- FBX 目标模型；运行方式："
+                + ("仅检查" if options.dry_run else "正式替换")
+            )
+            selected_geometry = [
+                node
+                for node in list(rt.selection)
+                if is_valid_node(node) and is_geometry_node(node)
             ]
-            warnings.extend(
-                f"Max 源模型：{warning}"
-                for warning in node_state_warnings(target_record.node)
-            )
-            if warnings:
-                for warning in warnings:
-                    report.add(f"状态提醒：{warning}")
-                report.status = "失败：需解除对象状态"
-            else:
-                replaced = replace_with_source_skin(src, target_record, ctx, report)
-                if options.dry_run and replaced:
-                    report.status = "已检查：可替换"
-                elif replaced:
-                    report.status = "完成：替换网格并保留蒙皮"
-                else:
-                    report.status = "失败：替换网格并保留蒙皮"
-            ctx.reports.append(report)
-            if report.diagnostics:
-                ctx.diagnostics.append(
-                    f"[对象：{target_record.original_name}]\n"
-                    + "\n\n".join(report.diagnostics)
+            if not selected_geometry:
+                raise RuntimeError("请在 Max 场景里选中至少 1 个 Max 源网格。")
+            if (
+                not options.dry_run
+                and len(selected_geometry) > 1
+                and not options.backup_old_mesh
+            ):
+                raise RuntimeError(
+                    "多个 Max 源模型同时替换时必须启用“备份旧网格”，否则删除后的源节点无法保证批次级无损回滚。"
                 )
+            prepare_scene_names(ctx)
+            target_records = selected_target_records(ctx)
+            selected_geometry.clear()
+            log.add(f"选中 Max 源网格数量：{len(target_records)}")
+            import_fbx(ctx)
 
-        if ctx.committed_replacements and not reports_succeeded(ctx):
+            sources = imported_geometry_nodes(ctx)
+            log.add(f"FBX 目标网格数量：{len(sources)}")
+            pairs, unmatched_reports = match_selected_targets_to_sources(target_records, sources)
+            ctx.reports.extend(unmatched_reports)
+
+            for src, target_record in pairs:
+                log.add(f"匹配：Max 源模型 {target_record.original_name} <- FBX 目标模型 {src.name}")
+                report = ObjectReport(name=target_record.original_name, status="处理中")
+                src_counts = mesh_counts(src)
+                dst_counts = mesh_counts(target_record.node)
+                report.add(f"FBX 目标模型统计：点 {src_counts[0]}，边 {src_counts[1]}，面 {src_counts[2]}")
+                report.add(f"Max 源模型统计：点 {dst_counts[0]}，边 {dst_counts[1]}，面 {dst_counts[2]}")
+                for warning in transform_pair_warnings(src, target_record.node):
+                    report.add(f"成对变换警告：{warning}")
+                warnings = [
+                    f"FBX 目标网格：{warning}"
+                    for warning in node_state_warnings(src)
+                ]
+                warnings.extend(
+                    f"Max 源模型：{warning}"
+                    for warning in node_state_warnings(target_record.node)
+                )
+                if warnings:
+                    for warning in warnings:
+                        report.add(f"状态提醒：{warning}")
+                    report.status = "失败：需解除对象状态"
+                else:
+                    replaced = replace_with_source_skin(src, target_record, ctx, report)
+                    if options.dry_run and replaced:
+                        report.status = "已检查：可替换"
+                    elif replaced:
+                        report.status = "完成：替换网格并保留蒙皮"
+                    else:
+                        report.status = "失败：替换网格并保留蒙皮"
+                ctx.reports.append(report)
+                if report.diagnostics:
+                    ctx.diagnostics.append(
+                        f"[对象：{target_record.original_name}]\n"
+                        + "\n\n".join(report.diagnostics)
+                    )
+
+            if ctx.committed_replacements and not reports_succeeded(ctx):
+                pairs.clear()
+                sources.clear()
+                selected_geometry.clear()
+                src = None
+                target_record = None
+                rollback_failures = rollback_committed_replacements(
+                    ctx,
+                    "同一批次中存在未匹配、状态阻断或替换失败的对象",
+                )
+                if rollback_failures:
+                    raise RuntimeError(
+                        "批次中存在失败对象，且此前已提交对象的回滚不完整："
+                        + "；".join(rollback_failures)
+                    )
+
             pairs.clear()
             sources.clear()
             selected_geometry.clear()
+            target_records.clear()
             src = None
             target_record = None
-            rollback_failures = rollback_committed_replacements(
-                ctx,
-                "同一批次中存在未匹配、状态阻断或替换失败的对象",
-            )
-            if rollback_failures:
-                raise RuntimeError(
-                    "批次中存在失败对象，且此前已提交对象的回滚不完整："
-                    + "；".join(rollback_failures)
-                )
+            cleanup_imported_nodes(ctx)
+            if not restore_scene_names(ctx):
+                raise RuntimeError("场景节点名称没有完整恢复，详见报告。")
 
-        pairs.clear()
-        sources.clear()
-        selected_geometry.clear()
-        target_records.clear()
-        src = None
-        target_record = None
-        cleanup_imported_nodes(ctx)
-        if not restore_scene_names(ctx):
-            raise RuntimeError("场景节点名称没有完整恢复，详见报告。")
-
+            _restore_selection_after_replace(original_selection)
+            _release_context_node_references(ctx, preserve_recovery=True)
+            summary = summarize_reports(ctx)
+            log.add("")
+            log.add(summary)
+            diagnostic_path = write_diagnostic_file(ctx.diagnostics, ctx.run_id)
+            if diagnostic_path:
+                log.add("内部诊断文件：" + diagnostic_path)
+            log_path = write_log_file(log.text(), ctx.run_id)
+            log.add(f"报告文件：{log_path}")
+            run_ok = reports_succeeded(ctx)
+            LAST_RUN_REPORT_PATH = log_path
+            LAST_RUN_SUMMARY = summary
+            if options.show_ui:
+                if options.dry_run:
+                    show_check_message(ctx, "FBX 到 3ds Max 检查结果", log_path)
+                elif not run_ok:
+                    show_execution_failure(ctx, log_path)
+                else:
+                    show_missing_transfer_attributes(ctx, log_path)
         _release_context_node_references(ctx)
-        summary = summarize_reports(ctx)
-        log.add("")
-        log.add(summary)
-        diagnostic_path = write_diagnostic_file(ctx.diagnostics, ctx.run_id)
-        if diagnostic_path:
-            log.add("内部诊断文件：" + diagnostic_path)
-        log_path = write_log_file(log.text(), ctx.run_id)
-        log.add(f"报告文件：{log_path}")
-        LAST_RUN_OK = reports_succeeded(ctx)
-        LAST_RUN_REPORT_PATH = log_path
-        LAST_RUN_SUMMARY = summary
-        if options.show_ui:
-            if options.dry_run:
-                show_check_message(ctx, "FBX 到 3ds Max 检查结果", log_path)
-            elif not LAST_RUN_OK:
-                show_execution_failure(ctx, log_path)
-            else:
-                show_missing_transfer_attributes(ctx, log_path)
-        ctx.committed_replacements = []
+        LAST_RUN_OK = run_ok
         return summary
     except Exception as exc:
+        LAST_RUN_OK = False
         ctx.diagnostics.append("[运行或收尾阶段]\n" + traceback.format_exc())
         failure_visible = visible_exception_text(exc)
         failure_detail = _exception_text_and_release(exc)
@@ -5801,8 +5844,18 @@ def _run_transfer_impl(options: TransferOptions) -> str:
             recovery_errors.append(
                 "名称恢复失败：" + restore_visible
             )
+        try:
+            _restore_selection_after_replace(original_selection)
+        except Exception as selection_exc:
+            ctx.diagnostics.append("[选择恢复失败]\n" + traceback.format_exc())
+            selection_visible = visible_exception_text(selection_exc)
+            _exception_text_and_release(selection_exc)
+            recovery_errors.append("选择恢复失败：" + selection_visible)
+        irreversible_result_preserved = bool(ctx.replacement_nodes) and not options.backup_old_mesh
         _release_context_node_references(ctx)
         error_text = f"传递失败：{failure_visible}"
+        if irreversible_result_preserved:
+            error_text += "\n\n无备份替换已提交；原节点已删除，已保留通过读回的新结果，不能将本次故障视为完整回滚。"
         if recovery_errors:
             error_text += "\n\n恢复阶段错误：\n" + "\n".join(recovery_errors)
         diagnostic_path = write_diagnostic_file(ctx.diagnostics, ctx.run_id)
@@ -5828,8 +5881,9 @@ def _run_transfer_impl(options: TransferOptions) -> str:
 def _restore_selection_after_replace(
     original_selection: Sequence[Tuple[int, str]],
 ) -> None:
-    live_nodes = [node for node in all_scene_nodes() if is_valid_node(node)]
-    by_handle = {node_handle(node): node for node in live_nodes}
+    live_nodes = list(rt.objects)
+    live_handles = _strict_node_handles(live_nodes, "选择恢复场景快照")
+    by_handle = dict(zip(live_handles, live_nodes))
     by_name: Dict[str, List[Any]] = {}
     for node in live_nodes:
         by_name.setdefault(str(node.name), []).append(node)
@@ -5849,10 +5903,8 @@ def _restore_selection_after_replace(
             # A committed replacement keeps the old target's original name,
             # while a backup (if enabled) is hidden and renamed.
             chosen = same_name[0]
-        elif original_node is not None:
-            chosen = original_node
         if chosen is None:
-            continue
+            raise RuntimeError("无法唯一恢复选择：" + str(original_name) + "[" + str(original_handle) + "]")
         handle = node_handle(chosen)
         if handle not in seen:
             restored.append(chosen)
@@ -5862,25 +5914,15 @@ def _restore_selection_after_replace(
         rt.select(restored)
     else:
         rt.clearSelection()
+    actual = set(_strict_node_handles(list(rt.selection), "选择恢复读回"))
+    if actual != seen:
+        raise RuntimeError("选择恢复读回不一致：期望 " + str(sorted(seen)) + "，实际 " + str(sorted(actual)))
 
 
 def run_transfer(options: TransferOptions) -> str:
-    """Run replacement without viewport churn and always restore selection."""
+    """Run the replacement transaction, including redraw finalization."""
 
-    ensure_runtime()
-    original_selection = [
-        (node_handle(node), str(node.name))
-        for node in list(rt.selection)
-        if is_valid_node(node)
-    ]
-    try:
-        with pymxs.redraw(False):
-            return _run_transfer_impl(options)
-    finally:
-        try:
-            _restore_selection_after_replace(original_selection)
-        except Exception:
-            pass
+    return _run_transfer_impl(options)
 
 
 def parse_uv_channels(text: str) -> List[int]:

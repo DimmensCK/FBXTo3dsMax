@@ -33,7 +33,7 @@ except Exception:
     rt = None
 
 
-TOOL_VERSION = "1.4.25"
+TOOL_VERSION = "1.4.26"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CHILD_ENV = "F2M_SELFCHECK_CHILD"
 RESULT_ENV = "F2M_SELFCHECK_RESULT"

@@ -1,158 +1,166 @@
-![FBXTo3dsMax — bring FBX edits back into your Max scene](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/brand/fbx-to-max.svg)
+![FBXTo3dsMax — bring edits back to your Max scene](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/brand/fbx-to-max.svg)
 
 # FBXTo3dsMax
 
 ### Edit elsewhere. Continue in your Max scene.
 
-**Bring FBX shape, UVs, materials, vertex colors and normals into an existing 3ds Max scene. When topology changes, replace the skinned mesh under strict validation while using the scene's skeleton and binding system.**
+Bring FBX shape, UVs, materials, vertex data and normals into an existing **3ds Max** scene. Update selected channels when topology matches; replace a changed mesh only after Skin, bone and binding checks pass.
 
-By **Dimmens** · Free, readable Python / MAXScript source · **MIT** · **中文 / English**
+**Dimmens · Free readable source · MIT · 中文 / English**
 
-[中文](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md) · [Install](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [Complete user guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) · [Download source](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip)
+**[Download complete v1.4.26 source](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · [Release notes](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) · [Install](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [中文概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md)
 
-This page describes **1.4.25** operations and design. See [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for version-specific results. **Historical 1.4.24 results do not qualify 1.4.25.**
+[Start in three steps](#quick-start) · [English UI](#language-ui) · [Choose a workflow](#workflows) · [See the changes](#examples) · [Task guides](#guides) · [Scope](#scope)
 
-## 1 · What problem does it solve?
+<a id="quick-start"></a>
 
-Your Max scene already contains organization, materials or skinning. You then revise the mesh in a modeling tool. A fresh import should not require rebuilding the scene or guessing which data came across correctly.
+## Start in three steps
 
-FBXTo3dsMax makes the choice explicit: **transfer selected data when topology matches; validate and replace a skinned mesh when topology changes.** Data always flows **FBX → receiving Max mesh**.
+1. **Download and extract everything.** Keep the installer, `contents/` and the other folders together. Do not run inside the ZIP or download one script alone.
+2. **Drag in the installer and confirm success.** Save your scene, then drag root **`Install_FBXTo3dsMax.ms`** into the Max viewport. Resolve any installation failure before use.
+3. **Open, self-check and try a copy.** Click **FBX 转 MAX / FBX to MAX** on the top toolbar, choose **EN**, and run **Run Self-check**. Start on a scene copy with one receiving mesh and the default **Shape** option.
 
-| Your task | Workflow to try |
-|---|---|
-| Adjust proportions or shape while keeping the Max node | Mode 1, positions only |
-| Revise UVs, face material assignments, RGB or alpha | Mode 1, the required channels only |
-| Bring back smoothing groups and edited normals | Mode 1, SG and/or custom normals as appropriate |
-| Change topology while using the Max scene's bones | Mode 2, with valid Skin on both meshes and uniquely matched bones |
+The plug-in uses Max's bundled Python; normal installation needs no separate interpreter, compiler or administrator access. Root `Uninstall_FBXTo3dsMax.ms` is the removal entry. [Detailed installation and removal →](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md)
 
-## 2 · Choose a workflow
+Read [TESTING](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for version-specific host results and limits. Package metadata declares Max 2023–2026; **2024–2026 remain untested**.
 
-![Two workflows and their data direction](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/two-modes.svg)
+<a id="language-ui"></a>
 
-| | Mode 1: Matching Models / Transfer Data | Mode 2: Different Models / Replace / Keep Skin |
+## English or Chinese, in the same window
+
+**Language · 中文 / EN** sits beside the mode heading. Switching in place preserves the selected mode, FBX, options and checked state. The two language buttons are mutually exclusive.
+
+![English UI reference from 1.4.25](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/ui/rollout-1.4.25-en.png)
+
+[Open the English image at full size](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/ui/rollout-1.4.25-en.png) · [中文界面原图](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/ui/rollout-1.4.25-cn.png) · [中文操作概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md#language-ui)
+
+This is a **real 1.4.25 UI reference** with an empty FBX field, not execution evidence for 1.4.26. Known UI text and user-facing messages follow the selected language; original technical diagnostics are retained when needed.
+
+<a id="workflows"></a>
+
+## Choose the workflow for your edit
+
+The direction is always **FBX supplies data → Max receives it**.
+
+| Your task | Choose | What must hold |
 |---|---|---|
-| Requirement | Unique vertex, connectivity and winding correspondence | One Skin per mesh; valid bone, weight and binding checks |
-| Mesh | Retains the receiving Max node; writes selected channels | Replaces the old mesh with the FBX candidate |
-| Skin | Does not replace the original node with a new mesh | Max supplies scene bones/binding data; FBX supplies weights |
-| Default protection | Snapshot and readback for each object | Hidden old-mesh backup; batch rollback while backups are retained |
-| Important limit | Equal vertex/face counts are not enough | Does not clone old parenting, animation controllers or arbitrary modifiers |
+| Adjust shape, unwrap UVs, update materials/face IDs, RGB/Alpha or normals | **Mode 1 · Matching Models / Transfer Data** | Keep the receiving Max node and write selected channels. Vertex identity, connectivity, winding and face mapping must correspond uniquely; matching counts alone are insufficient |
+| Change topology and combine the FBX mesh/weights with Max scene bones | **Mode 2 · Different Models / Replace / Keep Skin** | Each side needs one qualifying Skin. Bone, weight and binding checks must pass. The old mesh is hidden as a backup by default |
 
-## 3 · What makes it useful?
+![Original concept diagram: the two modes](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/two-modes.svg)
 
-| Capability | Practical benefit |
+Mode 2 does not copy the old node's hierarchy, transform/animation controllers, constraints or arbitrary modifiers. FBX supplies per-vertex weights; Max supplies scene bones and the binding system. Multi-object replacement requires backups. [Full Skin requirements and failure boundaries →](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-5--replace-a-skinned-mesh-after-topology-changes)
+
+<a id="examples"></a>
+
+## See what comes back to Max
+
+Try the [original canopy exercise](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/examples/README.md): generate your own receiving mesh and edited FBX, then check, transfer Shape + UV 1 and inspect the result. No model download is needed. The generator prepares the scene; it does not run the plug-in. See TESTING for the exact real-host coverage.
+
+### Update shape while keeping the Max node
+
+| Authorized historical example: before | Authorized historical example: after |
 |---|---|
-| **Selective channels** | Update only the data you changed: UVs without replacing materials, for example. Only positions are selected by default |
-| **Face-corner mapping** | UVs/normals are corner-based; material IDs/smoothing masks are face-based. The transfer respects that distinction |
-| **Strict smoothing and normal paths** | A valid native FBX smoothing layer takes priority. Inferred constraints must validate; unrepresentable cases stop |
-| **Explicit Skin authority** | Avoids writing another skeleton's FBX bind matrices onto scene bones; reads back bones, weights and bindings |
-| **Inspect, write, restore, report** | Precheck is not final completion. Execution validates again and restores selection, names and importer settings |
-| **Readable source** | Uses Max's bundled Python. Usually no administrator access, extra Python or compiler is needed; MIT permits modification and redistribution |
+| ![Historical shape transfer: before](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![Historical shape transfer: after](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
+| [Full-size image](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | [Full-size image](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
 
-These are capabilities and checks, not promises of universal losslessness, zero defects or superior benchmark performance.
+In Mode 1, selecting only **Shape** updates vertex positions. Leave channels you do not intend to change unchecked. The images show a historical result; screen position does not define which object supplies data. [About 10 seconds of historical result inspection · v1.3.23](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4) · [Follow the shape task](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-1--update-shape-only)
 
-## 4 · The data you can bring back
+### Select channels independently
 
-![Original schematic: vertices, face corners, faces and independent data channels](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/channel-map.svg)
+| Data to update | Option | What to inspect |
+|---|---|---|
+| UVs | UV 1 / 2 / 3 | Map channels 1 / 2 / 3 and face-corner mapping; select channels actually present |
+| Materials and assignment | Material / ID | Both material objects and each face's material ID |
+| Color and masks | Vertex RGB and Alpha separately | RGB is map channel 0; independent Alpha is channel -2, not inferred from brightness |
+| Surface continuity and direction | Smoothing Groups / Vertex Normals | SG controls sharing between faces; normals specify face-corner directions |
 
-### Shape — bring the edit back into the scene
+<details>
+<summary>Authorized historical gallery: material IDs, RGB and Alpha</summary>
 
-| Historical illustration: before | Historical illustration: after |
+**Materials and per-face IDs:** inspect actual face assignments, not viewport color alone.
+
+![Authorized historical screenshot: material IDs](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
+
+[Open full size](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
+
+**RGB and independent Alpha:** inspect both channels separately.
+
+![Authorized historical screenshot: RGB](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-color-rgb.webp)
+
+[RGB full size](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-color-rgb.webp)
+
+![Authorized historical screenshot: Alpha](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-alpha.webp)
+
+[Alpha full size](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-alpha.webp)
+
+</details>
+
+Historical images and video are authorized, without the underlying model files. Original SVGs explain concepts. UI references, historical results and diagrams have distinct labels. [Media provenance](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md)
+
+## Built for deliberate model iteration
+
+| Capability | Why it helps |
 |---|---|
-| ![Before historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![After historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
+| **Selective updates** | Transfer UVs without replacing materials; shape is the default channel |
+| **Face and corner mapping** | UVs/normals follow face corners; material IDs/SG follow faces |
+| **Separate smoothing and normals** | Prefer a valid native FBX smoothing layer; stop when inference constraints cannot be met exactly |
+| **Explicit Skin data sources** | Scene bones/binding and FBX weights have separate responsibilities, with readback before and after commit |
+| **Inspectable execution** | Preflight, writing, readback and recovery produce reports; a passed check is not a completed transfer |
+| **MIT source you can read** | Inspect, modify and redistribute Python/MAXScript while retaining copyright and license |
 
-Mode 1 writes point positions while retaining the Max receiving node and user stack. The images illustrate a historical result; their left/right arrangement does not define a fixed FBX/Max source convention.
+<details>
+<summary>Understand smoothing, custom normals and Skin data sources</summary>
 
-[Watch the historical deformation/binding inspection clip, about 10 seconds (v1.3.23)](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4). It does not show the complete operation or qualify the current version.
+![Original concept diagram: smoothing and normals](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/smoothing-and-normals.svg)
 
-### Materials and face IDs — transfer the assignment too
+SG and custom directions solve different problems. The retained `F2M_顶点法线` modifier is part of the result; do not delete or collapse it. User Edit Normals / Weighted Normal modifiers are not silently cleared.
 
-![Authorized historical screenshot: material and per-face ID inspection](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
+![Original concept diagram: Skin data sources](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/skin-data-authority.svg)
 
-Select materials/IDs to transfer both the material object and each face's ID. Viewport color alone does not prove per-face assignment: inspect the affected faces and material slots.
+FBX supplies the new mesh, channels and weights. Max supplies scene bone identity, binding local data and envelopes; candidate Mesh Bind is adapted. This is not a promise to copy an entire animation system after arbitrary topology edits.
 
-### UVs — face-corner transfer for channels 1 / 2 / 3
+</details>
 
-UV sharing does not correspond one-to-one with geometric vertices. The plug-in maps faces and corners for **map channels 1, 2 and 3**. Select only the UV channels you changed. Missing selected channels are reported and skipped; skipped is not copied.
+<a id="guides"></a>
 
-### Vertex color — separate RGB and alpha control
+## Continue with a task
 
-![Authorized historical screenshot: RGB vertex-color inspection](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-color-rgb.webp)
+| Task | English | 中文 |
+|---|---|---|
+| Installation, reinstall and removal | [Install](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) | [安装指南](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) |
+| Shape only | [Task 1](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-1--update-shape-only) | [任务一](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#任务一只修改形状) |
+| UVs, materials and face IDs | [Task 2](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-2--update-uvs-materials-and-face-ids) | [任务二](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#任务二更新-uv材质与面-id) |
+| RGB and Alpha | [Task 3](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-3--transfer-rgb-and-alpha-separately) | [任务三](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#任务三分别传递-rgb-与-alpha) |
+| Smoothing and custom normals | [Task 4](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-4--choose-smoothing-groups-or-custom-normals) | [任务四](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#任务四选择光滑组或自定义法线) |
+| Skin replacement after topology changes | [Task 5](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#task-5--replace-a-skinned-mesh-after-topology-changes) | [任务五](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#任务五拓扑改变后替换带-skin-的网格) |
+| Data contracts, algorithms and transactions | [Technical reference](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md#technical-reference) | [技术参考](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md#技术参考) |
 
-**RGB is map channel 0.** Materials, lighting and viewport settings affect its appearance; inspect the actual channel as well.
+<a id="scope"></a>
 
-![Authorized historical screenshot: independent vertex-alpha inspection](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/vertex-alpha.webp)
+## Read the result, then verify the asset
 
-**Alpha is independent map channel -2.** It is not guessed from RGB brightness. RGB and alpha can be selected and read back separately.
+**Illustrative interpretation examples, not execution receipts for this version:**
 
-All five screenshots are **author-authorized historical tutorial images**, not 1.4.25 UI captures. No model files accompany them. Original SVGs explain concepts and are not software screenshots. [Media provenance and scope](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md)
-
-## 5 · Your first transfer in five steps
-
-1. **Download and extract everything.** Use **Code → Download ZIP** in the [repository](https://github.com/DimmensCK/FBXTo3dsMax). Keep the directory structure; do not download only the installer.
-2. **Install and confirm success.** Drag root `Install_FBXTo3dsMax.ms` into the Max viewport. On failure, read the log before continuing.
-3. **Open and choose a language.** Click **FBX 转 MAX / FBX to MAX**, then **EN** beside **Language** for English (or **中文** for Chinese), and run the self-check.
-4. **Start with a copy and one mesh.** Select the receiving Max mesh, FBX, mode and channels. Positions are the default.
-5. **Check, transfer, inspect.** Run **Check FBX / Match**, read the report, then **Run Transfer**. Inspect appearance, channels, animation and save/reload.
-
-[Full installation and removal steps](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [Task-oriented user guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
-
-## 6 · Smoothing groups and custom normals do different jobs
-
-![Original schematic: smoothing relationships and corner-normal directions](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/smoothing-and-normals.svg)
-
-- **Smoothing groups (SG)** define which faces share computed normals. A face can belong to several groups.
-- **Custom normals** specify actual corner directions. SG alone cannot express every hand-edited or Weighted Normal result.
-- A unique, valid native FBX smoothing layer takes priority. Otherwise direction-based inference must satisfy strict constraints; non-manifold or contradictory cases stop.
-- With both selected, SG is written and read back first. Do not delete or collapse the retained `F2M_顶点法线` modifier.
-
-Display color does not prove source authority. Directions, flags and readback do. [Normal transfer paths and limits](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
-
-## 7 · What does “keep Skin” mean after a topology change?
-
-![Original schematic: Mode 2 geometry, weights and binding authority](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/diagrams/skin-data-authority.svg)
-
-**FBX supplies the new mesh and per-vertex weights. Max supplies existing scene-bone identities, binding local data, envelopes and related parameters.** Mesh Bind is adapted for the candidate, then fully read back.
-
-Commit requires one Skin on each mesh and unique mapping of every actual influence to Max bones. Hidden old-mesh backup is on by default and mandatory for multiple objects. Disabling it is single-object only and creates an irreversible boundary after deletion.
-
-This does not copy the entire old animation system after arbitrary topology editing. Old parenting, transform/animation controllers, constraints and arbitrary modifiers do not migrate automatically. Test complex rigs on a copy, with playback and save/reload. [Complete Mode 2 contract](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md)
-
-## 8 · 中文 and English, the same workflow
-
-Compact **Language · 中文 / EN** buttons occupy the mode heading’s right corner. **EN** selects English. Exactly one stays selected, including when the active button is clicked. Switching updates the existing window in place without clearing the mode, FBX, options or check state. The chosen language is saved for later use.
-
-[Language UI reference in the repository](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md#language-ui). The installed copy includes this page’s text; images, videos and web navigation use the online repository and require internet access.
-
-| 中文 | English |
+| Report state | What it means for your next step |
 |---|---|
-| 模型完全一致 / 传递数据 | Matching Models / Transfer Data |
-| 模型不一致 / 替换并保留蒙皮 | Different Models / Replace / Keep Skin |
-| 检查 FBX/匹配 | Check FBX / Match |
-| 开始执行 | Run Transfer |
-| 运行插件自检 | Run Self-check |
+| Check passed | Ready to attempt the transfer; no data has been transferred yet |
+| Selected UV channel missing and skipped | That channel was not copied; fix the FBX first if you need it |
+| Transfer completed | Inspect selected channels, appearance, animation and save/reload |
+| Failure / incomplete rollback | Keep your copy and report; resolve the problem before expanding the batch |
 
-Known UI labels and user messages follow the selected language. Original technical diagnostics may retain their original language, and stable JSON check names/summary protocols are unchanged. This is not a promise of all-English diagnostics.
+Mode 1 uses per-object transactions; a later failure does not undo earlier successful objects. Mode 2 supports batch rollback while backups are retained. Disabling backups for a single object introduces an irreversible deletion boundary. Transfer is synchronous and has no safe mid-transfer cancellation.
 
-## 9 · Scope to know before use
+[TESTING](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) records actual environments and coverage by version. Small generated regression scenes do not guarantee complex assets, every failure path or zero unknown bugs. Complete archive bytes are not proof that reinstallation from the archive was exercised.
 
-Historical validation used **Windows 11 x64, Max 2023.3.10 and bundled Python 3.9.7**. Package metadata declares Max 2023–2026; **2024–2026 remain untested**. Check [version-specific testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md). The former 27-target to 32-target upgrade was not separately exercised.
+Reports are under `%LOCALAPPDATA%\FBXTo3dsMax`; installer logs and archives are under `%APPDATA%\Autodesk\FBXTo3dsMaxInstaller`. Remove local paths, model names and project information before public feedback. [Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues) · [Contributing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/development/CONTRIBUTING.md) · [Changelog](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/development/CHANGELOG_中文.md)
 
-Mode 1 is transactional **per object**; a later failure does not automatically undo earlier successful objects. Mode 2 supports batch rollback while the old meshes remain. One injected-failure regression does not cover every failure. Uninstall retains recovery archives; archived-byte verification is not an exercised reinstall from those archives.
+## Open source and offline reading
 
-Self-check uses small original procedural scenes. It cannot replace complex-asset or performance tests, or your own scene-copy acceptance. Actual transfer is synchronous and has no safe mid-transfer cancellation.
+Installed text is beside the runtime as `README_EN.md`, `INSTALL_EN.md`, `USER_GUIDE_EN.md` and the three Chinese guides. Web images and videos require internet access. The complete task manuals and technical contracts remain available; this page is a starting point.
 
-Reports go to `%LOCALAPPDATA%\FBXTo3dsMax`; installation archives go to `%APPDATA%\Autodesk\FBXTo3dsMaxInstaller`. Sanitize local paths, model names and project information before public feedback.
+The repository includes source, tutorials and authorized media. It does **not** distribute private FBX/MAX/BLEND models, the original PDF or internal links. The [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) is a development snapshot; use the fixed release above for your first installation. [GitHub download and maintenance guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/GITHUB_发布指南.md)
 
-## 10 · Documentation, feedback and source
+If it helps your work, a Star makes the project easier to find again.
 
-| Goal | Start here |
-|---|---|
-| Install, reinstall or remove | [English installation](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) / [中文安装](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) |
-| Use the workflows and understand failures | [Complete English guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/USER_GUIDE.md) / [中文教程](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/FBXTo3dsMax_详细说明书.md) |
-| See what a version actually passed | [Testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) · [Changelog](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/development/CHANGELOG_中文.md) |
-| Report a problem or contribute | [Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues) · [Contributing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/development/CONTRIBUTING.md) |
-| Download or maintain with GitHub | [GitHub download and maintenance guide](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/GITHUB_发布指南.md) |
-
-The repository includes source, documentation, authorized tutorial media and procedural regression code. It distributes **no FBX / MAX / BLEND model files, original PDF or internal resource links**.
-
-Copyright © 2026 **Dimmens** · [MIT License](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/LICENSE). Free to use, modify, redistribute and use commercially while retaining the copyright and license. Tutorial media is authorized for documentation; no rights to the underlying private models are granted. Autodesk 3ds Max must be obtained separately.
+Copyright © 2026 **Dimmens** · [MIT License](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/LICENSE). Free to use, modify, redistribute and use commercially, with copyright and license retained. Tutorial-media permission does not grant rights to underlying private model files. Autodesk 3ds Max is licensed separately.

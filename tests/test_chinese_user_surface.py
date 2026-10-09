@@ -222,7 +222,7 @@ class ChineseUserSurfaceTests(unittest.TestCase):
             failing_path = pathlib.Path(folder) / "failing.py"
             host_path.write_text("# host\n", encoding="utf-8")
             failing_path.write_text(
-                "TOOL_VERSION = '1.4.25'\n"
+                "TOOL_VERSION = '1.4.26'\n"
                 "raise RuntimeError('partial import')\n",
                 encoding="utf-8",
             )
