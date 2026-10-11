@@ -2,6 +2,13 @@
 
 版本基线为原插件 `1.2.16`；BUG 修复增加 `0.0.1`，新增功能增加 `0.1.0`。发布时同步引擎、UI、版本文件、包元数据和安装器标记。
 
+## 2026-10-11 文档修订（插件版本仍为 1.4.26）
+
+- 首页逐项展开形状、UV 1/2/3、材质/面 ID、RGB/Alpha、光滑组、自定义法线与 Skin 工作流，中文/英文说明、步骤和结果检查对应；关键媒体不再默认折叠。
+- 补入作者授权的历史 UV2、光滑组与法线原图，并由已审查的历史模式一片段生成动画预览。保留历史/原创示意/实际雨棚结果的来源区别，不把模式一录像描述为模式二替换证明。
+- 双语概览和教程同步配图。功能引擎与安装器行为不变，四份安装指南及本更新日志的字节已改变，因此旧 32 项指纹不代表本次文档包；最新验证与剩余限制见 TESTING。
+- English: expand the bilingual illustrated homepage and task guides, add authorized historical UV/SG/normal images and a Mode 1 animation preview, and retain accurate provenance. Product behavior/version are unchanged; installed documentation bytes differ and need separate package qualification.
+
 ## v1.4.26（2026-10-10）：严格场景保护与坐标回传
 
 - 修复两种模式在选择恢复失败或读回不一致时仍可能报告成功的问题。完整捕获原选择，恢复后按节点句柄集合核对；原始故障与恢复故障分别记录。报告、通知和运行边界尚未完成时不提交成功状态。

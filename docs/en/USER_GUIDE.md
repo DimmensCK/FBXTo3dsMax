@@ -38,7 +38,7 @@ One Max mesh and one FBX mesh can pair directly. Other object-count combinations
 1. Preserve topology identity in the modeling tool and export FBX. Equal vertex/face counts are necessary clues, not sufficient proof.
 2. Select the receiving Max mesh and **Matching Models / Transfer Data**.
 3. Start with only the default shape/position option. Leave UVs, materials, RGB/alpha and normals unselected unless this edit needs them.
-4. Check, transfer and read the per-object result. Point positions are converted through object transforms and read back individually.
+4. Check, transfer and read the per-object result. Evaluated world-space positions are written to the receiving mesh and read back individually.
 5. Inspect the shape, original node and user stack; for a skinned scene, test the intended animation too.
 
 | Historical shape illustration: before | Historical shape illustration: after |
@@ -46,6 +46,16 @@ One Max mesh and one FBX mesh can pair directly. Other object-count combinations
 | ![Before historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![After historical shape transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
 
 These author-authorized historical images are not 1.4.26 captures. Their left/right positions do not define source authority. The [historical v1.3.23 inspection clip, about 10 seconds](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4), shows deformation/binding inspection, not the complete procedure.
+
+### An original exercise without a model download
+
+Follow the [canopy exercise](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/examples/README.md) to generate a receiving mesh and edited FBX locally. Select Mode 1 and **Shape + UV 1**, check, then transfer. The generator prepares data; it does not execute the plug-in transfer.
+
+| The same original canopy: before | After actual Shape + UV1 transfer |
+|---|---|
+| ![Original canopy before transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/demos/canopy-before-1.4.26.png) | ![Original canopy after transfer](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/demos/canopy-after-1.4.26.png) |
+
+This actual installed-copy 1.4.26 demonstration ran in Max 2023.3.10 on a 91-vertex, 144-triangle mesh. Both original 960×640 renders use the same camera, checker material and lighting. Inspect the waves and checker changes, then read the report confirming that the receiver, material and selection were retained. See [media provenance](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md) and [testing](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md) for the exact source, execution scope and limits.
 
 ## Task 2 — update UVs, materials and face IDs
 
@@ -58,6 +68,10 @@ These author-authorized historical images are not 1.4.26 captures. Their left/ri
 3. Select materials/IDs if both the material object and face assignments need updating. Leave them unselected for a UV-only edit.
 4. Check and transfer. If a selected channel is missing and skipped, correct the FBX before trying again.
 5. Inspect UV seams and the actual channel, then sample material slots and affected face IDs. Similar viewport appearance does not replace data verification.
+
+![Authorized historical screenshot: checking map channel 2 in the UV editor](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/uv-channel-2.webp)
+
+**Inspect UVs as shown:** on a scene copy, add a temporary **Unwrap UVW** modifier to the receiver, set its map channel to the transferred number, and open the UV editor. The lower-right setting above is **channel 2**. Check seams, island layout and checker stretching; inspect UV1/3 separately on channels 1/3. This authorized historical inspection image does not qualify all three channels on the current version, and the temporary inspection modifier need not remain on the production asset.
 
 ![Authorized historical screenshot: materials and face IDs](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
 
@@ -89,6 +103,26 @@ The historical figures illustrate RGB and alpha inspection separately. Lighting,
 | Update face smoothing relationships only | Smoothing groups | Native or strictly inferred SG and per-face masks |
 | Keep Max SG but bring back custom directions | Custom normals | Final corner directions and overriding modifiers |
 | Take both SG and custom normals from FBX | Both | SG first, then normals and final direction readback |
+
+### Inspect the actual smoothing groups
+
+1. Select **Smoothing Groups** when face-sharing relationships should change. Deselect Shape, materials and UVs when they should stay unchanged.
+2. Check and transfer, then confirm in the report that SG was neither skipped nor rejected.
+3. On a scene copy, use **Select by Smoothing Groups** at face level to inspect the faces in each group and the shading across seams. A face can belong to several groups; selection colors alone cannot verify its mask.
+
+![Authorized historical screenshot: selecting faces by smoothing group](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/smoothing-groups.webp)
+
+This historical SG inspection image shows the selection dialog and affected faces. It does not qualify every input to the current strict solver. The reference below explains native SG, strict inference and rejection of unrepresentable constraints.
+
+### Inspect custom directions and the F2M modifier
+
+1. Select only **Vertex Normals** to retain the receiver's SG; select both options when SG must also come from FBX.
+2. Check and transfer, then find the plug-in-created **`F2M_顶点法线`** modifier on the receiver and inspect its corner directions together with the report.
+3. Temporarily toggle it only on a test copy to compare shading, then enable it again. Retain it in the final result and inspect appearance plus save/reload.
+
+![Authorized historical screenshot: F2M normal modifier and direction display](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/custom-normals.webp)
+
+This historical image shows the modifier location and direction lines. Correctness comes from final corner-direction and Specified/Explicit readback, not line colors; the image is not current-version execution acceptance.
 
 Do not infer normal source from green, yellow or blue display colors. They describe editing/selection state, not authority.
 

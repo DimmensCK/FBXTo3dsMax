@@ -37,12 +37,6 @@ Both original 960×640 PNGs belong to one native installed-copy demonstration on
 
 Both new renders come from the same accepted native demonstration on the changed source. Their original PNG bytes, origin, SHA-256 and dimensions were checked separately. They are not UI or physical-mouse records and distribute no private model.
 
-## 1.4.25 历史真实界面 / Historical actual UI
-
-`ui/rollout-1.4.25-cn.png` 与 `ui/rollout-1.4.25-en.png` 来自1.4.25在 3ds Max 2023.3.10 中的真实运行，分别展示中文和英文的默认模式一界面。FBX 路径为空，没有模型、场景视口、本机个人路径或内部链接。两张原始 PNG 完整复制，未裁剪、重绘或重新编码，随项目按 MIT 提供。它们展示界面布局；操作回归范围见[测试说明](../TESTING.md)。
-
-These original PNG captures show the Chinese and English default Mode 1 UI of version 1.4.25 running in 3ds Max 2023.3.10. The FBX field is empty; no model, scene viewport, personal local path or internal link is included. Both PNGs are copied unchanged, without cropping, redrawing or re-encoding, and provided under MIT. They illustrate the layout; see [Testing](../TESTING.md) for the workflow regression scope.
-
 ## 授权历史截图 / Authorized historical screenshots
 
 | 文件 / File | 展示内容 / Subject |
@@ -50,8 +44,11 @@ These original PNG captures show the Chinese and English default Mode 1 UI of ve
 | `tutorial/deformation-before.webp` | 形状传递前 / Shape before transfer |
 | `tutorial/deformation-after.webp` | 形状传递后 / Shape after transfer |
 | `tutorial/materials-and-face-ids.webp` | 材质与逐面 ID 查看 / Material and face-ID inspection |
+| `tutorial/uv-channel-2.webp` | UV 编辑器中检查贴图通道2 / Map-channel-2 inspection in the UV editor |
 | `tutorial/vertex-color-rgb.webp` | RGB 顶点色查看 / RGB vertex-color inspection |
 | `tutorial/vertex-alpha.webp` | 独立 Alpha 查看 / Independent alpha inspection |
+| `tutorial/smoothing-groups.webp` | 按光滑组选择对应面 / Selecting faces by smoothing group |
+| `tutorial/custom-normals.webp` | F2M 法线修改器与方向显示 / F2M normal modifier and direction display |
 
 这些画面由 Dimmens 明确授权用于公开教程，按原图完整复制，未裁剪、重绘或重新编码。已逐图检查，没有可识别的公司/个人文字、完整本机路径或内部链接。普通匿名对象名与画面片段不构成人物身份说明。
 
@@ -61,11 +58,33 @@ Dimmens explicitly authorized these historical images for public tutorials. They
 
 The images illustrate historical functionality, not current-version UI, complete procedures or acceptance results. Left/right placement does not define FBX/Max authority. No underlying model or scene files are included, and no rights to the underlying private models are granted.
 
+### 补全 UV、SG 与法线 / Additional UV, SG and normal figures
+
+这三张图来自作者提供的同一组授权历史教程素材，分别按原图完整复制，未裁剪、重绘或重新编码；以下长度和 SHA-256 与各自独立原文件逐字节核对。原图逐张查看，未发现可识别公司/个人身份文字、完整本机路径或内部链接。普通匿名对象名、软件标签及画面边缘片段保留，不分发底层模型。
+
+These three figures come from the same owner-supplied, authorized historical tutorial collection. Each was copied whole without cropping, redrawing or re-encoding, and its length/SHA-256 was checked against its original file. Each original was viewed separately; no identifiable company/personal identity text, full local path or internal link was found. Generic anonymous object names, software labels and clipped screen edges remain; underlying models are not distributed.
+
+| 文件 / File | 字节 / Bytes | SHA-256 |
+|---|---:|---|
+| `tutorial/uv-channel-2.webp` | 237,292 | `B38FE1E615BBE0256C319F57EDD76511C39DF38FFB578BEF3FF7FF282E9D5230` |
+| `tutorial/smoothing-groups.webp` | 104,788 | `3EFE756FD4A1E1C80DF2C7C26B20C8C1EF1AC0949DB7545968942DE33F801DA3` |
+| `tutorial/custom-normals.webp` | 194,598 | `51A12AAD91C55581A17545FF86683B8F69B707E881EA69CA780C57D277EBA238` |
+
+UV 图只展示 **map channel 2** 的历史查看，不是当前三个通道的实测收据；SG 图展示选择组与对应面，不证明所有约束都可表达。法线图展示 `F2M_顶点法线` 修改器和方向线，蓝/绿/黄颜色不能说明数据来自谁；最终方向与 Specified/Explicit 读回才是技术依据，保留的 F2M 修改器不应删除或塌陷。
+
+The UV figure inspects **map channel 2** historically; it does not qualify all three channels on the current version. The SG figure shows group selection and associated faces, not that every constraint can be represented. The normal figure shows `F2M_顶点法线` and direction lines. Blue/green/yellow display colors do not establish data source; final direction and Specified/Explicit readback are the technical evidence. Retain the resulting F2M modifier without deleting or collapsing it.
+
 ## 历史视频 / Historical clip
 
 `demos/mode1-deformation-v1.3.23.mp4` 是经授权的旧版结果检查片段：裁去非演示区域，去除原片音轨与附加元数据，画面加入中英历史版本标题。标准容器信息（例如 **Lavf61.7.100**）仍保留，不表示全部元数据为零。它展示变形/绑定结果查看，不是完整操作录像或新版验证证明。
 
 The authorized historical clip is cropped to the demonstration viewport, with the original audio track and additional source metadata removed, and a bilingual historical-version caption added. Standard container information, including **Lavf61.7.100**, remains; this is not a claim of zero metadata. It shows deformation/binding result inspection, not a complete tutorial recording or current-version validation.
+
+### 首页动画预览 / Inline animation preview
+
+`demos/mode1-historical-preview.gif` 直接转码自上述已审查片段：560×467、8 fps、循环播放、672,418 B；SHA-256 `DA1AEA2DA3737B001FA4ACA1158936634970A3CD7FC141FFD4954912F2C01391`。源 MP4 为283,126 B、10.433333秒、SHA-256 `073B5507DF6E637A474DBC038D873CA383769111640AF403CC09552A8338C977`。使用 FFmpeg 8fps/缩放/调色板生成GIF，不添加或替换演示内容，保留历史双语标题；首、中、末帧已分别查看。它是模式一变形后旋转骨骼的结果查看，不是完整操作、模式二替换录像或当前版验收。
+
+The inline GIF is a direct 560×467, 8 fps looping conversion of the reviewed 10.433333-second MP4. Exact byte lengths and hashes are recorded above. FFmpeg applies frame-rate/size/palette conversion only; no demonstration content is added or replaced, and the historical bilingual caption is retained. Beginning, middle and ending frames were viewed separately. It shows Mode 1 result inspection with bone rotation, not a complete workflow, Mode 2 replacement recording or current-version qualification.
 
 ## 不分发的资料 / Excluded material
 

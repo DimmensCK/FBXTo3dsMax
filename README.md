@@ -1,193 +1,254 @@
-![FBXTo3dsMax — 把修改带回已有 Max 场景](docs/assets/brand/fbx-to-max.svg)
+![FBXTo3dsMax](docs/assets/brand/fbx-to-max.svg)
 
 # FBXTo3dsMax
 
 [![Source checks](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml/badge.svg?branch=main)](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml)
 
 ### 在别处修改模型，回到 Max 继续工作。
+### Edit elsewhere. Continue in your existing Max scene.
 
-将 FBX 的形状、UV、材质、顶点色与法线带回已有 **3ds Max** 场景。拓扑不变时按通道更新；拓扑改变时，在 Skin、骨骼与绑定检查通过后替换网格。
+把 FBX 的形状、UV、材质、顶点色和法线带回 **3ds Max**：同拓扑按通道更新；拓扑改变后，通过 Skin、骨骼与绑定检查再替换网格。
 
-**Dimmens · 免费可读源码 · MIT · 中文 / English**
+Bring FBX shape, UVs, materials, vertex data and normals back into **3ds Max**. Update selected channels on matching topology, or replace a changed mesh after Skin, bone and binding validation.
 
-**[下载 v1.4.26 完整源码](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · [发行说明](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) · [安装指南](docs/zh/INSTALL_中文.md) · [English](docs/en/README.md) · [中文快速概览](docs/zh/README_中文.md)
+**Dimmens · 免费可读源码 / Free readable source · MIT · 中文 / English**
 
-[三步开始](#quick-start) · [真实界面](#language-ui) · [选择模式](#workflows) · [传递效果](#examples) · [任务教程](#guides) · [测试与边界](#scope)
+**[固定 v1.4.26 / Fixed v1.4.26](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · **[最新图文源码 / Latest illustrated source](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip)** · [Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) · [中文教程](docs/zh/FBXTo3dsMax_详细说明书.md) · [English tutorial](docs/en/USER_GUIDE.md)
+
+[安装 / Start](#quick-start) · [界面 / UI](#language-ui) · [模式 / Modes](#workflows) · [形状 / Shape](#shape) · [UV](#uv) · [材质 / Materials](#materials) · [RGB & Alpha](#vertex-data) · [光滑组 / SG](#smoothing) · [法线 / Normals](#normals) · [Skin](#skin) · [原创练习 / Exercise](#exercise) · [实测范围 / Testing](#scope)
 
 <a id="quick-start"></a>
 
-## 三步开始
+## 三步开始 / Three steps to start
 
-1. **完整下载并解压。** 保留安装器、`contents/` 和其余目录，不要只下载单个脚本，也不要在 ZIP 内运行。
-2. **拖入安装器，确认成功。** 保存场景，将根目录 **`Install_FBXTo3dsMax.ms`** 拖入 Max 视口。安装失败先解决，不继续使用。
-3. **打开、自检、试副本。** 点击顶部 **FBX 转 MAX / FBX to MAX**，选 **中文 / EN**，运行自检；首次从场景副本、单对象和界面默认勾选的“变形”开始。
+1. **完整下载、解压。** 保留根目录安装器和小写 `contents/` 等目录，不在 ZIP 内运行。<br>
+   **Download and extract the complete package.** Keep the installer and all folders together.
+2. **保存场景，拖入安装器。** 将 **`Install_FBXTo3dsMax.ms`** 拖进 Max 视口，确认安装成功。<br>
+   **Save your scene and drag the installer into a Max viewport.** Confirm the installation result.
+3. **打开、自检、试副本。** 点击顶部 **FBX 转 MAX / FBX to MAX**，选中文或 EN，运行自检，首次用副本中的单对象。<br>
+   **Open the toolbar entry, choose your language and run Self-check.** Start with one object in a scene copy.
 
-插件使用 Max 自带 Python，通常不需要额外解释器、编译器或管理员权限。卸载入口为根目录 `Uninstall_FBXTo3dsMax.ms`。[安装、重装与卸载的详细步骤 →](docs/zh/INSTALL_中文.md)
+使用 Max 自带 Python，通常无需额外解释器、编译器或管理员权限。安装失败先解决，再开始使用。卸载入口为 `Uninstall_FBXTo3dsMax.ms`。
 
-各版本真实宿主、自检结果与限制以[测试说明](docs/TESTING.md)为准。包描述声明 Max 2023–2026；**2024–2026 尚未实测**。
+Uses Max's bundled Python; an extra interpreter, compiler or administrator access is normally unnecessary. Resolve installation errors before use. Remove with `Uninstall_FBXTo3dsMax.ms`.
+
+[中文安装、重装与卸载](docs/zh/INSTALL_中文.md) · [English installation, reinstall and removal](docs/en/INSTALL.md)
 
 <a id="language-ui"></a>
 
-## 中文与 English，直接切换
+## 中文 / English，原位切换 / Switch in place
 
-**Language · 中文 / EN** 位于模式标题右侧。原位切换保留模式、FBX、选项与检查状态，两个按钮保持单选。
-
-| 中文界面 | English UI |
+| 中文 | English |
 |---|---|
-| ![1.4.26 中文界面](docs/assets/ui/rollout-1.4.26-cn.png) | ![1.4.26 English UI](docs/assets/ui/rollout-1.4.26-en.png) |
-| [查看中文原图](docs/assets/ui/rollout-1.4.26-cn.png) | [Open English image at full size](docs/assets/ui/rollout-1.4.26-en.png) |
+| ![中文界面参考](docs/assets/ui/rollout-1.4.26-cn.png) | ![English UI reference](docs/assets/ui/rollout-1.4.26-en.png) |
 
-上图为 **1.4.26 在 3ds Max 2023.3.10 中的历史真实界面参考**，使用未裁剪的原始 PNG。两张布局图来自较早源码，不代替下方新核心修订的验收。点击右上角中文 / EN 可原位切换，保留当前模式、文件、选项与检查状态；再次点击当前语言仍保持唯一选中。已知界面与报告标签支持中英切换，技术诊断保留原文。
+点击模式标题右侧的 **Language · 中文 / EN**，保留模式、文件、选项和检查状态；再次点击当前语言仍保持单选，选择会保存供下次使用。已知界面与报告标签支持中英切换，原始技术诊断可能保留原文。
 
-These original, uncropped PNGs show an **earlier source revision of 1.4.26 running in 3ds Max 2023.3.10**. They document the layout and do not qualify the revised core below. The compact 中文 / EN buttons switch in place while retaining the mode, file, options and check state. One language stays selected, including when its active button is clicked. Known UI/report labels are translated; technical diagnostics retain their original text.
+Use **Language · 中文 / EN** beside the mode heading. Switching retains the mode, file, options and check state; clicking the active language keeps it selected. Your preference is saved. Known UI/report labels are localized; original technical diagnostics may retain their source text.
 
-[English overview →](docs/en/README.md#language-ui)
-
-<a id="workflows"></a>
-
-## 选对工作流，更新需要的数据
-
-数据方向始终是 **FBX 提供数据 → Max 接收网格**。
-
-| 你的任务 | 选择 | 保留与前提 |
-|---|---|---|
-| 调形状、重做 UV、更新材质/逐面 ID、RGB/Alpha 或法线 | **模式一 · 模型完全一致 / 传递数据** | 保留 Max 接收节点，按勾选通道写入。顶点身份、连接、绕序和面映射须能唯一对应；相同点/面数并不够 |
-| 拓扑改变，结合 FBX 新网格/权重与 Max 场景骨骼 | **模式二 · 模型不一致 / 替换并保留蒙皮** | 双方各有一个合格 Skin，骨骼、权重和绑定验证通过。默认隐藏旧网格备份 |
-
-![两模式的对象保留与数据来源](docs/assets/diagrams/two-modes.svg)
-
-模式二不复制旧节点的父子层级、Transform/动画控制器、约束或任意修改器；FBX 提供逐顶点权重，Max 提供场景骨骼与绑定系统。多对象替换必须保留备份。[完整条件与失败边界 →](docs/zh/FBXTo3dsMax_详细说明书.md#任务五拓扑改变后替换带-skin-的网格)
-
-<a id="examples"></a>
-
-## 看清修改带回了什么
-
-试做[原创雨棚练习](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/examples/README.md)：现场生成接收网格和编辑后的 FBX，先检查，再传递变形与 UV 1，并核对结果。无需下载模型。生成器只准备场景，不代替插件执行；实机覆盖以 TESTING 为准。
-
-| 原创雨棚：传递前 / Before | 传递后 / After |
-|---|---|
-| ![原创雨棚传递前](docs/assets/demos/canopy-before-1.4.26.png) | ![Original canopy after transfer](docs/assets/demos/canopy-after-1.4.26.png) |
-
-这组原图来自本次新源码在 **Max 2023.3.10** 中的同一次真实插件执行：公开生成器创建 **91 顶点、144 三角形**的原创雨棚，预检后实际传递变形与 UV1，保留接收节点、材质和选择。两幅 **960×640** 原生 scanline 渲染采用同一相机、棋盘材质与灯光，分别显示原始低起伏雨棚与传递后的明显波浪及 UV 变化。安装副本运行已自然退出 0，并完成独立复核；它们不是界面截图或物理鼠标操作记录。
-
-These original images come from the same actual plugin run on the new source in **Max 2023.3.10**. The public generator authored an original **91-vertex, 144-triangle** canopy; real preflight and Shape/UV1 transfer retained the receiver, material and selection. Both **960×640** native scanline renders use the same camera, checker material and lighting. The installed run exited naturally 0 and passed independent review. These are not UI captures or physical-mouse records.
-
-本次源码修订处理模式一形状回传中的重复变换：源节点含单位缩放，或源/目标矩阵不同时，不应再次变换已处于世界空间的求值点。原创雨棚练习同时修正了 UV 构建、FBX 文本布局与失败时的自有节点清理。新安装副本已实际完成 16 例独立世界点回归，并由真实旧 MXS 点位 helper 负例检出已知重复变换错误。原生用例、安装副本运行及安装生命周期均已完成实际验收与独立复核。
-
-This source revision removes a repeated transform during Mode 1 shape transfer when unit scale or differing node transforms are involved. The original canopy generator also repairs UV construction, FBX text layout and owned-node cleanup on failure. The new installed copy completed all 16 independent world-coordinate cases and rejected the actual legacy MXS point helper for the known repeated-transform error. The installed run and installation lifecycle completed their natural-exit, log and origin checks and independent review.
-
-实际覆盖与日期见[测试说明](docs/TESTING.md)及[Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)。 / See [Testing](docs/TESTING.md) and the [Release](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) for executed scope and dates.
-
-### 形状更新，继续使用原 Max 节点
-
-| 授权历史示意：传递前 | 授权历史示意：传递后 |
-|---|---|
-| ![历史形状传递前](docs/assets/tutorial/deformation-before.webp) | ![历史形状传递后](docs/assets/tutorial/deformation-after.webp) |
-| [查看原图](docs/assets/tutorial/deformation-before.webp) | [查看原图](docs/assets/tutorial/deformation-after.webp) |
-
-模式一只勾“变形”可更新点位置；这次不改的通道保持未勾选。历史图展示功能效果，左右位置不定义谁提供数据。[约10秒历史结果检查视频 · v1.3.23](docs/assets/demos/mode1-deformation-v1.3.23.mp4) · [照步骤操作](docs/zh/FBXTo3dsMax_详细说明书.md#任务一只修改形状)
-
-### 通道分开选择，避免不必要的覆盖
-
-| 想更新什么 | 对应选项 | 核对重点 |
-|---|---|---|
-| UV | UV 1 / 2 / 3 | 对应 map channel 1 / 2 / 3 与面角映射；只选择实际存在的通道 |
-| 材质与面分配 | 材质与 ID | 材质对象与每个面的 ID 一起核对 |
-| 顶点色与遮罩 | RGB、Alpha 分别勾选 | RGB 是通道0，独立 Alpha 是通道-2，不由亮度猜测 |
-| 平滑关系与方向 | 光滑组、顶点法线 | SG 决定面之间的共享关系；法线指定面角方向 |
-
-<details>
-<summary>展开授权历史画廊：材质 / RGB / Alpha</summary>
-
-**材质与逐面 ID**：查看实际面分配，不只看视口颜色。
-
-![授权历史截图：材质与逐面ID](docs/assets/tutorial/materials-and-face-ids.webp)
-
-[查看原图](docs/assets/tutorial/materials-and-face-ids.webp)
-
-**RGB 与独立 Alpha**：两个通道分别检查。
-
-![授权历史截图：RGB通道](docs/assets/tutorial/vertex-color-rgb.webp)
-
-[RGB原图](docs/assets/tutorial/vertex-color-rgb.webp)
-
-![授权历史截图：Alpha通道](docs/assets/tutorial/vertex-alpha.webp)
-
-[Alpha原图](docs/assets/tutorial/vertex-alpha.webp)
-
-</details>
-
-历史截图和视频已获作者授权，不随附底层模型；原创 SVG 用于解释概念。界面参考、历史结果和概念示意分别标注。[媒体来源与范围](docs/assets/MEDIA.md)
-
-## 为什么适合模型迭代
-
-| 能力 | 工作中的意义 |
-|---|---|
-| **选择性通道更新** | 例如只传 UV，不替换材质；界面默认只勾“变形” |
-| **面角与面映射** | UV/法线按面角，材质ID/SG按面处理，不将这些数据混为一谈 |
-| **光滑与法线分工** | 优先有效 FBX 原生平滑层；推导约束不能严格满足时停止，避免悄悄近似 |
-| **Skin 来源明确** | Max 场景骨骼/绑定与 FBX 权重各负其责，提交前后读回检查 |
-| **可检查的执行过程** | 预检、写入、读回和恢复都有报告；预检通过不等于传递已经完成 |
-| **可读源码与 MIT** | Python / MAXScript 直接阅读、修改和再分发，保留版权与许可证 |
-
-界面默认只勾选“变形”，UV 1 / 2 / 3 默认未勾选。直接调用 Python API 时，`TransferOptions` 的 `transfer_uv=True`、`uv_channels=[1]` 是另一组默认值；脚本调用应显式设置需要的通道。
-
-The UI initially selects Shape only. The Python API separately defaults to `transfer_uv=True` and `uv_channels=[1]`; set intended channels explicitly in scripts.
-
-<details>
-<summary>进一步了解光滑组、法线与Skin数据来源</summary>
-
-![原创概念图：光滑组与法线](docs/assets/diagrams/smoothing-and-normals.svg)
-
-SG 与自定义方向解决不同问题。插件保留的 `F2M_顶点法线` 是结果的一部分，不应删除或塌陷；用户的 Edit Normals / Weighted Normal 不会被静默清除。
-
-![原创概念图：Skin数据来源](docs/assets/diagrams/skin-data-authority.svg)
-
-新网格、通道和权重来自 FBX；Max 提供场景骨骼身份、绑定 local data 和包络，候选 Mesh Bind 自适应建立。它不承诺任意拓扑编辑后复制完整旧动画系统。
-
-</details>
+上图是较早 1.4.26 源码在 Max 2023.3.10 中的真实界面参考，展示布局；当前核心的实测范围另见 [TESTING](docs/TESTING.md)。<br>
+These are actual UI references from an earlier 1.4.26 source in Max 2023.3.10. They illustrate layout; see [TESTING](docs/TESTING.md) for separate core qualification.
 
 <a id="guides"></a>
+<a id="workflows"></a>
 
-## 按任务继续阅读
+## 先选工作流 / Choose your workflow
 
-| 任务 | 中文 | English |
+**数据方向始终是 FBX → Max 接收网格。先选 Max 网格，再选 FBX。** 界面的“Max 源模型”接收数据，“FBX 目标模型”提供数据。
+
+**Data always flows from FBX to the receiving Max mesh. Select the Max mesh first, then the FBX.** The Chinese source/target labels do not reverse this direction.
+
+| 任务 / Task | 模式 / Mode | 前提与结果 / Requirements and result |
 |---|---|---|
-| 安装、重复安装、卸载 | [安装指南](docs/zh/INSTALL_中文.md) | [Install](docs/en/INSTALL.md) |
-| 形状更新 | [任务一](docs/zh/FBXTo3dsMax_详细说明书.md#任务一只修改形状) | [Shape](docs/en/USER_GUIDE.md#task-1--update-shape-only) |
-| UV、材质与面 ID | [任务二](docs/zh/FBXTo3dsMax_详细说明书.md#任务二更新-uv材质与面-id) | [UV / materials](docs/en/USER_GUIDE.md#task-2--update-uvs-materials-and-face-ids) |
-| RGB 与 Alpha | [任务三](docs/zh/FBXTo3dsMax_详细说明书.md#任务三分别传递-rgb-与-alpha) | [Vertex data](docs/en/USER_GUIDE.md#task-3--transfer-rgb-and-alpha-separately) |
-| 光滑组与法线 | [任务四](docs/zh/FBXTo3dsMax_详细说明书.md#任务四选择光滑组或自定义法线) | [Normals](docs/en/USER_GUIDE.md#task-4--choose-smoothing-groups-or-custom-normals) |
-| 拓扑改变后的 Skin 替换 | [任务五](docs/zh/FBXTo3dsMax_详细说明书.md#任务五拓扑改变后替换带-skin-的网格) | [Skin workflow](docs/en/USER_GUIDE.md#task-5--replace-a-skinned-mesh-after-topology-changes) |
-| 数据合同、算法与事务 | [完整参考](docs/zh/FBXTo3dsMax_详细说明书.md#技术参考) | [Technical reference](docs/en/USER_GUIDE.md#technical-reference) |
+| 形状、UV、材质、RGB/Alpha、SG/法线 / Shape, UVs, materials, RGB/alpha, SG/normals | **模式一：模型完全一致 / 传递数据** · **Matching Models / Transfer Data** | 保留 Max 节点，写入勾选通道。须保持顶点身份、连接与绕序，并有唯一面映射。 / Keep the Max node; update selected channels. Vertex identity, connectivity, winding and unique face mapping must match. |
+| 改拓扑后替换带 Skin 的网格 / Replace a skinned mesh after topology changes | **模式二：模型不一致 / 替换并保留蒙皮** · **Different Models / Replace / Keep Skin** | 双方各一个合格 Skin；使用 FBX 网格/权重和 Max 场景骨骼/绑定。 / One valid Skin on each side; use FBX mesh/weights with Max scene bones/binding. |
+
+![原创概念图：两种模式 / Original schematic: two modes](docs/assets/diagrams/two-modes.svg)
+
+通用步骤：**选接收网格 → 选 FBX → 选模式与通道 → 检查 FBX/匹配 → 阅读报告 → 开始执行 → 核对结果**。一个网格对一个网格可直接配对，其余组合按完整网格名匹配。相同点数、面数不等于拓扑身份一致。
+
+Shared steps: **select receiver → select FBX → choose mode/channels → Check FBX / Match → read report → Run Transfer → inspect result**. One-to-one meshes can pair directly; other combinations use full mesh names. Equal counts do not prove matching topology.
+
+<a id="examples"></a>
+<a id="shape"></a>
+
+## 01 · 修改轮廓，保留 Max 节点 / Update shape, retain the Max node
+
+| 授权历史示意：传递前 / Historical before | 传递后 / After |
+|---|---|
+| ![Shape before](docs/assets/tutorial/deformation-before.webp) | ![Shape after](docs/assets/tutorial/deformation-after.webp) |
+
+**怎么做：** 保持拓扑身份，选模式一，先只勾默认的 **变形 / Shape**，检查后执行。此次不需要的通道不勾选。检查轮廓、原节点、修改器栈；带 Skin 时再检查动画。
+
+**Try it:** preserve topology identity, choose Mode 1 and start with only the default **Shape** option. Check, then transfer. Leave unrelated channels unselected. Inspect the silhouette, original node and modifier stack; test animation when Skin is present.
+
+![授权历史动画：模式一结果查看 / Historical Mode 1 result inspection](docs/assets/demos/mode1-historical-preview.gif)
+
+这段约 10 秒的授权历史预览展示 **v1.3.23 模式一变形后的结果查看**，不是完整操作或模式二替换演示。历史对照图的左右位置不定义数据来源。<br>
+This authorized, approximately 10-second **v1.3.23 Mode 1 result preview** is not a complete procedure or a Mode 2 replacement demonstration. Image placement does not define data authority.
+
+[播放 MP4 / Play MP4](docs/assets/demos/mode1-deformation-v1.3.23.mp4) · [中文步骤](docs/zh/FBXTo3dsMax_详细说明书.md#任务一只修改形状) · [English steps](docs/en/USER_GUIDE.md#task-1--update-shape-only)
+
+<a id="uv"></a>
+
+## 02 · 单独更新 UV 1 / 2 / 3 / Transfer UV channels independently
+
+![授权历史截图：检查 UV 通道 2 / Historical UV channel 2 inspection](docs/assets/tutorial/uv-channel-2.webp)
+
+**怎么做：** 模式一中取消不需要的变形，只勾 FBX 实际包含的 **UV 1 / 2 / 3**。执行后，在 Unwrap UVW 中切到相应 map channel，检查岛、接缝与面角对应。图中展示的是通道 **2** 的历史检查。
+
+**Try it:** in Mode 1, deselect Shape if positions should stay unchanged. Select the **UV 1 / 2 / 3** channels actually present in the FBX. After transfer, inspect the corresponding map channel in Unwrap UVW, including islands, seams and corner mapping. This historical image shows channel **2**.
+
+UV 按面角映射，一个几何顶点可有多个 UV 顶点。通道缺失并跳过不代表复制成功。<br>
+UVs use face-corner mapping; one geometric vertex can have several UV vertices. A missing, skipped channel has not been copied.
+
+[中文步骤](docs/zh/FBXTo3dsMax_详细说明书.md#任务二更新-uv材质与面-id) · [English steps](docs/en/USER_GUIDE.md#task-2--update-uvs-materials-and-face-ids)
+
+<a id="materials"></a>
+
+## 03 · 材质与逐面 ID 一起带回 / Bring back materials and face IDs
+
+![授权历史截图：材质与逐面 ID / Historical material and face-ID inspection](docs/assets/tutorial/materials-and-face-ids.webp)
+
+**怎么做：** 在模式一勾 **材质与 ID**，取消不需更新的变形及其他通道。检查、执行后查看材质槽，并选面核对实际 ID 与分配；只改 UV 时可以不传材质。
+
+**Try it:** select **Material / ID** in Mode 1. Deselect **Shape** and other channels that should stay unchanged. After checking and transferring, inspect material slots and actual face assignments. A UV-only edit can leave materials untouched.
+
+材质对象和逐面 ID 是两项都要核对的数据，视口颜色相近不能替代检查。<br>
+Inspect both the material object and per-face IDs; similar viewport colors are insufficient.
+
+[中文教程](docs/zh/FBXTo3dsMax_详细说明书.md#任务二更新-uv材质与面-id) · [English tutorial](docs/en/USER_GUIDE.md#task-2--update-uvs-materials-and-face-ids)
+
+<a id="vertex-data"></a>
+
+## 04 · RGB 与 Alpha 分别传递 / Transfer RGB and alpha separately
+
+| RGB 顶点色 / Vertex color | 独立 Alpha / Independent alpha |
+|---|---|
+| ![Historical RGB inspection](docs/assets/tutorial/vertex-color-rgb.webp) | ![Historical alpha inspection](docs/assets/tutorial/vertex-alpha.webp) |
+
+**怎么做：** 模式一分别勾 **RGB 顶点色** 和/或 **顶点 Alpha**。执行后使用对应顶点通道显示或材质检查，不需移动模型时取消变形。
+
+**Try it:** select **RGB vertex color** and/or **vertex alpha** independently in Mode 1. Inspect the corresponding channel with a suitable viewport display or material. Deselect Shape if the mesh should not move.
+
+RGB 是 **map channel 0**，独立 Alpha 是 **map channel -2**，不会从 RGB 亮度推测。缺失数据会警告并跳过；两幅图为授权历史通道检查。
+
+RGB is **map channel 0**; independent alpha is **map channel -2**, never inferred from RGB brightness. Missing data is warned about and skipped. Both images are authorized historical inspections.
+
+[中文步骤](docs/zh/FBXTo3dsMax_详细说明书.md#任务三分别传递-rgb-与-alpha) · [English steps](docs/en/USER_GUIDE.md#task-3--transfer-rgb-and-alpha-separately)
+
+<a id="smoothing"></a>
+
+## 05 · 传回面之间的光滑关系 / Transfer smoothing relationships
+
+![授权历史截图：按光滑组选择 / Historical selection by smoothing group](docs/assets/tutorial/smoothing-groups.webp)
+
+**怎么做：** 只需平滑关系时勾 **光滑组 / Smoothing groups**。执行后用“按平滑组选择”与逐面掩码检查相邻面的关系。图中是历史 SG 选择检查，不是所有所选面都属于单一光滑组的证明。
+
+**Try it:** choose **Smoothing groups** when only face smoothing relationships need updating. Inspect selection by smoothing group and per-face masks afterward. This historical selection view does not prove that all highlighted faces belong to one group.
+
+优先采用有效 FBX 原生平滑层；需要推导时严格核对边和顶点扇关系，无法精确表达则停止。SG 不等于任意自定义法线方向。
+
+A valid native FBX smoothing layer takes priority. Inferred relationships are checked strictly; unrepresentable constraints stop the operation. SG cannot encode every custom normal direction.
+
+[中文教程](docs/zh/FBXTo3dsMax_详细说明书.md#任务四选择光滑组或自定义法线) · [English tutorial](docs/en/USER_GUIDE.md#task-4--choose-smoothing-groups-or-custom-normals)
+
+<a id="normals"></a>
+
+## 06 · 保留自定义法线方向 / Preserve custom normal directions
+
+![授权历史截图：F2M 法线修改器 / Historical F2M normal modifier](docs/assets/tutorial/custom-normals.webp)
+
+**怎么做：** 勾 **顶点法线 / Vertex Normals**；若 SG 也要来自 FBX，两项一起勾选。执行后查看最终面角方向及修改器栈，保留插件创建的 **`F2M_顶点法线`**，不要删除或塌陷它。
+
+**Try it:** select **Vertex Normals** to transfer custom directions. Select SG too when both should come from FBX. Inspect final corner directions and the stack afterward; retain the generated **`F2M_顶点法线`** modifier without deleting or collapsing it.
+
+绿色、蓝色等显示颜色表示编辑/选择状态，不能判断方向来自 SG 还是 FBX。用户自己的 Edit Normals / Weighted Normal 不会被静默清除；覆盖冲突会停止。
+
+Display colors indicate editing/selection state, not whether a direction came from SG or FBX. User Edit Normals / Weighted Normal modifiers are not silently removed; overriding conflicts stop the transfer.
+
+![原创概念图：SG 与法线 / Original schematic: SG versus normals](docs/assets/diagrams/smoothing-and-normals.svg)
+
+[中文步骤与三路行为](docs/zh/FBXTo3dsMax_详细说明书.md#任务四选择光滑组或自定义法线) · [English steps and transfer paths](docs/en/USER_GUIDE.md#task-4--choose-smoothing-groups-or-custom-normals)
+
+<a id="skin"></a>
+
+## 07 · 拓扑改变后，结合 FBX 权重与 Max 骨架 / Changed topology: FBX weights, Max bones
+
+![原创概念图：Skin 数据来源 / Original schematic: Skin data authority](docs/assets/diagrams/skin-data-authority.svg)
+
+**怎么做：** 在场景副本中，确认 Max 与 FBX 网格各有一个合格 Skin，骨骼能唯一匹配。选模式二，保留默认 **隐藏备份旧网格**，检查后执行。检查新网格、权重、绑定、位置与显示状态，再播放动画并保存重载。
+
+**Try it:** on a scene copy, ensure each Max/FBX mesh has one valid Skin with uniquely matched bones. Choose Mode 2, keep the default **hidden old-mesh backup**, then check and transfer. Inspect the new mesh, weights, binding, placement and display; test animation and save/reload.
+
+| 数据 / Data | 来源 / Authority |
+|---|---|
+| 新网格、通道、默认材质、逐顶点权重 / New mesh, channels, default material, per-vertex weights | **FBX** |
+| 场景骨骼身份、绑定 local data、包络 / Scene bone identity, binding local data, envelopes | **Max** |
+| 候选 Mesh Bind / Candidate Mesh Bind | 在候选上自适应建立并验证 / Adapted and validated for the candidate |
+
+这是原创流程示意，没有可公开的完整历史模式二录像。模式二不会自动迁移旧父子层级、Transform/动画控制器、约束或任意修改器，不承诺任意改拓扑后完整动画系统无损。多对象须保留备份；单对象关闭备份后存在不可逆删除边界。
+
+This is an original workflow schematic; no complete historical Mode 2 recording is available for publication. Old parenting, transform/animation controllers, constraints and arbitrary modifiers do not migrate automatically. Arbitrary topology edits are not a promise of lossless animation-system cloning. Batches require backups; single-object replacement without backup crosses an irreversible deletion boundary.
+
+[中文完整步骤](docs/zh/FBXTo3dsMax_详细说明书.md#任务五拓扑改变后替换带-skin-的网格) · [English full workflow](docs/en/USER_GUIDE.md#task-5--replace-a-skinned-mesh-after-topology-changes)
+
+<a id="exercise"></a>
+
+## 08 · 不用下载模型，试做原创雨棚 / Try an original canopy without downloading models
+
+| 实际传递前 / Before actual transfer | 实际传递后 / After actual transfer |
+|---|---|
+| ![Original canopy before](docs/assets/demos/canopy-before-1.4.26.png) | ![Original canopy after](docs/assets/demos/canopy-after-1.4.26.png) |
+
+[原创练习 / Original exercise](docs/examples/README.md)现场生成接收网格与编辑后的 FBX。选择模式一，勾变形与 UV1，先检查，再执行并比较结果。生成器负责准备数据，插件负责实际传递。
+
+The [original exercise](docs/examples/README.md) generates a receiving mesh and edited FBX locally. Choose Mode 1 with Shape and UV1, check, then transfer and inspect. The generator prepares data; the plugin performs the transfer.
+
+两张 **960×640** 原生渲染来自 1.4.26 同一次真实安装副本运行，同相机、棋盘材质与灯光，展示 **91 顶点、144 三角形**雨棚的形状与 UV1 更新。保留了接收节点、材质与选择。它们是实际结果图；上方历史截图和原创概念图分别标注。
+
+These **960×640** native renders belong to one actual 1.4.26 installed-copy run, with the same camera, checker material and lighting. They show Shape/UV1 updates on an original **91-vertex, 144-triangle** canopy while retaining the receiver, material and selection. Historical images and conceptual schematics above are labeled separately.
+
+[媒体来源、版本与授权 / Media provenance, versions and authorization](docs/assets/MEDIA.md)
+
+## 读报告，再扩大操作 / Read the result before widening the operation
+
+| 状态 / Status | 含义与下一步 / Meaning and next step |
+|---|---|
+| 检查通过 / Check passed | 可以继续执行，还未完成传递。 / Ready to proceed; transfer has not happened. |
+| 所选通道缺失并跳过 / Selected channel missing and skipped | 没有复制该通道，先修正 FBX。 / That channel was not copied; correct the FBX. |
+| 执行完成 / Transfer completed | 核对实际通道、外观、动画与保存重载。 / Inspect channels, appearance, animation and save/reload. |
+| 失败或恢复不完整 / Failure or incomplete recovery | 保留副本与报告，解决后再扩大操作。 / Retain the copy/report and resolve it before proceeding. |
+
+模式一按对象执行事务，后续失败不会自动撤销先前成功对象。模式二保留备份时支持批次回滚。正式传递同步执行，没有中途安全取消；自检是独立、可取消的 Batch 任务。
+
+Mode 1 uses per-object transactions; a later failure does not undo earlier successful objects. Mode 2 supports batch rollback with backups. Transfer is synchronous and has no safe mid-operation cancellation; Self-check is a separate cancellable Batch task.
+
+报告位于 `%LOCALAPPDATA%\FBXTo3dsMax`；安装日志/归档位于 `%APPDATA%\Autodesk\FBXTo3dsMaxInstaller`。公开反馈前去掉路径、模型名与项目资料。
+
+Reports are under `%LOCALAPPDATA%\FBXTo3dsMax`; installation logs/archives are under `%APPDATA%\Autodesk\FBXTo3dsMaxInstaller`. Remove paths, model names and project information before public feedback.
 
 <a id="scope"></a>
 
-## 执行结果与使用范围
+## 实测范围 / Tested scope
 
-1.4.26 在 **Windows 11 x64、3ds Max 2023.3.10** 完成 **337/337** 纯回归、**32 项**静态资源检查，以及全新/重复安装、冷启动、中文六类自检、九个故障场景、16 例独立世界坐标回归与原创演示。真实安装失败回滚、正常重试和可恢复卸载通过，归档字节已核对，**归档复装未演练**。各项实际执行及独立复核范围见[测试说明](docs/TESTING.md)；Max 2024–2026 尚未实测。
+**1.4.26 · Windows 11 x64 · 3ds Max 2023.3.10 · bundled Python 3.9.7**
 
-本轮未扩大重跑完整双语链、附加英文自检或 PowerShell 三阶段；较早结果仅作对应来源的历史记录。当前界面实证是新安装与冷启动的程序检查，详细范围见 TESTING。
+2026-10-11 图文包已完成 **337/337 纯回归、32 项静态安装资源检查、中文六类安装自检、9 个原生故障场景、16 例独立世界点回归与原创雨棚实际传递**。新的隔离五步链及独立证据复核通过：全新/重复安装、冷启动、安装副本自检、真实安装失败回滚与正常重试、可恢复卸载；各阶段自然退出 0，无强制清理。准确冻结来源、最后文档覆盖与历史结果见 [TESTING](docs/TESTING.md)；CI 不运行 Max。
 
-**以下为报告状态示例：**
+The 2026-10-11 illustrated package completed **337/337 pure tests, 32 static installation resources, six Chinese installed checks, nine native fault cases, 16 independent world-point cases and the original canopy transfer**. Its new isolated five-stage chain passed independent evidence review: fresh/repeat install, cold start, installed checks, actual installer-failure rollback with normal retry, and recoverable uninstall. Every stage exited naturally with code 0 and no forced cleanup. See [TESTING](docs/TESTING.md) for the frozen host source, final documentation overlay and historical results. CI does not run Max.
 
-| 报告表达的状态 | 应怎样处理 |
-|---|---|
-| 检查通过 | 可以继续正式执行，尚未传递完成 |
-| 所选 UV 通道缺失并跳过 | 该通道没有复制；需要它时先修正 FBX |
-| 执行完成 | 核对这次选择的通道、外观、动画与保存重载 |
-| 失败 / 回滚不完整 | 保留副本和报告，先解决问题，不扩大批量操作 |
+**Max 2024–2026 尚未实测；复杂资产、全部故障、性能、27→32 跨版本升级及卸载归档复装未获完整覆盖。** 历史双语/英文/PowerShell 结果保留各自范围。小型回归不能保证未知缺陷为零，归档哈希完整不等于复装演练通过。
 
-模式一以逐对象事务执行，后续对象失败不会自动撤销先前成功的对象。模式二保留旧网格时支持批次回滚；单对象关闭备份后存在不可逆删除边界。正式传递同步执行，没有中途安全取消。
+**Max 2024–2026 remain unverified. Complex assets, all faults, performance, the historical 27→32 upgrade and restoration from uninstall archives are not fully covered.** Historical bilingual/English/PowerShell results retain their own scope. Small regressions cannot establish zero unknown defects; archive hashes do not prove exercised restoration.
 
-[TESTING](docs/TESTING.md)记录对应版本的真实环境和覆盖范围。这些小型原创测试未覆盖所有复杂资产和故障，仍可能有未知缺陷；归档字节完整也不等于已经演练归档复装。
+## 源码与维护 / Source and maintenance
 
-报告在 `%LOCALAPPDATA%\FBXTo3dsMax`，安装日志/备份在 `%APPDATA%\Autodesk\FBXTo3dsMaxInstaller`。公开反馈前去掉本机路径、模型名与项目资料。[Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues) · [贡献说明](docs/development/CONTRIBUTING.md) · [更新日志](docs/development/CHANGELOG_中文.md)
+仓库提供可读 Python / MAXScript、安装器、测试、双语教程与授权媒体，**不分发私有 FBX / MAX / BLEND、原内部 PDF、备份或日志**。上方固定发行版是可重复下载的插件版本；[main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) 是后续开发与文档快照。
 
-## 开源与维护
+The repository contains readable Python/MAXScript, installers, tests, bilingual guides and authorized media, **without private FBX/MAX/BLEND models, original internal PDFs, backups or logs**. The tagged download is a fixed plugin release; [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) is the evolving development/documentation snapshot.
 
-本仓库提供源码、教程与授权媒体，**不分发私有 FBX / MAX / BLEND 模型、原 PDF 或内部链接**。主分支 [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) 是开发快照；首次安装优先使用上面的固定发行版。[GitHub下载与维护指南](docs/GITHUB_发布指南.md)
+[Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues) · [贡献 / Contributing](docs/development/CONTRIBUTING.md) · [GitHub 下载与更新 / Download and maintain](docs/GITHUB_发布指南.md) · [更新日志 / Changelog](docs/development/CHANGELOG_中文.md)
 
-如果对你的工作有帮助，欢迎 Star，方便以后找到项目。
-
-Copyright © 2026 **Dimmens** · [MIT License](LICENSE)。免费使用、修改、再分发及商用，须保留版权与许可证。教程媒体授权不授予底层私有模型使用权。Autodesk 3ds Max 需另行取得。
+Copyright © 2026 **Dimmens** · [MIT License](LICENSE). 免费使用、修改、商用与再分发，须保留版权和许可证。媒体授权不包含底层私有模型权利；Autodesk 3ds Max 需另行取得。<br>
+Free use, modification, commercial use and redistribution with copyright/license retained. Media authorization grants no rights to underlying private models. Autodesk 3ds Max is obtained separately.

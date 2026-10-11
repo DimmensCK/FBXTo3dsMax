@@ -1,6 +1,39 @@
 # 回归测试与验证边界
 
-## 1.4.26 当前修订 / Current revision
+## 2026-10-11 图文文档包验收 / Illustrated-package acceptance
+
+本节独立记录新增双语图文教程和授权历史媒体后的文档包，功能引擎及安装器行为保持 1.4.26。四份安装指南和更新日志字节已改变，因此重新验收；下方 2026-10-10 及更早结果均属各自固定来源的历史记录。
+
+This section qualifies the expanded bilingual illustrated package separately. Engine/installer behavior remains 1.4.26, but four installed guides and the changelog have different bytes. Results dated 2026-10-10 and earlier below are historical and source specific.
+
+| 来源与检查 / Source and check | 本轮记录 / This qualification |
+|---|---|
+| 宿主 / Host | Windows 11 x64 · 3ds Max 2023.3.10 · bundled Python 3.9.7 |
+| 本地宿主冻结来源 / Local frozen host source | commit `69320815dd09078588acfdaf6eaa60390077210a`；tree `2ae39df93d534d4a1cd7cc023a0e7651bd9f59ae`；公开及隔离快照各 133 文件，公开 6,364,804 B / 133 files in both source and isolated snapshot |
+| 全源冻结 / Source freeze | SHA-256 `6B72448C836D6BCF96A50F52031CB9E3940B77B2D4BEE4A4AFD06F8AD1C13F19`；本地验收身份，不是 GitHub 下载提交 / Local qualification identity, not a GitHub download commit |
+| 安装资源 / Installed resources | 32 项、1,330,538 B；canonical SHA-256 `F670AA57F94CCE0AB1F52700AAABE223A0CD500DA997416AE1BB5B818150980D` |
+| 该来源纯/静态检查 / Pure and static checks of this source | **337/337**（9.260 s，zh-CN，Python 3.9.7，短临时路径 / short temporary paths）；**32/32，通过 / Passed** |
+| 新隔离五步链 / New isolated five-stage chain | **实际通过并独立复核 / Actual pass and independent review**：全新/重复安装 → 冷启动 → 安装副本自检及扩展 → 真实安装失败回滚/正常重试 → 可恢复卸载；各阶段自然退出 0、forced cleanup=false / Each stage exited naturally 0 without forced cleanup |
+| 安装副本业务范围 / Installed business scope | 中文六类 **6/6**、原生故障 **9/9**、独立世界点 **16/16**、旧 MXS helper 预期负例、生成器故障清理、原创雨棚形状/UV1 实际传递与原生渲染 / Chinese six-category suite, nine fault cases, sixteen world-point cases, expected legacy-MXS negative, generator cleanup and original canopy transfer/native renders |
+| 回滚与卸载范围 / Rollback and uninstall scope | 单个激活后 Bootstrap-false 故障恢复完整旧状态、保留失败包、重开锁并标准重试；卸载归档 **33 包文件 + 3 受管文件**逐字节一致，live 安装移除；**归档复装未演练** / One postactivation fault with restoration, failed-package retention, lock reopening and retry; exact 33+3 archive and live removal; restoration not exercised |
+
+同一完整冻结快照的首轮补跑在 `TemporaryDirectory` 清理时失败一次，残留文件路径长达 260 字符；失败日志和残留均保留。仅将临时目录及本地测试数据改用更短的隔离路径后，337 项全部通过，退出 0，前后 133 项源码哈希一致，未改断言或启动 Max。长路径是原因线索，尚未独立证实根因；此处通过不涵盖任意路径长度。
+
+The first supplemental run of this exact complete snapshot failed during temporary-directory cleanup, leaving a 260-character file path. Its failed log and remnants are retained. With only shorter isolated temporary/local-data roots, all 337 tests passed with exit 0; all 133 source hashes matched before/after, assertions were unchanged and Max was not started. Path length is a clue, not an independently established cause; this pass does not qualify arbitrary path lengths.
+
+每阶段仅使用同一新链的前序新成功收据，逐项核对源码/安装来源、12 个原生目录及环境隔离、许可环境继承、精确 PID/创建时间/EXE、完整原生日志前缀和增量、时间窗、指定严重错误模式及自然退出。世界点最大误差 `1.4273290202232137e-05`，原预算不变；实际旧 MXS 点位 helper 负例误差 `2.5547464067261356 > 0.001`，不是旧完整 Python/FBX 路径。九个故障有不同提交边界，不能统称九次完整回滚；下方机制说明仍适用。新雨棚渲染为本轮独立证据，公开图保留其原有日期和来源。
+
+Every stage consumes only the preceding fresh success receipt in this new chain. Reviews check origins, twelve native directories and environment isolation, inherited licensing, exact process identity, full native-log prefix/delta/time/error gates and natural exit. World-point maximum error is recorded above with unchanged budgets. The rejected legacy MXS point helper is not the old complete Python/FBX route. The nine faults have distinct commit boundaries, as described below. New canopy renders are separate evidence; public images retain their original provenance.
+
+正常配置桌面观察属于较早本地修订 `9895481`，仅证明启动，未采该观察的自然退出码，不是本轮插件安装/业务验收。没有重置设置、修改许可或复制认证文件。先前另一隔离链在正式卸载前的原 UI 检查报 TopButton 被遮挡；原失败保留，因缺少当时窗口/前景/Qt 命中取证，遮挡根因未确定。后继仅改进自有窗口准备和证据保全，原 verifier、断言及等待不变；新成功不解释旧失败。UI 验证使用程序 `QToolButton.click`，不等于物理鼠标或真人可用性验收。
+
+The earlier normal-profile desktop observation belongs to local revision `9895481`: startup only, without a collected exit code or current plugin qualification. Settings/licensing were not reset or altered; authentication files were not copied. A prior isolated chain failed its original TopButton check before uninstall started. That failure remains recorded and its occlusion cause unresolved. Successor tooling improves owned-window preparation/evidence while retaining the original verifier, assertions and wait. New success does not establish the earlier cause. Programmatic UI checks are not physical-mouse or human-usability acceptance.
+
+完成宿主验收后仅覆盖 `README.md`、本页及 `docs/development/PROJECT_MEMORY.md`，三者均不在 32 安装资源内；32 个安装文件的原字节及 F670 指纹保持。覆盖后的整仓库不是再次完整 Max 实测的源码快照。最终发布 commit/tree/字节、ZIP、全新 clone 和具体 CI 另做读回，不预写通过。只实测 Max 2023.3.10；2024–2026、复杂/大资产性能、全部故障、27→32 升级及卸载归档复装仍未覆盖。未知缺陷为零不能由小型回归推导。
+
+After host acceptance, only README, this page and project memory receive the final overlay, outside the 32 installed resources. Installed bytes and the F670 fingerprint remain unchanged; the overlaid whole source was not rerun through every Max stage. Final publication identities/bytes, ZIP, fresh clone and exact CI run require separate readback. Only Max 2023.3.10 is tested; other declared versions, complex assets/performance, all faults, the 27→32 upgrade and archive restoration remain unverified.
+
+## 1.4.26 核心来源历史验收（2026-10-10） / Historical core-source acceptance (2026-10-10)
 
 本次目标宿主为 **Windows 11 x64、3ds Max 2023.3.10、内置 Python 3.9.7**。最终验收日期：2026-10-10。新核心修订来源：`a9071872a1cfe3034af3c6b20c4e13ca7283fee3`；32 项安装资源指纹：`F2D7A897A4B9CC835BE14044810C6CCDCCA7400479654C52E2B20F5BEB6FD1D0`。
 
@@ -30,7 +63,7 @@ The five stages used one new isolated chain: fresh/repeat installation, cold sta
 | 最终文档/图片覆盖检查 / Final documentation/media overlay | 与发行运输检查单独记录 / Recorded separately from host acceptance | 四文档、四 PNG 的内容与最终源码检查 / Content and source checks for four documents and four PNGs |
 | GitHub 发布读回 / GitHub readback | 发布后单独记录 / Recorded after publication | 公开 commit/tree/tag、ZIP、全新 clone 与具体 CI 运行；不预写通过 / Public commit/tree/tag, ZIP, fresh clone and specific CI run, without preclaimed success |
 
-### 当前来源记录 / Current source provenance
+### 该历史来源记录 / Historical source provenance
 
 本地源码树为 `7e22a69821a1dbd0cf4ccee1f9dfd82ed5cbe3f8`，共 127 文件、3,609,063 B；宿主流程使用其中 121 文件的隔离副本，安装资源为 32 项、1,315,661 B。原始源码冻结 SHA-256 为 `2B85BCBA28665BBDF6CFAB48F98CF0D2710BB32FEC1CF9EF1F506ABD314AC719`。这些是本地来源记录，不是可访问的 GitHub 下载提交。
 

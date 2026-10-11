@@ -38,7 +38,7 @@
 1. 在建模工具中保留拓扑身份并导出 FBX。点数与面数相同只是必要线索，不是充分证明。
 2. 在 Max 中选接收网格，选择 **模型完全一致 / 传递数据**。
 3. 先只勾默认的 **变形**。这次不需要更新的 UV、材质、RGB/Alpha 和法线保持未勾选。
-4. 检查、执行并阅读逐对象报告。插件按对象空间转换点位置并逐点读回。
+4. 检查、执行并阅读逐对象报告。插件将求值后的世界点写入接收网格，并逐点读回验证。
 5. 核对轮廓、原节点与用户修改器栈，再检查有 Skin 的场景在动画下是否仍符合预期。
 
 | 历史形状示意：传递前 | 历史形状示意：传递后 |
@@ -46,6 +46,16 @@
 | ![历史形状传递前](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-before.webp) | ![历史形状传递后](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/deformation-after.webp) |
 
 这是作者授权的历史功能示意，不是 1.4.26 截图；左右位置不定义固定的数据提供方。[v1.3.23 历史结果检查片段，约 10 秒](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/demos/mode1-deformation-v1.3.23.mp4)展示变形/绑定查看，没有展示完整操作。
+
+### 不用下载模型的原创练习
+
+按[雨棚练习](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/examples/README.md)在本机生成接收网格和编辑后的 FBX，选择模式一、**变形 + UV 1**，检查后再执行。生成器只准备数据，不代替插件传递。
+
+| 同一原创雨棚：传递前 | 真实形状 + UV1 传递后 |
+|---|---|
+| ![原创雨棚传递前](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/demos/canopy-before-1.4.26.png) | ![原创雨棚传递后](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/demos/canopy-after-1.4.26.png) |
+
+这组 1.4.26 安装副本的真实演示在 Max 2023.3.10 完成，网格为 91 顶点、144 三角形；两幅 960×640 原始渲染使用同一相机、棋盘材质和灯光。查看波浪轮廓与棋盘变化，再读报告确认接收节点、材质及选择保留。具体来源、执行范围与限制见[媒体说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/assets/MEDIA.md)和[测试说明](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/TESTING.md)。
 
 ## 任务二：更新 UV、材质与面 ID
 
@@ -58,6 +68,10 @@
 3. 需要传材质对象与逐面 ID 时勾 **材质与 ID**；仅修 UV 时可以不勾。
 4. 检查、执行；若报告某勾选通道缺失并跳过，先修 FBX，再重新操作。
 5. 在 Max 中查看 UV 接缝与对应通道，抽查材质槽和受影响面的 ID。视口外观相近不能替代数据检查。
+
+![授权历史截图：在 UV 编辑器检查 map channel 2](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/uv-channel-2.webp)
+
+**照图检查 UV：** 在场景副本给接收网格添加临时 **UVW 展开 / Unwrap UVW**，将贴图通道设成这次传递的编号，再打开 UV 编辑器。上图右下角为 **通道 2**，可查看接缝、岛形与棋盘拉伸；UV1/3 应分别切到通道1/3查看。该图是授权历史检查画面，不是本版三个通道全部实测的收据，也不要求把临时检查修改器保留在正式资产中。
 
 ![授权历史截图：材质和面 ID 的检查](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/materials-and-face-ids.webp)
 
@@ -89,6 +103,26 @@ UV 以面角为单位，一个几何顶点可对应多个 UV 顶点。材质 ID 
 | 只更新面之间的平滑关系 | 光滑组 | 原生 SG 或严格推导结果、逐面掩码 |
 | 保留 Max 原 SG，带回自定义方向 | 顶点法线 | 最终面角方向，以及是否有覆盖修改器 |
 | SG 与自定义法线都来自 FBX | 两项一起勾选 | 先 SG、后法线；读回后的最终方向 |
+
+### 检查实际光滑组
+
+1. 需要更新平滑关系时勾 **光滑组**；不需要改形状、材质或 UV 时取消这些选项。
+2. 检查并执行，先读报告确认 SG 没有被跳过或拒绝。
+3. 在场景副本的面级别使用 **按平滑组选择 / Select by Smoothing Groups**，逐组查看对应面，再核对接缝处的明暗。一个面可以属于多个组，不能只凭分组颜色判断掩码正确。
+
+![授权历史截图：按平滑组选择查看对应面](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/smoothing-groups.webp)
+
+这是历史 SG 查看示例，展示选择窗口与对应面；它不是本版严格求解全部输入的验收证明。原生 SG、严格推导及无法表达时停止的条件见下方技术参考。
+
+### 检查自定义方向与 F2M 修改器
+
+1. 需要保留 Max 原 SG 时只勾 **顶点法线**；SG 也应来自 FBX 时两项一起勾。
+2. 检查、执行后，在接收网格栈中找到插件创建的 **`F2M_顶点法线`**，查看面角方向和报告。
+3. 仅在测试副本中临时开关该修改器比较明暗，比较后重新启用。正式结果中保留它，再检查最终外观与保存重载。
+
+![授权历史截图：F2M_顶点法线修改器与方向显示](https://raw.githubusercontent.com/DimmensCK/FBXTo3dsMax/main/docs/assets/tutorial/custom-normals.webp)
+
+这张历史截图展示修改器位置和方向线；最终正确性来自逐面角方向及 Specified/Explicit 状态的读回，不来自线条颜色，也不代替本版执行验收。
 
 不要根据绿色、黄色或蓝色判断法线来自谁。它们表示编辑状态和选择显示，不能证明权威来源。
 
