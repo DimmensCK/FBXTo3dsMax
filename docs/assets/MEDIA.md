@@ -97,3 +97,31 @@ The original PDF, internal resource indexes/links, unexported video and FBX / MA
 `brand/social-preview.svg` 是延续项目品牌视觉的原创 1280×640 SVG；`brand/social-preview.png` 是使用 Max 自带 Python 3.9.7 与 PySide2 / QtSvg 5.15.1 直接栅格化的同尺寸 PNG（使用现有 Windows 平台插件，仅 QImage 内存绘制，未显示窗口）。未启动 Max、未编辑历史截图或模型。它用于仓库社交预览，说明选择性通道、Skin 工作流、免费 MIT 源码与中英语言；不是软件界面、实际模型输出或验收证明。
 
 The original 1280×640 social-preview SVG extends the project branding. Its PNG is a direct rasterization using Max-bundled Python 3.9.7 and PySide2 / QtSvg 5.15.1, with the existing Windows platform plugin and QImage memory painting only; no window was shown. No Max host was started and no historical screenshot or model was edited. It describes selective channels, Skin workflows, free MIT source and Chinese/English; it is not a software capture, actual transfer output or acceptance result.
+
+## 作者完整教程补充 / Complete author tutorial
+
+The English-default homepage and separate Chinese homepage use the author's original eight-page tutorial as a reference. Every page was reviewed. Task order and illustrations were checked against the current implementation: an unsuccessful installation must be resolved; equal mesh counts do not establish topology identity; non-manifold input is not a robustness guarantee; Mode 2 requires compatible Skin/bones/binding, and does not clone the entire old animation system. Normal display colors do not establish data authority.
+
+新版英文默认首页与独立中文首页参考了作者亲写教程的全部8页，并按当前实现修正过时说法：安装失败必须解决；等点数/面数不代表同拓扑；非流形不保证更稳；模式二仍须满足Skin、骨骼与绑定要求，不复制整套旧动画系统；法线显示颜色不代表数据来源。原PDF含内部水印/路径，保留私有，不作为公开附件。
+
+Author workflow images added to both homepages: selecting receiving Max meshes; choosing the FBX; running the precheck. The selection image only shows Max-side multi-selection, not an observed FBX name-match result. Private history/path fields in the latter two images are covered with solid masks, without replacing demonstration content. The existing eight author feature images remain unchanged. No original model files are distributed.
+
+两页补入作者的Max多选、选择FBX和预检图。多选图只显示Max侧选择，不证明FBX名称匹配。后两图仅对私有历史记录/路径作实色遮挡，不替换演示内容。已有8张作者功能原图保持原字节；不分发底层模型。
+
+## Complete and edited historical Mode 1 videos / 完整录像与精简导览
+
+Both files derive from the same authorized v1.3.23 Mode 1 recording, with private account/project/history areas cropped and local path fields covered. The complete cut retains the original 60.43-second timing; the 28.93-second tour shortens waiting sections while retaining the precheck, transfer, normal explanation and missing-UV3 notice. Both are 1280×704, 30 fps, H.264 level 3.1 / yuv420p, video only. They are historical workflow illustrations, not new-version acceptance or Mode 2 evidence.
+
+两文件均来自同一段获授权的 v1.3.23 模式一录像：裁掉账户/项目/历史区域，实色遮挡本地路径。完整版保留原片60.43秒时序；28.93秒导览缩短等待段，保留预检、执行、法线说明与UV3缺失提醒。两段均为1280×704、30fps、H.264 level 3.1 / yuv420p、无音轨。它们展示历史操作，不作为新版本验收或模式二证据。
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `demos/mode1-author-full-v1.3.23.mp4` | 1,125,649 | `FF13EE9A6D2A0F8DA9B179F37518255F46B8AE7D3877C957E1BFA13F23D534CA` |
+| `demos/mode1-author-guide-v1.3.23.mp4` | 940,213 | `E91ABC7C0E7125E74E6E55FB9B58166317FD64826F3B63F8083B639132C0D7CF` |
+| `demos/mode1-author-poster.png` | 284467 | `9EC79A6994D2FDD22CB0ACDA36ACA14F01BF4F46CFA924310EA1E37911CA9B38` |
+
+The poster is exact frame 1500 of the complete derivative (50.0 seconds). The homepage uses a clickable frame and explicit open/download links; a repository MP4 link is not an inline README player. The earlier 10-second preview remains for existing guide links.
+
+封面为完整衍生片第1500帧（50.0秒）。首页使用可点击封面与明确的打开/下载入口；仓库MP4链接不等于README内嵌播放器。较早的10秒预览保留供既有教程链接使用。
+
+New image derivatives: `tutorial/select-receiving-meshes.webp` (73,490 B, SHA-256 `C39EB0B90EEF21999E9674AB09B7861979824CE8A5579142D29502774988DA61`); `tutorial/select-fbx-path-redacted.png` (108,423 B, `D576AB372DA0D32C874ACA02EF686E2478EF48488CC38809BB91E0BFEC35E58F`); `tutorial/preflight-path-redacted.png` (19,377 B, `88821496B51CCAEC6EFC178B7B3380C6E759B8B15C7C4BF5B18E5D4C1B066BBD`).

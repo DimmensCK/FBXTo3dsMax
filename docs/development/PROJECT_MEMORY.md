@@ -1,5 +1,11 @@
 # FBXTo3dsMax project memory
 
+## 2026-10-11 English-default homepage and author walkthroughs
+
+The root README now defaults to English and links at the top to a complete Chinese README.zh-CN.md. The two language pages use the same author-focused task order, original screenshots and privacy-redacted historical v1.3.23 Mode 1 video, with full and shortened-wait cuts. The original eight-page tutorial was reviewed and outdated assumptions corrected against source contracts. One original Skin data diagram supports the author material; the original canopy practice remains near the end.
+
+This is a repository presentation/media revision only. All 32 installed resource bytes remain identical to the qualified 2026-10-11 host source and runtime fingerprint F670AA57F94CCE0AB1F52700AAABE223A0CD500DA997416AE1BB5B818150980D. No new Max execution is implied; the exact earlier host scope and remaining limits remain in TESTING. The v1.4.26 tag is unchanged. Private models, the internally watermarked original PDF, backups and local evidence stay outside Git.
+
 ## 2026-10-11 documentation revision
 
 The bilingual homepage now presents every main channel with visible illustrations, task steps and result checks. Authorized historical UV2, SG and normal screenshots supplement the existing material/color/alpha examples. An animation preview derives from the sanitized Mode 1 historical clip, never Mode 2 evidence. Both language portals and task guides are synchronized. Engine/installer behavior and the product version remain 1.4.26; installed guide/changelog bytes differ from the tagged release. The historical acceptance below is version-and-source specific.
