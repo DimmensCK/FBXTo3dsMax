@@ -1,16 +1,16 @@
 [English](README.md) | **简体中文**
 
+> **English readers:** The plug-in and complete guides are available in English. [Read the English homepage →](README.md)
+
 # FBXTo3dsMax
 
-### 模型在别处改，回到已有 Max 场景继续做。
+### 更新模型，继续用你搭好的 Max 场景。
 
-免费开源的 **FBX → 3ds Max** 选择性网格更新与蒙皮网格替换工具。
+免费开源的 **FBX → Autodesk 3ds Max** 插件：**按需更新网格通道、传递自定义法线，或替换带 Skin 的新网格**。
 
-**完整中文界面与教程，也支持 English。** 插件内可原位切换语言，本页也可切换到 [English](README.md)。
-
-- **这次改什么，就传什么。** 形状、UV 1/2/3、材质/ID、RGB/Alpha、SG 与法线按需勾选；同拓扑保留 Max 接收节点。
-- **让光滑组与自定义法线配合工作。** 严格验证平滑关系，读回最终面角方向，保护认真编辑过的着色结果。
-- **新网格、新 FBX 权重，继续用 Max 场景骨骼。** Skin、骨骼与绑定通过检查后替换，默认隐藏备份旧网格。
+- **这次改什么，就带回什么；同拓扑保留原接收节点。** 形状、UV 1/2/3、材质/ID、RGB 与 Alpha 分别选择，写回已有 Max 网格。
+- **光滑组与精修法线一起带回。** 传递软硬关系与自定义面角方向，严格检查并读回最终法线结果。
+- **新 FBX 网格、新权重，继续用 Max 场景骨骼。** Skin、骨骼与绑定通过检查后替换，默认隐藏备份旧网格。
 
 **[下载 v1.4.26](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · **[先看完整演示](#demos)** · [三步开始](#quick-start) · [完整教程](docs/zh/FBXTo3dsMax_详细说明书.md)
 
@@ -18,7 +18,7 @@ Dimmens · MIT · 可读 Python / MAXScript 源码 · 已实测 **3ds Max 2023.3
 
 [![源码检查](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml/badge.svg?branch=main)](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml)
 
-[两种模式](#workflows) · [形状](#shape) · [UV](#uv) · [材质](#materials) · [RGB 与 Alpha](#colors) · [光滑组](#smoothing) · [法线](#normals) · [Skin](#skin) · [安装](#quick-start)
+[两种模式](#workflows) · [形状](#shape) · [UV](#uv) · [材质](#materials) · [RGB 与 Alpha](#colors) · [光滑组](#smoothing) · [法线](#normals) · [Skin](#skin) · [安装](#quick-start) · [中文 / English 界面](#language-ui)
 
 ![作者历史模式一结果预览](docs/assets/demos/mode1-historical-preview.gif)
 
@@ -200,11 +200,13 @@ RGB 颜色与独立 Alpha 遮罩分别勾选，需要哪项就带回哪项。
 
 ### 插件内原位切换语言
 
-![较早 1.4.26 来源的真实中文界面参考](docs/assets/ui/rollout-1.4.26-cn.png)
+| 中文界面 | English UI |
+|---|---|
+| [![较早 1.4.26 来源的真实中文界面参考](docs/assets/ui/rollout-1.4.26-cn.png)](docs/assets/ui/rollout-1.4.26-cn.png) | [![English interface reference from an earlier 1.4.26 source](docs/assets/ui/rollout-1.4.26-en.png)](docs/assets/ui/rollout-1.4.26-en.png) |
 
 模式标题右侧使用 **Language · 中文 / EN**，切换时保留模式、FBX、选项与检查状态，始终保持唯一语言选中并保存偏好。已知界面/报告标签跟随语言；原技术诊断可能保留原文。
 
-这张真实 Max 2023.3.10 截图展示较早 1.4.26 布局。[英文界面参考](docs/assets/ui/rollout-1.4.26-en.png) · [媒体说明](docs/assets/MEDIA.md)。
+两张均为 Max 2023.3.10 真实截图，展示较早的 1.4.26 布局。点击任意图片可查看原始尺寸。[媒体说明](docs/assets/MEDIA.md)。
 
 <a id="guides"></a>
 

@@ -1,5 +1,11 @@
 # FBXTo3dsMax project memory
 
+## 2026-10-11 reader-language and interface-gallery refinement
+
+The English homepage now addresses Chinese readers in Chinese immediately below the language links; the Chinese homepage reciprocates in English. Both language pages display the existing original Chinese and English UI captures side by side, with links to their full-size originals and the earlier-1.4.26 provenance retained. Hero copy foregrounds selective same-topology updates into the existing Max node, smoothing groups with authored normals, and revised FBX mesh/weights with Max Skin bones. Conditions and data-authority limits remain explicit; no complete-animation or arbitrary-asset promise is added.
+
+This refinement changes only the two root READMEs and this development record. No media or installed resources change; all 32 installed files retain canonical fingerprint F670AA57F94CCE0AB1F52700AAABE223A0CD500DA997416AE1BB5B818150980D. It introduces no new Max execution or compatibility qualification. The fixed v1.4.26 tag is unchanged. Repository description/topics are reviewed separately against GitHub's 20-topic limit; keywords do not promise ranking or traffic.
+
 ## 2026-10-11 English-default homepage and author walkthroughs
 
 The root README now defaults to English and links at the top to a complete Chinese README.zh-CN.md. The two language pages use the same author-focused task order, original screenshots and privacy-redacted historical v1.3.23 Mode 1 video, with full and shortened-wait cuts. The original eight-page tutorial was reviewed and outdated assumptions corrected against source contracts. One original Skin data diagram supports the author material; the original canopy practice remains near the end.

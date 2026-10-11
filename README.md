@@ -1,16 +1,16 @@
 **English** | [简体中文](README.zh-CN.md)
 
+> **中文用户：** 插件有完整中文界面与教程。[点击进入简体中文首页 →](README.zh-CN.md)
+
 # FBXTo3dsMax
 
-### Bring your edits back to your existing 3ds Max scene.
+### Bring mesh revisions back to the Max scene you already built.
 
-A free, open-source **FBX → 3ds Max** tool for selective mesh updates and skinned-mesh replacement.
+A free, open-source **FBX → Autodesk 3ds Max** plug-in for **selective mesh-data transfer**, **custom normals** and **Skin-aware mesh replacement**.
 
-**Chinese and English UI and complete guides are available.** Switch the plug-in's language in place, or read this page in [简体中文](README.zh-CN.md).
-
-- **Update the channels you choose.** Shape, UV 1/2/3, materials/IDs, RGB/alpha, SG and normals; keep the Max receiving node on matching topology.
-- **Keep smoothing groups and custom-normal edits together.** Strict relationship checks and final corner-direction readback protect the shading result.
-- **New FBX weights, existing Max bones.** Replace a changed mesh after Skin, bone and binding checks, with a hidden old-mesh backup enabled by default.
+- **Update only what changed. Keep the Max receiver.** On matching topology, choose shape, UV 1/2/3, materials/IDs, RGB or alpha and write into the existing receiving node.
+- **Bring smoothing groups and authored normals back together.** Transfer hard/soft relationships and custom corner directions, with strict checks and final-direction readback.
+- **New FBX mesh and weights. Your Max scene bones.** Replace a skinned mesh after Skin, bone and binding checks, with a hidden old-mesh backup enabled by default.
 
 **[Download v1.4.26](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · **[Watch the walkthrough](#demos)** · [Quick start](#quick-start) · [Full tutorial](docs/en/USER_GUIDE.md)
 
@@ -18,7 +18,7 @@ Dimmens · MIT · Readable Python / MAXScript · Tested on **3ds Max 2023.3.10**
 
 [![Source checks](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml/badge.svg?branch=main)](https://github.com/DimmensCK/FBXTo3dsMax/actions/workflows/source-checks.yml)
 
-[Workflows](#workflows) · [Shape](#shape) · [UV](#uv) · [Materials](#materials) · [RGB & alpha](#colors) · [Smoothing](#smoothing) · [Normals](#normals) · [Skin](#skin) · [Install](#quick-start)
+[Workflows](#workflows) · [Shape](#shape) · [UV](#uv) · [Materials](#materials) · [RGB & alpha](#colors) · [Smoothing](#smoothing) · [Normals](#normals) · [Skin](#skin) · [Install](#quick-start) · [中文 / English UI](#language-ui)
 
 ![Author's historical Mode 1 result preview](docs/assets/demos/mode1-historical-preview.gif)
 
@@ -91,7 +91,7 @@ Bring an edited shape back to the receiving mesh without replacing that node. Us
 
 <a id="uv"></a>
 
-## UV: re-unwrap without moving the mesh
+## UV transfer: re-unwrap without moving the mesh
 
 Transfer **UV 1 / 2 / 3** independently. Face-corner mapping preserves the distinction between a geometric vertex and its UV seam vertices.
 
@@ -118,7 +118,7 @@ Update the material object and per-face material IDs together while choosing whe
 <a id="vertex-data"></a>
 <a id="colors"></a>
 
-## Vertex data: color and alpha are independent
+## Vertex colors and alpha: transfer them independently
 
 Bring back RGB color and an independent alpha mask, selecting either or both.
 
@@ -144,7 +144,7 @@ A valid native FBX smoothing layer takes priority. Where inference is needed, th
 
 <a id="normals"></a>
 
-## Custom normals: carry the directions you authored
+## Custom-normal transfer: carry the directions you authored
 
 Transfer FBX custom corner directions and keep them alongside smoothing groups. The SG-aware path retains custom differences greater than **0.1°** from the smoothing baseline; written directions are checked after writing and reevaluation.
 
@@ -200,11 +200,13 @@ The plug-in uses Max's bundled Python; a separate interpreter, compiler or admin
 
 ### Choose the plug-in's language in place
 
-![English interface reference from an earlier 1.4.26 source](docs/assets/ui/rollout-1.4.26-en.png)
+| English UI | 中文界面 |
+|---|---|
+| [![English interface reference from an earlier 1.4.26 source](docs/assets/ui/rollout-1.4.26-en.png)](docs/assets/ui/rollout-1.4.26-en.png) | [![较早 1.4.26 来源的真实中文界面参考](docs/assets/ui/rollout-1.4.26-cn.png)](docs/assets/ui/rollout-1.4.26-cn.png) |
 
 Use **Language · 中文 / EN** beside the mode heading. Switching retains the mode, FBX, options and check state, keeps exactly one language selected and saves the preference. Known UI/report labels are localized; raw technical diagnostics may retain their original language.
 
-This actual Max 2023.3.10 capture shows the earlier 1.4.26 layout. [Chinese UI reference](docs/assets/ui/rollout-1.4.26-cn.png) · [Media details](docs/assets/MEDIA.md).
+Both real Max 2023.3.10 captures show an earlier 1.4.26 layout. Click either image to open its original size. [Media details](docs/assets/MEDIA.md).
 
 <a id="guides"></a>
 
