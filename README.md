@@ -12,7 +12,7 @@ A free, open-source **FBX → Autodesk 3ds Max** plug-in for **selective mesh-da
 - **Bring smoothing groups and authored normals back together.** Transfer hard/soft relationships and custom corner directions, with strict checks and final-direction readback.
 - **New FBX mesh and weights. Your Max scene bones.** Replace a skinned mesh after Skin, bone and binding checks, with a hidden old-mesh backup enabled by default.
 
-**[Download v1.4.26](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · **[Watch the walkthrough](#demos)** · [Quick start](#quick-start) · [Full tutorial](docs/en/USER_GUIDE.md)
+**[Download v1.4.26 with refreshed tutorials](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)** · **[Watch the walkthrough](#demos)** · [Quick start](#quick-start) · [Full tutorial](docs/en/USER_GUIDE.md)
 
 Dimmens · MIT · Readable Python / MAXScript · Tested on **3ds Max 2023.3.10**
 
@@ -188,7 +188,7 @@ The recording above demonstrates **Mode 1**; no complete author Mode 2 recording
 
 ## Start in three steps
 
-1. **Download the complete [v1.4.26 ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip) and extract it.** Keep the installer, lowercase `contents/` and all other package folders together.
+1. **Open the [v1.4.26 release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26), download the complete-project ZIP featured at the top, and extract it.** Keep the installer, lowercase `contents/` and all other package folders together.
 2. **Save your scene and drag `Install_FBXTo3dsMax.ms` into a Max viewport.** Confirm the installation result before proceeding.
 3. **Open `FBX 转 MAX / FBX to MAX` from the toolbar.** Choose **EN** or **中文**, run **Self-check**, and start with one receiving object in a scene copy.
 
@@ -242,7 +242,7 @@ Check before transfer, then read the execution result and inspect a scene copy. 
 
 ## Feedback, source and license
 
-The repository includes readable **Python / MAXScript**, installers, tests and tutorials. The tagged ZIP is the fixed release; [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) contains the latest documentation/development snapshot.
+The repository includes readable **Python / MAXScript**, installers, tests and tutorials. For a first installation, use the complete-project ZIP featured on the [v1.4.26 release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26). The automatic **Assets → Source code** ZIP is the original tag snapshot; [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) changes with the branch and is for development.
 
 Have a reproducible issue? Include Max/plugin versions and sanitized steps in [Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues). Remove local paths, model names and project information from logs; do not upload private assets.
 

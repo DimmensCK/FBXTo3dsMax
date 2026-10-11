@@ -4,7 +4,7 @@
 
 ## Start in three steps
 
-1. **Download a complete release and extract it.** Use the [v1.4.26 source ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip), or choose **Source code (zip)** under Assets on the [Release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26). Do not save the installer alone or run inside the ZIP.
+1. **Download the complete project and extract it.** On the [v1.4.26 release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26), choose the complete-project ZIP featured at the top. The automatic **Assets → Source code (zip)** is the original tag snapshot. Do not save the installer alone or run inside the ZIP.
 2. **Save your scene and drag in the installer.** Drag root **`Install_FBXTo3dsMax.ms`** into the Max viewport. Wait and confirm success; retain the log and resolve a failure before use.
 3. **Open, self-check and try a copy.** Click **FBX 转 MAX / FBX to MAX** on the top toolbar. Click **EN** beside **Language**, then **Run Self-check**. Start on a scene copy with one receiving mesh and the default **Shape** option.
 

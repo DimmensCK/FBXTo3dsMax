@@ -4,7 +4,7 @@
 
 ## 三步开始
 
-1. **下载完整发行版并解压。** 使用 [v1.4.26 源码 ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)，或在 [Release 页面](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) 的 Assets 中选择 **Source code (zip)**。不要只保存安装器，也不要在 ZIP 内运行。
+1. **下载完整工程并解压。** 在 [v1.4.26 发行页](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)选择页面顶部推荐的完整工程 ZIP；下方自动生成的 **Assets → Source code (zip)** 是原标签快照。不要只保存安装器，也不要在 ZIP 内运行。
 2. **保存场景，拖入安装器。** 将根目录 **`Install_FBXTo3dsMax.ms`** 拖入 Max 视口，等待并确认成功。安装失败先保留日志、解决问题，不继续使用。
 3. **打开、自检、试副本。** 点击顶部 **FBX 转 MAX / FBX to MAX**，使用 **Language · 中文 / EN** 切换语言，运行自检。首次传递从场景副本、单对象和默认“变形”开始。
 

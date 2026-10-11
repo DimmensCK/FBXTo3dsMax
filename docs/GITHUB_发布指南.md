@@ -6,9 +6,9 @@
 
 ## 下载给自己用
 
-在仓库页面选择 **Code → Download ZIP**，解压后找到同时包含 `Install_FBXTo3dsMax.ms` 和小写 `contents/` 的工程根目录。按安装说明拖入标准 `.ms` 入口，保持相对结构，不在 ZIP 中运行。[GitHub 官方下载说明](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)
+首次安装请到 [v1.4.26 发行页](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)下载页面顶部推荐的完整工程 ZIP。解压后找到同时包含 `Install_FBXTo3dsMax.ms` 和小写 `contents/` 的工程根目录，按安装说明拖入标准 `.ms` 入口；保持相对结构，不在 ZIP 中运行。[GitHub 官方下载说明](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives)
 
-如果需要固定版本，在 **Releases** 选择对应版本的完整源代码包；分支 `main` 可能继续变化。记录插件版本，不要将历史验证误当作新版本验证。
+发行页下方自动生成的 **Assets → Source code** 是原标签快照；仓库 **Code → Download ZIP** 则跟随 `main` 变化，供开发查看。记录插件版本，不要将历史验证误当作新版本验证。
 
 Root `LICENSE` 是 MIT，作者 Dimmens。公开内容是可读源码、资源、测试代码、双语文档及经授权审查的教程媒体，不携带 FBX/MAX/BLEND 模型、私有备份、本机日志或构建工具链。
 
@@ -38,4 +38,4 @@ Root `LICENSE` 是 MIT，作者 Dimmens。公开内容是可读源码、资源�
 
 ## English quick reference
 
-Download the complete repository via **Code → Download ZIP** and extract it before installation. For maintenance, use **GitHub Desktop → File → Clone repository**, choose `DimmensCK/FBXTo3dsMax` and a new empty development directory. Contributors fork and clone their own copy. Start from the published history, copy only reviewed source changes, verify them, then commit and push the reviewed branch. Before adding an existing local repository, check its remote, branch and history. Do not publish local validation branches or backup refs, use `push --all`, or force-push to resolve a history mismatch. `.gitignore` does not remove committed content or history. Commit is local; push updates the remote. Release only the exact qualified commit, state tested Max versions and limits, and verify a fresh remote download.
+For a first installation, download the complete-project ZIP featured at the top of the [v1.4.26 release page](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) and extract it; automatic Assets ZIPs contain the original tag, while **Code → Download ZIP** follows the moving `main` branch. For maintenance, use **GitHub Desktop → File → Clone repository**, choose `DimmensCK/FBXTo3dsMax` and a new empty development directory. Contributors fork and clone their own copy. Start from the published history, copy only reviewed source changes, verify them, then commit and push the reviewed branch. Before adding an existing local repository, check its remote, branch and history. Do not publish local validation branches or backup refs, use `push --all`, or force-push to resolve a history mismatch. `.gitignore` does not remove committed content or history. Commit is local; push updates the remote. Release only the exact qualified commit, state tested Max versions and limits, and verify a fresh remote download.

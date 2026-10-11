@@ -6,7 +6,7 @@
 
 Dimmens · Free readable Python / MAXScript · MIT · 中文 / English
 
-**[Download complete v1.4.26 source](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · [Release notes](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) · [Install](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [中文概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md) · [Illustrated homepage](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md)
+**[Open v1.4.26 release to download the complete project](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)** · [Install](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/INSTALL.md) · [中文概览](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/README_中文.md) · [Illustrated homepage](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md)
 
 [Start](#quick-start) · [UI](#language-ui) · [Workflows](#workflows) · [See each feature](#examples) · [Task guides](#guides) · [Scope](#scope)
 

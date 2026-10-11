@@ -6,7 +6,7 @@
 
 Dimmens · 免费可读 Python / MAXScript · MIT · 中文 / English
 
-**[下载 v1.4.26 完整源码](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · [发行说明](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) · [安装指南](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [English overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md) · [图文首页](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md)
+**[打开发行页下载带更新教程的 v1.4.26 完整工程](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)** · [安装指南](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/zh/INSTALL_中文.md) · [English overview](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/docs/en/README.md) · [图文首页](https://github.com/DimmensCK/FBXTo3dsMax/blob/main/README.md)
 
 [三步开始](#quick-start) · [真实界面](#language-ui) · [选择模式](#workflows) · [逐项看功能](#examples) · [任务教程](#guides) · [测试与边界](#scope)
 

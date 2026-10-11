@@ -12,7 +12,7 @@
 - **光滑组与精修法线一起带回。** 传递软硬关系与自定义面角方向，严格检查并读回最终法线结果。
 - **新 FBX 网格、新权重，继续用 Max 场景骨骼。** Skin、骨骼与绑定通过检查后替换，默认隐藏备份旧网格。
 
-**[下载 v1.4.26](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)** · **[先看完整演示](#demos)** · [三步开始](#quick-start) · [完整教程](docs/zh/FBXTo3dsMax_详细说明书.md)
+**[下载带更新教程的 v1.4.26 完整工程](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)** · **[先看完整演示](#demos)** · [三步开始](#quick-start) · [完整教程](docs/zh/FBXTo3dsMax_详细说明书.md)
 
 Dimmens · MIT · 可读 Python / MAXScript 源码 · 已实测 **3ds Max 2023.3.10**
 
@@ -188,7 +188,7 @@ RGB 颜色与独立 Alpha 遮罩分别勾选，需要哪项就带回哪项。
 
 ## 三步开始
 
-1. **完整下载 [v1.4.26 ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/tags/v1.4.26.zip)，然后解压。** 保留安装器、小写 `contents/` 及其余目录。
+1. **打开 [v1.4.26 发行页](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)，下载页面顶部推荐的完整工程 ZIP，然后解压。** 保留安装器、小写 `contents/` 及其余目录。
 2. **保存场景，将 `Install_FBXTo3dsMax.ms` 拖入 Max 视口。** 确认安装成功后再继续。
 3. **从顶部 `FBX 转 MAX / FBX to MAX` 打开插件。** 选 **中文** 或 **EN**，运行自检，首次从场景副本中的单对象开始。
 
@@ -242,7 +242,7 @@ RGB 颜色与独立 Alpha 遮罩分别勾选，需要哪项就带回哪项。
 
 ## 反馈、源码与许可证
 
-仓库提供可读 **Python / MAXScript**、安装器、测试与教程。固定标签 ZIP 是发行版；[main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip)包含最新文档与开发快照。
+仓库提供可读 **Python / MAXScript**、安装器、测试与教程。首次安装请使用 [v1.4.26 发行页](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26)顶部推荐的完整工程 ZIP；下方自动生成的 **Assets → Source code** ZIP 是原标签快照。[main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip)随分支变化，适合开发查看。
 
 遇到可复现问题，请在 [Issues](https://github.com/DimmensCK/FBXTo3dsMax/issues)提供 Max/插件版本和去隐私步骤。公开日志前去掉本机路径、模型名与项目信息，不上传私有资产。
 
