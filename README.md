@@ -40,7 +40,7 @@ The author's historical **v1.3.23 Mode 1 walkthrough** shows the complete flow: 
 
 **[Open / download the edited-tour MP4](https://github.com/DimmensCK/FBXTo3dsMax/raw/refs/heads/main/docs/assets/demos/mode1-author-guide-v1.3.23.mp4)**
 
-Click the frame or links to open / download the MP4; behavior depends on the browser. The latest [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) also includes the [full recording](docs/assets/demos/mode1-author-full-v1.3.23.mp4) and [edited tour](docs/assets/demos/mode1-author-guide-v1.3.23.mp4).
+Click the frame or links to open / download the MP4; behavior depends on the browser. The [fixed tutorial snapshot ZIP](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) also includes the [full recording](docs/assets/demos/mode1-author-full-v1.3.23.mp4) and [edited tour](docs/assets/demos/mode1-author-guide-v1.3.23.mp4).
 
 | In the full recording | What to watch |
 |---|---|

@@ -40,7 +40,7 @@ Dimmens · MIT · 可读 Python / MAXScript 源码 · 已实测 **3ds Max 2023.3
 
 **[打开 / 下载精简导览 MP4](https://github.com/DimmensCK/FBXTo3dsMax/raw/refs/heads/main/docs/assets/demos/mode1-author-guide-v1.3.23.mp4)**
 
-点击封面或链接打开 / 下载 MP4，具体行为由浏览器决定。最新 [main ZIP](https://github.com/DimmensCK/FBXTo3dsMax/archive/refs/heads/main.zip) 内也包含[完整录像](docs/assets/demos/mode1-author-full-v1.3.23.mp4)与[精简导览](docs/assets/demos/mode1-author-guide-v1.3.23.mp4)。
+点击封面或链接打开 / 下载 MP4，具体行为由浏览器决定。[固定的教程快照 ZIP](https://github.com/DimmensCK/FBXTo3dsMax/releases/tag/v1.4.26) 内也包含[完整录像](docs/assets/demos/mode1-author-full-v1.3.23.mp4)与[精简导览](docs/assets/demos/mode1-author-guide-v1.3.23.mp4)。
 
 | 完整录像的位置 | 可以重点看什么 |
 |---|---|
